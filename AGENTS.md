@@ -132,7 +132,7 @@ User: "adjust the volume to match the kick sound you played before"
 ```sql
 CREATE EXTENSION IF NOT EXISTS vector;
 
-CREATE TABLE document_chunks (
+CREATE TABLE doc_embeddings (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     page_name TEXT NOT NULL,
     page_url TEXT NOT NULL,
@@ -143,11 +143,11 @@ CREATE TABLE document_chunks (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE INDEX document_chunks_embedding_idx ON document_chunks 
+CREATE INDEX doc_embeddings_embedding_idx ON doc_embeddings 
 USING ivfflat (embedding vector_cosine_ops)
 WITH (lists = 100);
 
-CREATE INDEX document_chunks_page_name_idx ON document_chunks(page_name);
+CREATE INDEX doc_embeddings_page_name_idx ON doc_embeddings(page_name);
 ```
 
 ### Error Handling

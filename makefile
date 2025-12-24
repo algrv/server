@@ -77,3 +77,8 @@ ci: ## Run CI checks locally (lint + test)
 	@echo "✓ All CI checks passed!"
 
 .DEFAULT_GOAL := help
+
+db-migrate: ## Apply pending migrations
+	@echo "Applying migrations to Supabase..."
+	supabase db push
+	@echo "✓ Migrations applied"

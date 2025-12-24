@@ -42,7 +42,7 @@ func (c *Client) Close() {
 
 // deletes all existing chunks from the database
 func (c *Client) ClearAllChunks(ctx context.Context) error {
-	_, err := c.pool.Exec(ctx, "DELETE FROM document_chunks")
+	_, err := c.pool.Exec(ctx, "DELETE FROM doc_embeddings")
 	if err != nil {
 		return fmt.Errorf("failed to clear chunks: %w", err)
 	}
@@ -53,7 +53,7 @@ func (c *Client) ClearAllChunks(ctx context.Context) error {
 // inserts a single chunk with its embedding into the database
 func (c *Client) InsertChunk(ctx context.Context, chunk chunker.Chunk, embedding []float32) error {
 	query := `
-		INSERT INTO document_chunks (page_name, page_url, section_title, content, embedding, metadata)
+		INSERT INTO doc_embeddings (page_name, page_url, section_title, content, embedding, metadata)
 		VALUES ($1, $2, $3, $4, $5, $6)
 	`
 
@@ -88,7 +88,7 @@ func (c *Client) InsertChunksBatch(ctx context.Context, chunks []chunker.Chunk, 
 
 	batch := &pgx.Batch{}
 	query := `
-		INSERT INTO document_chunks (page_name, page_url, section_title, content, embedding, metadata)
+		INSERT INTO doc_embeddings (page_name, page_url, section_title, content, embedding, metadata)
 		VALUES ($1, $2, $3, $4, $5, $6)
 	`
 
@@ -104,13 +104,18 @@ func (c *Client) InsertChunksBatch(ctx context.Context, chunks []chunker.Chunk, 
 	}
 
 	br := tx.SendBatch(ctx, batch)
-	defer br.Close()
 
 	for i := 0; i < len(chunks); i++ {
 		_, err := br.Exec()
 		if err != nil {
+			br.Close()
 			return fmt.Errorf("failed to insert chunk %d: %w", i, err)
 		}
+	}
+
+	// must close batch results before committing, otherwise connection is still "busy"
+	if err := br.Close(); err != nil {
+		return fmt.Errorf("failed to close batch: %w", err)
 	}
 
 	if err := tx.Commit(ctx); err != nil {
@@ -124,7 +129,7 @@ func (c *Client) InsertChunksBatch(ctx context.Context, chunks []chunker.Chunk, 
 func (c *Client) GetChunkCount(ctx context.Context) (int, error) {
 	var count int
 
-	err := c.pool.QueryRow(ctx, "SELECT COUNT(*) FROM document_chunks").Scan(&count)
+	err := c.pool.QueryRow(ctx, "SELECT COUNT(*) FROM doc_embeddings").Scan(&count)
 	if err != nil {
 		return 0, fmt.Errorf("failed to get chunk count: %w", err)
 	}
