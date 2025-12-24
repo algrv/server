@@ -38,4 +38,4 @@ dist/
 build/
 
 # Documentation (fetched dynamically, not committed)
-docs/
+docs/strudel
