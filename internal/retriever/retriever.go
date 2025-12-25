@@ -11,9 +11,10 @@ import (
 	"github.com/pgvector/pgvector-go"
 )
 
-// NewClient creates a new retriever client with auto-configuration from environment
+// creates a new retriever client with auto-configuration from environment
 func NewClient(ctx context.Context) (*Client, error) {
 	config, err := loadRetrieverConfig()
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to load retriever config: %w", err)
 	}
@@ -21,10 +22,10 @@ func NewClient(ctx context.Context) (*Client, error) {
 	return NewClientWithConfig(ctx, config)
 }
 
-// NewClientWithConfig creates a new retriever client with explicit configuration
+// creates a new retriever client with explicit configuration
 func NewClientWithConfig(ctx context.Context, config *RetrieverConfig) (*Client, error) {
-	// initialize database connection pool
 	pool, err := pgxpool.New(ctx, config.DBConnString)
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to create connection pool: %w", err)
 	}
@@ -51,15 +52,14 @@ func (c *Client) Close() {
 	c.pool.Close()
 }
 
-// VectorSearch performs a vector similarity search on doc_embeddings
+// performs a vector similarity search on doc_embeddings
 func (c *Client) VectorSearch(ctx context.Context, queryText string, topK int) ([]SearchResult, error) {
-	// generate embedding for query
 	embedding, err := c.llm.GenerateEmbedding(ctx, queryText)
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate query embedding: %w", err)
 	}
 
-	// use the search_docs function from Supabase
 	query := `
 		SELECT
 			id::text,
@@ -75,12 +75,14 @@ func (c *Client) VectorSearch(ctx context.Context, queryText string, topK int) (
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute search query: %w", err)
 	}
+
 	defer rows.Close()
 
 	var results []SearchResult
 
 	for rows.Next() {
 		var result SearchResult
+
 		err := rows.Scan(
 			&result.ID,
 			&result.PageName,
@@ -104,15 +106,14 @@ func (c *Client) VectorSearch(ctx context.Context, queryText string, topK int) (
 	return results, nil
 }
 
-// SearchExamples performs a vector similarity search on example_strudels
+// performs a vector similarity search on example_strudels
 func (c *Client) SearchExamples(ctx context.Context, queryText string, topK int) ([]ExampleResult, error) {
-	// generate embedding for query
 	embedding, err := c.llm.GenerateEmbedding(ctx, queryText)
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate query embedding: %w", err)
 	}
 
-	// use the search_examples function from Supabase
 	query := `
 		SELECT
 			id::text,
@@ -161,12 +162,10 @@ func (c *Client) SearchExamples(ctx context.Context, queryText string, topK int)
 	return results, nil
 }
 
-// HybridSearchDocs implements hybrid search (primary + contextual) for documentation
+// implements hybrid search (primary + contextual) for documentation
 func (c *Client) HybridSearchDocs(ctx context.Context, userQuery, editorState string, topK int) ([]SearchResult, error) {
-	// transform query to add technical keywords
 	searchQuery, err := c.llm.TransformQuery(ctx, userQuery)
 	if err != nil {
-		// fallback to original query if transformation fails
 		log.Printf("query transformation failed, using original query: %v", err)
 		searchQuery = userQuery
 	}
@@ -176,12 +175,14 @@ func (c *Client) HybridSearchDocs(ctx context.Context, userQuery, editorState st
 
 	// run primary and contextual searches in parallel
 	primaryK := topK + 2 // get a few extra for merging
+
 	var primaryResults, contextualResults []SearchResult
 	var primaryErr, contextualErr error
 	var wg sync.WaitGroup
 
 	// primary search (60% weight) - user intent only
 	wg.Add(1)
+
 	go func() {
 		defer wg.Done()
 		primaryResults, primaryErr = c.VectorSearch(ctx, searchQuery, primaryK)
@@ -190,6 +191,7 @@ func (c *Client) HybridSearchDocs(ctx context.Context, userQuery, editorState st
 	// contextual search (40% weight) - if editor has content
 	if editorContext != "" {
 		wg.Add(1)
+
 		go func() {
 			defer wg.Done()
 			contextualQuery := searchQuery + " " + editorContext
@@ -226,8 +228,8 @@ func (c *Client) HybridSearchDocs(ctx context.Context, userQuery, editorState st
 func (c *Client) HybridSearchExamples(ctx context.Context, userQuery, editorState string, topK int) ([]ExampleResult, error) {
 	// transform query to add technical keywords
 	searchQuery, err := c.llm.TransformQuery(ctx, userQuery)
+
 	if err != nil {
-		// fallback to original query if transformation fails
 		log.Printf("query transformation failed, using original query: %v", err)
 		searchQuery = userQuery
 	}

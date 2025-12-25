@@ -264,3 +264,26 @@ func contains(slice []string, str string) bool {
 	}
 	return false
 }
+
+// helper to split space-separated words
+func splitWords(s string) []string {
+	words := []string{}
+	current := ""
+
+	for _, char := range s {
+		if char == ' ' {
+			if current != "" {
+				words = append(words, current)
+				current = ""
+			}
+		} else {
+			current += string(char)
+		}
+	}
+
+	if current != "" {
+		words = append(words, current)
+	}
+
+	return words
+}
