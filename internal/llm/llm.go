@@ -5,13 +5,13 @@ import (
 	"fmt"
 )
 
-// CompositeLLM combines a QueryTransformer and Embedder into a single LLM
+// combines a QueryTransformer and Embedder into a single LLM
 type CompositeLLM struct {
 	QueryTransformer
 	Embedder
 }
 
-// NewLLM creates a new LLM with auto-configuration from environment variables
+// creates a new LLM with auto-configuration from environment variables
 func NewLLM(ctx context.Context) (LLM, error) {
 	config, err := loadConfig()
 	if err != nil {
@@ -21,7 +21,7 @@ func NewLLM(ctx context.Context) (LLM, error) {
 	return NewLLMWithConfig(ctx, config)
 }
 
-// NewLLMWithConfig creates a new LLM with explicit configuration
+// creates a new LLM with explicit configuration
 func NewLLMWithConfig(ctx context.Context, config *Config) (LLM, error) {
 	if config == nil {
 		return nil, fmt.Errorf("config cannot be nil")

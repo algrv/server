@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"sync"
 
 	"github.com/algorave/server/internal/llm"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -77,6 +78,7 @@ func (c *Client) VectorSearch(ctx context.Context, queryText string, topK int) (
 	defer rows.Close()
 
 	var results []SearchResult
+
 	for rows.Next() {
 		var result SearchResult
 		err := rows.Scan(
@@ -87,9 +89,11 @@ func (c *Client) VectorSearch(ctx context.Context, queryText string, topK int) (
 			&result.Content,
 			&result.Similarity,
 		)
+
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan row: %w", err)
 		}
+
 		results = append(results, result)
 	}
 
@@ -122,12 +126,15 @@ func (c *Client) SearchExamples(ctx context.Context, queryText string, topK int)
 	`
 
 	rows, err := c.pool.Query(ctx, query, pgvector.NewVector(embedding), topK)
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute search query: %w", err)
 	}
+
 	defer rows.Close()
 
 	var results []ExampleResult
+
 	for rows.Next() {
 		var result ExampleResult
 		err := rows.Scan(
@@ -139,9 +146,11 @@ func (c *Client) SearchExamples(ctx context.Context, queryText string, topK int)
 			&result.URL,
 			&result.Similarity,
 		)
+
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan row: %w", err)
 		}
+
 		results = append(results, result)
 	}
 
@@ -165,23 +174,40 @@ func (c *Client) HybridSearchDocs(ctx context.Context, userQuery, editorState st
 	// extract editor context
 	editorContext := extractEditorKeywords(editorState)
 
-	// primary search (60% weight) - user intent only
+	// run primary and contextual searches in parallel
 	primaryK := topK + 2 // get a few extra for merging
-	primaryResults, err := c.VectorSearch(ctx, searchQuery, primaryK)
-	if err != nil {
-		return nil, fmt.Errorf("primary search failed: %w", err)
-	}
+	var primaryResults, contextualResults []SearchResult
+	var primaryErr, contextualErr error
+	var wg sync.WaitGroup
+
+	// primary search (60% weight) - user intent only
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		primaryResults, primaryErr = c.VectorSearch(ctx, searchQuery, primaryK)
+	}()
 
 	// contextual search (40% weight) - if editor has content
-	var contextualResults []SearchResult
 	if editorContext != "" {
-		contextualQuery := searchQuery + " " + editorContext
-		contextualResults, err = c.VectorSearch(ctx, contextualQuery, topK)
-		if err != nil {
-			// don't fail completely, just log and use primary only
-			log.Printf("contextual search failed, using primary only: %v", err)
-			contextualResults = []SearchResult{}
-		}
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			contextualQuery := searchQuery + " " + editorContext
+			contextualResults, contextualErr = c.VectorSearch(ctx, contextualQuery, topK)
+		}()
+	}
+
+	wg.Wait()
+
+	// check for errors
+	if primaryErr != nil {
+		return nil, fmt.Errorf("primary search failed: %w", primaryErr)
+	}
+
+	if contextualErr != nil {
+		// don't fail completely, just log and use primary only
+		log.Printf("contextual search failed, using primary only: %v", contextualErr)
+		contextualResults = []SearchResult{}
 	}
 
 	// merge and rank by score
@@ -209,23 +235,40 @@ func (c *Client) HybridSearchExamples(ctx context.Context, userQuery, editorStat
 	// extract editor context
 	editorContext := extractEditorKeywords(editorState)
 
-	// primary search (60% weight) - user intent only
+	// run primary and contextual searches in parallel
 	primaryK := topK + 2 // get a few extra for merging
-	primaryResults, err := c.SearchExamples(ctx, searchQuery, primaryK)
-	if err != nil {
-		return nil, fmt.Errorf("primary search failed: %w", err)
-	}
+	var primaryResults, contextualResults []ExampleResult
+	var primaryErr, contextualErr error
+	var wg sync.WaitGroup
+
+	// primary search (60% weight) - user intent only
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		primaryResults, primaryErr = c.SearchExamples(ctx, searchQuery, primaryK)
+	}()
 
 	// contextual search (40% weight) - if editor has content
-	var contextualResults []ExampleResult
 	if editorContext != "" {
-		contextualQuery := searchQuery + " " + editorContext
-		contextualResults, err = c.SearchExamples(ctx, contextualQuery, topK)
-		if err != nil {
-			// don't fail completely, just log and use primary only
-			log.Printf("contextual search failed, using primary only: %v", err)
-			contextualResults = []ExampleResult{}
-		}
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			contextualQuery := searchQuery + " " + editorContext
+			contextualResults, contextualErr = c.SearchExamples(ctx, contextualQuery, topK)
+		}()
+	}
+
+	wg.Wait()
+
+	// check for errors
+	if primaryErr != nil {
+		return nil, fmt.Errorf("primary search failed: %w", primaryErr)
+	}
+
+	if contextualErr != nil {
+		// don't fail completely, just log and use primary only
+		log.Printf("contextual search failed, using primary only: %v", contextualErr)
+		contextualResults = []ExampleResult{}
 	}
 
 	// merge and rank by score

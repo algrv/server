@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"sync"
 )
 
 const (
@@ -21,25 +22,39 @@ func (c *Client) organizeByPage(ctx context.Context, chunks []SearchResult) ([]S
 		pageSet[chunk.PageName] = true
 	}
 
-	// fetch special chunks for each page
+	// fetch special chunks for each page in parallel
 	specialChunks := make(map[string][]SearchResult)
-	for pageName := range pageSet {
-		// always fetch PAGE_SUMMARY
-		summary, err := c.fetchSpecialChunk(ctx, pageName, "PAGE_SUMMARY")
-		if err != nil {
-			log.Printf("failed to fetch PAGE_SUMMARY for %s: %v", pageName, err)
-		} else if summary != nil {
-			specialChunks[pageName] = append(specialChunks[pageName], *summary)
-		}
+	var mu sync.Mutex
+	var wg sync.WaitGroup
 
-		// conditionally fetch PAGE_EXAMPLES (if < 500 chars)
-		examples, err := c.fetchSpecialChunk(ctx, pageName, "PAGE_EXAMPLES")
-		if err != nil {
-			log.Printf("failed to fetch PAGE_EXAMPLES for %s: %v", pageName, err)
-		} else if examples != nil && len(examples.Content) < 500 {
-			specialChunks[pageName] = append(specialChunks[pageName], *examples)
-		}
+	for pageName := range pageSet {
+		wg.Add(1)
+		go func(pName string) {
+			defer wg.Done()
+
+			// fetch PAGE_SUMMARY
+			summary, err := c.fetchSpecialChunk(ctx, pName, "PAGE_SUMMARY")
+			if err != nil {
+				log.Printf("failed to fetch PAGE_SUMMARY for %s: %v", pName, err)
+			} else if summary != nil {
+				mu.Lock()
+				specialChunks[pName] = append(specialChunks[pName], *summary)
+				mu.Unlock()
+			}
+
+			// fetch PAGE_EXAMPLES (if < 500 chars)
+			examples, err := c.fetchSpecialChunk(ctx, pName, "PAGE_EXAMPLES")
+			if err != nil {
+				log.Printf("failed to fetch PAGE_EXAMPLES for %s: %v", pName, err)
+			} else if examples != nil && len(examples.Content) < 500 {
+				mu.Lock()
+				specialChunks[pName] = append(specialChunks[pName], *examples)
+				mu.Unlock()
+			}
+		}(pageName)
 	}
+
+	wg.Wait()
 
 	// organize by page: track page order, categorize chunks
 	pageOrder := []string{}
