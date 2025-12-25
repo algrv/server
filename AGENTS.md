@@ -39,6 +39,10 @@ algorave/
 │   │   └── openai.go        # OpenAI embedding client
 │   ├── storage/
 │   │   └── supabase.go      # Supabase pgvector operations
+│   ├── strudel/             # ← NEW! Shared Strudel code analysis
+│   │   ├── parser.go        # Core parsing utilities (extract sounds, notes, functions)
+│   │   ├── keywords.go      # Keyword extraction (for retriever)
+│   │   └── analyzer.go      # Semantic analysis (for examples tagging)
 │   ├── cheatsheet/          # (Phase 1.5)
 │   │   └── cheatsheet.go    # Quick reference constants
 │   ├── retriever/           # (For server phase)
@@ -1089,6 +1093,13 @@ func uniqueStrings(slice []string) []string {
 ## Notes for Claude Code
 When implementing, pay special attention to:
 
+### Strudel Code Analysis
+- **NEW:** Use `internal/strudel` package for all Strudel code parsing
+- See detailed documentation: `docs/system-specs/STRUDEL_CODE_ANALYSIS.md`
+- **Retriever:** Use `strudel.ExtractKeywords()` for editor context
+- **Examples:** Use `strudel.AnalyzeCode()` and `strudel.GenerateTags()` for tagging
+- Do NOT duplicate regex patterns - centralize in strudel package
+
 ### Chunking
 - Markdown parsing: Use regex carefully, test with varied headers
 - Summary extraction: Look for "Summary" or "Overview" sections
@@ -1108,7 +1119,7 @@ When implementing, pay special attention to:
 - Primary search (60%): User intent only - ensures request is prioritized
 - Contextual search (40%): Intent + editor - adds integration context
 - Merge and deduplicate results, rank by similarity score
-- Editor context extraction: Parse current code for keywords (sound names, functions, notes)
+- Editor context extraction: Use `strudel.ExtractKeywords()` from shared package
 - Limit editor keywords to ~10 to prevent noise
 - Graceful degradation: if contextual search fails, use primary only
 - **Explicit special section fetch:** Always fetch PAGE_SUMMARY when page appears, conditionally fetch PAGE_EXAMPLES (if < 500 chars)

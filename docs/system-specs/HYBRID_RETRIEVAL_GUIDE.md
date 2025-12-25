@@ -630,70 +630,33 @@ The .fast() function speeds up patterns...
 
 ### Editor Keyword Extraction
 
+Keyword extraction is now handled by the shared `internal/strudel` package. See `docs/system-specs/STRUDEL_CODE_ANALYSIS.md` for full details.
+
 ```go
+// retriever/utils.go
+import "algorave/internal/strudel"
+
 // extractEditorKeywords extracts relevant keywords from current editor state
 func (r *Retriever) extractEditorKeywords(editorState string) string {
-    if editorState == "" {
-        return ""
-    }
-    
-    keywords := []string{}
-    
-    // Extract sound sample names: sound("bd") → "bd"
-    soundRegex := regexp.MustCompile(`sound\("(\w+)"\)`)
-    for _, match := range soundRegex.FindAllStringSubmatch(editorState, -1) {
-        if len(match) > 1 {
-            keywords = append(keywords, match[1])
-        }
-    }
-    
-    // Extract note names: note("c e g") → ["c", "e", "g"]
-    noteRegex := regexp.MustCompile(`note\("([^"]+)"\)`)
-    for _, match := range noteRegex.FindAllStringSubmatch(editorState, -1) {
-        if len(match) > 1 {
-            notes := strings.Fields(match[1])
-            keywords = append(keywords, notes...)
-        }
-    }
-    
-    // Extract function calls: .fast(2) → "fast"
-    funcRegex := regexp.MustCompile(`\.(\w+)\(`)
-    for _, match := range funcRegex.FindAllStringSubmatch(editorState, -1) {
-        if len(match) > 1 {
-            keywords = append(keywords, match[1])
-        }
-    }
-    
-    // Extract scale/mode names: scale("minor") → "minor"
-    scaleRegex := regexp.MustCompile(`(?:scale|mode)\("(\w+)"\)`)
-    for _, match := range scaleRegex.FindAllStringSubmatch(editorState, -1) {
-        if len(match) > 1 {
-            keywords = append(keywords, match[1])
-        }
-    }
-    
-    // Deduplicate
-    uniqueKeywords := uniqueStrings(keywords)
-    
-    // Limit to 10 keywords max to prevent noise
-    if len(uniqueKeywords) > 10 {
-        uniqueKeywords = uniqueKeywords[:10]
-    }
-    
-    return strings.Join(uniqueKeywords, " ")
+    // Delegates to centralized strudel package
+    // Extracts: sounds, notes, functions, scales
+    // Returns: space-separated keywords (max 10, deduplicated)
+    return strudel.ExtractKeywords(editorState)
 }
+```
 
-func uniqueStrings(slice []string) []string {
-    seen := make(map[string]bool)
-    result := []string{}
-    for _, s := range slice {
-        if !seen[s] {
-            result = append(result, s)
-            seen[s] = true
-        }
-    }
-    return result
-}
+**What it does:**
+- Extracts sound names: `sound("bd")` → `"bd"`
+- Extracts notes: `note("c e g")` → `"c e g"`
+- Extracts functions: `.fast(2)` → `"fast"`
+- Extracts scales: `scale("minor")` → `"minor"`
+- Deduplicates and limits to 10 keywords to prevent noise
+
+**Example:**
+```go
+editorState := `sound("bd").fast(2).stack(note("c e g"))`
+keywords := strudel.ExtractKeywords(editorState)
+// Returns: "bd fast stack c e g"
 ```
 
 ### Vector Search Implementation
