@@ -22,9 +22,8 @@ func ProcessRawExample(raw RawExample) (Example, error) {
 		description = generateDescription(raw.Code, raw.Title, raw.Category, tags)
 	}
 
-	author := raw.Author
-	if author == "" {
-		author = "curated"
+	if raw.Author == "" {
+		raw.Author = "curated"
 	}
 
 	return Example{
@@ -32,7 +31,7 @@ func ProcessRawExample(raw RawExample) (Example, error) {
 		Description: description,
 		Code:        raw.Code,
 		Tags:        tags,
-		Author:      author,
+		Author:      raw.Author,
 		Category:    raw.Category,
 		SourceURL:   "",
 		CreatedAt:   time.Now(),

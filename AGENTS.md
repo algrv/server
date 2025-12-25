@@ -26,9 +26,10 @@ Strudel is a live coding language for creating music patterns in the browser. Us
 algorave/
 ├── cmd/
 │   ├── ingester/
-│   │   └── main.go          # Ingestion CLI entry point
-│   ├── ingest-examples/     # (Phase 1.5)
-│   │   └── main.go          # Example Strudels ingestion
+│   │   ├── main.go          # Ingestion CLI entry point
+│   │   ├── docs.go          # Ingest technical docs
+│   │   ├── concepts.go      # Ingest concept docs (MDX) ← NEW!
+│   │   └── examples.go      # Ingest example Strudels
 │   └── server/              # (Build later)
 │       └── main.go          # API server entry point
 ├── internal/
@@ -45,7 +46,14 @@ algorave/
 │   └── agent/               # (For server phase)
 │       └── agent.go         # Code generation orchestration
 ├── docs/
-│   └── project-docs/        # Documentation to be indexed (30 pages)
+│   ├── project-docs/        # Technical documentation (30 pages)
+│   └── concepts/            # Teaching concepts (MDX files) ← NEW!
+│       ├── music-theory.mdx
+│       ├── common-patterns.mdx
+│       ├── genres.mdx
+│       ├── sound-selection.mdx
+│       ├── composition-techniques.mdx
+│       └── mixing-basics.mdx
 ├── agent.md                 # This file
 ├── .env                     # Environment variables (gitignored)
 ├── .env.example             # Template
@@ -66,37 +74,70 @@ A 1-2 page quick reference with the most common Strudel patterns and functions. 
 **Purpose:** Fast lookup, prevent syntax errors, common patterns
 
 #### 2. **Documentation** (Vector Search - Stateless)
-30 pages of Strudel documentation, chunked and embedded for semantic search.
+Documentation pages including both technical reference (~30 pages) and teaching concepts (~6-10 MDX files), chunked and embedded for semantic search.
+
+**Two types of documentation (both stored in same table):**
+- **Technical docs** (`docs/project-docs/*.md`) - API reference, function documentation
+- **Concept docs** (`docs/concepts/*.mdx`) - Teaching materials (music theory, common patterns, genres, sound selection, composition techniques, etc.)
 
 **Chunking Strategy - Special Sections Approach:**
 - Each page creates **PAGE_SUMMARY chunk** (embedded separately)
 - Each page creates **PAGE_EXAMPLES chunk** if examples section exists (embedded separately)
 - Page content split into section chunks by headers
 - Special chunks allow high-level overview + simple syntax examples + detailed content
+- **Both technical and concept docs use identical chunking strategy**
 
 **Example:**
 ```
-Page: "Sound Synthesis" creates 7 chunks:
+Technical Doc: "Sound Synthesis" creates 7 chunks:
 
 Chunk 0 (Summary):
   section_title: "PAGE_SUMMARY"
+  page_url: "/docs/sound-synthesis"
   content: "SUMMARY: This page covers sound synthesis basics..."
-  (This gets embedded and is searchable!)
 
 Chunk 1 (Examples):
   section_title: "PAGE_EXAMPLES"
-  content: "sound('bd')  // Simple kick\nsound('bd hh')  // Pattern"
-  (This gets embedded and is searchable!)
+  content: "sound('bd')  // Simple kick"
 
 Chunks 2-6 (Sections):
   section_title: "Basic Sounds", "Layering", etc.
-  content: Detailed section content
+  content: Detailed technical documentation
+
+Concept Doc: "Music Theory" (MDX) creates 8 chunks:
+
+Chunk 0 (Summary):
+  section_title: "PAGE_SUMMARY"
+  page_url: "/concepts/music-theory"
+  content: "SUMMARY: Essential music theory for live coding..."
+
+Chunk 1 (Examples):
+  section_title: "PAGE_EXAMPLES"
+  content: "sound('bd').fast(4).stack(sound('hh').fast(3))  // Polyrhythm"
+
+Chunks 2-7 (Sections):
+  section_title: "Polyrhythm Basics", "Call and Response", etc.
+  content: Teaching content with heavily commented code
 ```
 
-**Retrieval:** Top 5 section chunks via vector similarity search
-**Explicit Fetch:** Summary + Examples for each retrieved page (not via vector search)
+**Retrieval:** Top 5 section chunks (mixed from technical + concept docs)
+**Explicit Fetch:** Summary + Examples for each page (both types)
 **Organization:** Group by page, summaries first, then examples, then sections
-**Purpose:** Provide overview + simple examples + technical details for requested features
+**Purpose:** Technical reference (HOW) + Teaching concepts (WHY/WHEN)
+
+**Retrieval Example:**
+```
+Query: "create tension in my track"
+  ↓
+Retrieved (mixed):
+1. /concepts/music-theory - "Polyrhythm Basics" (0.95) ← Concept!
+2. /docs/patterns - "Speed Control" (0.88) ← Technical!
+3. /concepts/composition - "Building Tension" (0.85) ← Concept!
+4. /docs/effects - "Filter Sweeps" (0.82) ← Technical!
+5. /concepts/common-patterns - "Tension Techniques" (0.80) ← Concept!
+
+Claude gets both technical docs AND teaching concepts!
+```
 
 #### 3. **Example Strudels** (Vector Search - Contextual)
 Finished Strudel code examples from public websites, showing working patterns.
@@ -219,7 +260,7 @@ Search Query: "audio playback, frequency, volume, amplitude, sound generation, b
 - Handles synonyms automatically (e.g., "loud" → "volume, amplitude")
 - Improves retrieval recall significantly
 
-#### Stage 2: Hybrid Retrieval
+#### Stage 2: Hybrid Retrieval (Option C - Best UX)
 
 **Hybrid strategy for BOTH docs and examples:**
 - **Primary search (60% weight):** User intent only - ensures request is always prioritized
@@ -256,7 +297,7 @@ contextualExamples := retriever.SearchExamples(ctx, contextualQuery, topK=3)
 examples := mergeAndRank(primaryExamples, contextualExamples, topK=3)
 ```
 
-**Why Hybrid?**
+**Why Hybrid (Option C)?**
 - ✅ Handles ALL scenarios well (incremental building AND pivoting)
 - ✅ User intent always dominates (60% from primary search)
 - ✅ Adds contextual integration tips (40% from contextual search)
@@ -419,11 +460,11 @@ CURRENT EDITOR STATE
 sound("bd").fast(4)
 
 ═══════════════════════════════════════════════════════════
-RELEVANT DOCUMENTATION
+RELEVANT DOCUMENTATION (Technical + Concepts)
 ═══════════════════════════════════════════════════════════
 
 ─────────────────────────────────────────
-Page: Sound Synthesis
+Page: Sound Synthesis (Technical Doc)
 ─────────────────────────────────────────
 SUMMARY: This page covers sound synthesis basics including
 triggering samples, layering sounds, and basic pattern creation.
@@ -436,10 +477,21 @@ sound("bd").stack(sound("hh")) // Layering sounds
 SECTION: Basic Sounds
 The sound() function is the primary way to trigger samples...
 
-SECTION: Layering Sounds
-Use .stack() to layer multiple sounds together...
+─────────────────────────────────────────
+Page: Music Theory (Concept Doc)
+─────────────────────────────────────────
+SUMMARY: Essential music theory for live coding including
+polyrhythms and tension building techniques.
 
-[~2000 tokens - 5 chunks organized by page with summaries + examples first]
+EXAMPLES:
+sound("bd").fast(4).stack(sound("hh").fast(3))  // Polyrhythm
+
+SECTION: Polyrhythm Basics
+POLYRHYTHM: Multiple rhythms playing simultaneously.
+Creates musical tension. The kick plays 4 beats while
+the hi-hat plays 3 beats.
+
+[~2000 tokens - 5 chunks from mixed technical + concept docs]
 
 ═══════════════════════════════════════════════════════════
 EXAMPLE STRUDELS FOR REFERENCE
@@ -472,6 +524,7 @@ You are a Strudel code generation assistant.
 - Generate code based on the user's request
 - Build upon the current editor state when applicable
 - Use the cheatsheet and documentation for accurate syntax
+- Reference concept docs to understand WHY/WHEN to use techniques
 - Reference examples for pattern inspiration
 - Return ONLY executable Strudel code, no explanations unless asked
 ```
@@ -617,18 +670,21 @@ require (
 2. 🔄 internal/chunker - Markdown chunking with summary extraction
 3. ⏳ internal/embedder - OpenAI embedding client
 4. ⏳ internal/storage - Supabase pgvector operations
-5. ⏳ cmd/ingester - CLI orchestration
+5. ⏳ cmd/ingester - CLI orchestration with three ingestion functions:
+   - `docs.go` - Ingest technical documentation (30 pages)
+   - `concepts.go` - Ingest concept docs (MDX files) ← NEW!
+   - `examples.go` - Ingest example Strudels (JSON files)
 6. ⏳ Test with real documentation
 
 ### Phase 1.5: Enhanced Context
 1. Create cheatsheet (manual curation - 1-2 pages)
-2. Scrape example Strudels from public website
-3. Create example_strudels table
-4. cmd/ingest-examples - Example ingestion tool
+2. Create concept MDX files (music-theory, common-patterns, genres, etc.) ← NEW!
+3. Scrape example Strudels from public website
+4. Create example_strudels table
 5. internal/cheatsheet - Cheatsheet constants
 
 ### Phase 2: API Server
-1. internal/retriever - Hybrid vector search (primary + contextual) for docs and examples + query transformation
+1. internal/retriever - Hybrid vector search (Option C: primary + contextual) for docs and examples + query transformation
 2. internal/agent - Code generation with multi-source context
 3. cmd/server - REST API endpoints
 4. Frontend integration with Strudel editor
@@ -828,7 +884,7 @@ func organizeByPage(chunks []DocChunk) []DocChunk {
 - Organized presentation: Overview → Syntax Examples → Details
 - Smart token management: Skip long examples, rely on finished Strudels instead
 
-### Hybrid Retrieval Strategy
+### Hybrid Retrieval Strategy (Option C)
 
 **Implementation approach:**
 ```go
@@ -1048,7 +1104,7 @@ When implementing, pay special attention to:
 - Examples: embed description/tags, store code separately
 
 ### Retrieval
-- **Hybrid search:** Both docs and examples use primary + contextual searches
+- **Hybrid search (Option C):** Both docs and examples use primary + contextual searches
 - Primary search (60%): User intent only - ensures request is prioritized
 - Contextual search (40%): Intent + editor - adds integration context
 - Merge and deduplicate results, rank by similarity score
