@@ -5,15 +5,17 @@ import (
 	"fmt"
 )
 
-// combines a QueryTransformer and Embedder into a single LLM
+// combines a QueryTransformer, Embedder, and TextGenerator into a single LLM
 type CompositeLLM struct {
 	QueryTransformer
 	Embedder
+	TextGenerator
 }
 
 // creates a new LLM with auto-configuration from environment variables
 func NewLLM(ctx context.Context) (LLM, error) {
 	config, err := loadConfig()
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to load LLM config: %w", err)
 	}
@@ -29,15 +31,18 @@ func NewLLMWithConfig(ctx context.Context, config *Config) (LLM, error) {
 
 	// create transformer based on provider
 	var transformer QueryTransformer
+	var textGenerator TextGenerator
 
 	switch config.TransformerProvider {
 	case ProviderAnthropic:
-		transformer = NewAnthropicTransformer(AnthropicConfig{
+		anthropic := NewAnthropicTransformer(AnthropicConfig{
 			APIKey:      config.TransformerAPIKey,
 			Model:       config.TransformerModel,
 			MaxTokens:   config.MaxTokens,
 			Temperature: config.Temperature,
 		})
+		transformer = anthropic
+		textGenerator = anthropic // AnthropicTransformer implements both interfaces
 	default:
 		return nil, fmt.Errorf("unsupported transformer provider: %s", config.TransformerProvider)
 	}
@@ -58,5 +63,6 @@ func NewLLMWithConfig(ctx context.Context, config *Config) (LLM, error) {
 	return &CompositeLLM{
 		QueryTransformer: transformer,
 		Embedder:         embedder,
+		TextGenerator:    textGenerator,
 	}, nil
 }

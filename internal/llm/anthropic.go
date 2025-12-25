@@ -123,6 +123,78 @@ func (t *AnthropicTransformer) TransformQuery(ctx context.Context, userQuery str
 	return userQuery + " " + transformed, nil
 }
 
+func (t *AnthropicTransformer) GenerateText(ctx context.Context, req TextGenerationRequest) (string, error) {
+	// build messages array with system prompt and conversation history
+	messages := make([]message, 0, len(req.Messages)+1)
+
+	// if there's a system prompt, prepend it to the first user message
+	systemPrompt := req.SystemPrompt
+
+	for i, msg := range req.Messages {
+		content := msg.Content
+
+		// prepend system prompt to first user message
+		if i == 0 && msg.Role == "user" && systemPrompt != "" {
+			content = systemPrompt + "\n\n" + content
+		}
+
+		messages = append(messages, message{
+			Role:    msg.Role,
+			Content: content,
+		})
+	}
+
+	// determine max tokens (use request value or fall back to config)
+	maxTokens := req.MaxTokens
+	if maxTokens == 0 {
+		maxTokens = t.config.MaxTokens
+	}
+
+	reqBody := transformRequest{
+		Model:       t.config.Model,
+		MaxTokens:   maxTokens,
+		Temperature: t.config.Temperature,
+		Messages:    messages,
+	}
+
+	jsonData, err := json.Marshal(reqBody)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", anthropicMessagesURL, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return "", fmt.Errorf("failed to create request: %w", err)
+	}
+
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("x-api-key", t.config.APIKey)
+	httpReq.Header.Set("anthropic-version", anthropicVersion)
+
+	resp, err := t.httpClient.Do(httpReq)
+	if err != nil {
+		return "", fmt.Errorf("failed to send request: %w", err)
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return "", fmt.Errorf("API request failed with status %d: %s", resp.StatusCode, string(body))
+	}
+
+	var apiResp transformResponse
+	if err := json.NewDecoder(resp.Body).Decode(&apiResp); err != nil {
+		return "", fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	if len(apiResp.Content) == 0 {
+		return "", fmt.Errorf("no content in response")
+	}
+
+	return strings.TrimSpace(apiResp.Content[0].Text), nil
+}
+
 // returns the system prompt for query transformation
 func buildTransformationPrompt() string {
 	const prompt = `You are a technical query expander for Strudel music documentation.
