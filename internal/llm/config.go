@@ -4,36 +4,39 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+
+	"github.com/algorave/server/internal/config"
 )
 
-// loadConfig loads LLM configuration from environment variables
+// loads LLM configuration from environment variables
 func loadConfig() (*Config, error) {
-	// transformer configuration
+	baseConfig, err := config.LoadEnvironmentVariables()
+	if err != nil {
+		return nil, fmt.Errorf("failed to load base config: %w", err)
+	}
+
+	// transformer configuration (for query transformation)
 	transformerProvider := Provider(os.Getenv("TRANSFORMER_PROVIDER"))
 	if transformerProvider == "" {
 		transformerProvider = ProviderAnthropic // default
 	}
 
-	transformerAPIKey := os.Getenv("ANTHROPIC_API_KEY")
-	if transformerAPIKey == "" {
-		return nil, fmt.Errorf("ANTHROPIC_API_KEY environment variable is required")
-	}
+	// use API key from base config
+	transformerAPIKey := baseConfig.AnthropicKey
 
 	transformerModel := os.Getenv("TRANSFORMER_MODEL")
 	if transformerModel == "" {
 		transformerModel = "claude-3-haiku-20240307" // default
 	}
 
-	// generator configuration
+	// generator configuration (for code generation)
 	generatorProvider := Provider(os.Getenv("GENERATOR_PROVIDER"))
 	if generatorProvider == "" {
 		generatorProvider = ProviderAnthropic // default
 	}
 
-	generatorAPIKey := os.Getenv("ANTHROPIC_API_KEY")
-	if generatorAPIKey == "" {
-		return nil, fmt.Errorf("ANTHROPIC_API_KEY environment variable is required")
-	}
+	// use API key from base config
+	generatorAPIKey := baseConfig.AnthropicKey
 
 	generatorModel := os.Getenv("GENERATOR_MODEL")
 	if generatorModel == "" {
@@ -46,10 +49,8 @@ func loadConfig() (*Config, error) {
 		embedderProvider = ProviderOpenAI // default
 	}
 
-	embedderAPIKey := os.Getenv("OPENAI_API_KEY")
-	if embedderAPIKey == "" {
-		return nil, fmt.Errorf("OPENAI_API_KEY environment variable is required")
-	}
+	// use API key from base config
+	embedderAPIKey := baseConfig.OpenAIKey
 
 	embedderModel := os.Getenv("EMBEDDER_MODEL")
 	if embedderModel == "" {

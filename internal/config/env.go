@@ -7,6 +7,8 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// holds all application-wide configuration loaded from environment variables
+// this is the single source of truth for API keys and connection strings
 type Config struct {
 	OpenAIKey          string
 	AnthropicKey       string
@@ -14,9 +16,10 @@ type Config struct {
 	Environment        string
 }
 
+// loads configuration from environment variables
 func LoadEnvironmentVariables() (*Config, error) {
 	if err := godotenv.Load(); err != nil {
-		_ = err
+		_ = err // not an error - production environments may not have .env file
 	}
 
 	openaiKey := os.Getenv("OPENAI_API_KEY")
