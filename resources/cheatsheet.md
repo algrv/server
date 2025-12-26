@@ -196,6 +196,8 @@ note("c# d# f# g# a#")            // Sharps
 n("0 2 4 6").scale("C:major")     // Numbers become scale degrees
 n("<0 1 2 3>").scale("C:minor")   // Change scales per cycle
 n("0 2 4").scale("C:pentatonic")
+n("0 2 4").scale("C4:major")      // With octave specification
+n("0 2 4").scale("C:minor:pentatonic")  // Compound scales
 ```
 
 ### Transpose
@@ -214,6 +216,35 @@ n("0 2 4").scale("C:major").scaleTranspose(1)
 ```javascript
 chord("C Am F G").voicing()       // Turn chords into note voicings
 n("0 1 2 3").chord("C Am F G").voicing()
+```
+
+### Common Chord Progressions (Scale Degrees)
+Convert Roman numerals to scale degrees: I=0, ii=1, iii=2, IV=3, V=4, vi=5, vii=6
+
+```javascript
+// Pop (I-V-vi-IV)
+n("0 4 5 3").scale("C:major").sound("piano")
+
+// Jazz ii-V-I
+n("1 4 0").scale("C:major").sound("piano")
+
+// Blues 12-bar (I-I-I-I-IV-IV-I-I-V-IV-I-V)
+n("0 0 0 0 3 3 0 0 4 3 0 4").scale("C:major").sound("piano")
+
+// Folk (I-IV-I-V)
+n("0 3 0 4").scale("C:major").sound("piano")
+
+// Rock (I-bVII-IV-I) - use negative for flat
+n("0 -1 3 0").scale("C:major").sound("sawtooth")
+
+// Classical (I-IV-V-I)
+n("0 3 4 0").scale("C:major").sound("piano")
+
+// Modal (i-bVII-IV-i in minor)
+n("0 -1 3 0").scale("C:minor").sound("sawtooth")
+
+// EDM (i-VI-III-VII in minor)
+n("0 5 2 6").scale("C:minor").sound("sawtooth")
 ```
 
 ---
@@ -717,10 +748,15 @@ Effects: fx
 
 ### Scale Types
 
-For every key (C, C, D, E, F, F, G, A, B, and their respective sharps and flats), there are the following scales available:
+For every key (C, C#, D, E, F, F#, G, A, B, and their respective sharps and flats), there are the following scales available:
 
 ```
 major, minor, dorian, phrygian, lydian, mixolydian
 pentatonic, blues, harmonic_minor
 ```
-```
+
+**Compound Scales:**
+Scales can be combined using colon notation: `"C:minor:pentatonic"`, `"D:dorian:blues"`
+
+**With Octaves:**
+Scale notation can include octave: `"C4:major"`, `"A2:minor"`
