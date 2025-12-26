@@ -8,7 +8,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-type WelcomeModel struct {
+type Welcome struct {
 	mode     string
 	input    string
 	commands []Command
@@ -21,7 +21,7 @@ type Command struct {
 }
 
 // returns a new welcome screen
-func NewWelcomeModel(mode string) *WelcomeModel {
+func NewWelcome(mode string) *Welcome {
 	commands := []Command{
 		{Name: "start", Description: "start the algorave server", Available: true},
 		{Name: "ingest", Description: "run documentation ingester", Available: mode == "development"},
@@ -29,13 +29,13 @@ func NewWelcomeModel(mode string) *WelcomeModel {
 		{Name: "quit", Description: "exit algorave", Available: true},
 	}
 
-	return &WelcomeModel{
+	return &Welcome{
 		mode:     mode,
 		commands: commands,
 	}
 }
 
-func (m *WelcomeModel) Update(msg tea.Msg) (*WelcomeModel, tea.Cmd) {
+func (m *Welcome) Update(msg tea.Msg) (*Welcome, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -63,7 +63,7 @@ func (m *WelcomeModel) Update(msg tea.Msg) (*WelcomeModel, tea.Cmd) {
 	return m, nil
 }
 
-func (m *WelcomeModel) View() string {
+func (m *Welcome) View() string {
 	var b strings.Builder
 
 	b.WriteString(titleStyle.Render(logo))
@@ -102,7 +102,7 @@ func (m *WelcomeModel) View() string {
 	return b.String()
 }
 
-func (m *WelcomeModel) executeCommand() tea.Cmd {
+func (m *Welcome) executeCommand() tea.Cmd {
 	cmd := strings.TrimSpace(m.input)
 
 	switch cmd {

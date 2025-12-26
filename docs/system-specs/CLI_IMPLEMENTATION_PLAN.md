@@ -200,11 +200,15 @@ response := agentClient.ProcessQuery(ctx, request)
 ---
 
 ### Phase 3: Remote SSH Access
-**Duration**: 1-2 days
-**Complexity**: Medium
+**Status**: REMOVED (not currently implemented)
+
+~~**Duration**: 1-2 days~~
+~~**Complexity**: Medium~~
 
 #### What We're Building
-SSH server for remote terminal access with multi-user support.
+~~SSH server for remote terminal access with multi-user support.~~
+
+**NOTE**: SSH functionality has been removed from the codebase. This section is kept for reference only.
 
 #### Components (Additional)
 ```

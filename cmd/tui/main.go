@@ -16,7 +16,7 @@ func main() {
 	}
 
 	app := tui.NewApp(env)
-	p := tea.NewProgram(app, tea.WithAltScreen())
+	p := tea.NewProgram(app, tea.WithAltScreen(), tea.WithMouseCellMotion())
 
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Error running algorave: %v\n", err)

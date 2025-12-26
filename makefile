@@ -1,4 +1,4 @@
-.PHONY: help ingest build cli ssh test clean setup
+.PHONY: help ingest build cli test clean setup
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -39,7 +39,6 @@ build: ## Build binaries
 	go build -o bin/ingester ./cmd/ingester
 	go build -o bin/server ./cmd/server
 	go build -o bin/algorave ./cmd/tui
-	go build -o bin/algorave-ssh ./cmd/ssh
 	@echo "✓ Built all binaries in bin/"
 
 cli: ## Build local CLI
@@ -47,12 +46,6 @@ cli: ## Build local CLI
 	@mkdir -p bin
 	go build -o bin/algorave ./cmd/tui
 	@echo "✓ Built bin/algorave"
-
-ssh: ## Build SSH server
-	@echo "Building SSH server..."
-	@mkdir -p bin
-	go build -o bin/algorave-ssh ./cmd/ssh
-	@echo "✓ Built bin/algorave-ssh"
 
 test: ## Run tests
 	go test -v ./...

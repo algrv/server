@@ -14,14 +14,13 @@ Algorave is evolving from a simple code generation tool into a collaborative liv
 
 ### 1. CLI/TUI Interface
 
-**Location**: `cmd/algorave/`, `internal/tui/`, `internal/ssh/`
+**Location**: `cmd/tui/`, `internal/tui/`
 
-**Status**: Planned (Phases 1-3)
+**Status**: Implemented
 
-Interactive terminal interface for local development and remote access:
+Interactive terminal interface for local development:
 - Welcome screen with command menu
 - Live code editor with AI assistance
-- Remote SSH access for collaborative coding
 - Production-safe command filtering
 
 See [CLI Architecture](./CLI_ARCHITECTURE.md) for detailed design.

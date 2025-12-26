@@ -8,19 +8,11 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/algorave/server/internal/agent"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type agentResponse struct {
-	Code                string   `json:"code"`
-	DocsRetrieved       int      `json:"docs_retrieved"`
-	ExamplesRetrieved   int      `json:"examples_retrieved"`
-	Model               string   `json:"model"`
-	IsActionable        bool     `json:"is_actionable"`
-	ClarifyingQuestions []string `json:"clarifying_questions"`
-}
-
-func sendToAgent(userQuery, editorState string, conversationHistory []Message) tea.Cmd {
+func sendToAgent(userQuery, editorState string, conversationHistory []MessageModel) tea.Cmd {
 	return func() tea.Msg {
 		endpoint := os.Getenv("ALGORAVE_AGENT_ENDPOINT")
 		if endpoint == "" {
@@ -35,28 +27,29 @@ func sendToAgent(userQuery, editorState string, conversationHistory []Message) t
 
 		jsonData, err := json.Marshal(payload)
 		if err != nil {
-			return AgentErrorMsg{err: fmt.Errorf("failed to marshal request: %w", err)}
+			return AgentErrorMsg{userQuery: userQuery, err: fmt.Errorf("failed to marshal request: %w", err)}
 		}
 
 		resp, err := http.Post(endpoint, "application/json", bytes.NewBuffer(jsonData))
 		if err != nil {
-			return AgentErrorMsg{err: fmt.Errorf("failed to connect to agent: %w", err)}
+			return AgentErrorMsg{userQuery: userQuery, err: fmt.Errorf("failed to connect to agent: %w", err)}
 		}
 		defer resp.Body.Close()
 
 		if resp.StatusCode != http.StatusOK {
 			body, _ := io.ReadAll(resp.Body)
-			return AgentErrorMsg{err: fmt.Errorf("agent returned error %d: %s", resp.StatusCode, string(body))}
+			return AgentErrorMsg{userQuery: userQuery, err: fmt.Errorf("agent returned error %d: %s", resp.StatusCode, string(body))}
 		}
 
-		var result agentResponse
+		var result agent.GenerateResponse
 
 		if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-			return AgentErrorMsg{err: fmt.Errorf("failed to parse response: %w", err)}
+			return AgentErrorMsg{userQuery: userQuery, err: fmt.Errorf("failed to parse response: %w", err)}
 		}
 
 		code, metadata := formatAgentResponse(result)
 		return AgentResponseMsg{
+			userQuery: userQuery,
 			code:      code,
 			metadata:  metadata,
 			questions: result.ClarifyingQuestions,
@@ -64,7 +57,7 @@ func sendToAgent(userQuery, editorState string, conversationHistory []Message) t
 	}
 }
 
-func formatAgentResponse(result agentResponse) (string, string) {
+func formatAgentResponse(result agent.GenerateResponse) (string, string) {
 	code := result.Code
 
 	metadata := fmt.Sprintf("retrieved: %d docs, %d examples | model: %s",

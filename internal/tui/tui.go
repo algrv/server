@@ -21,7 +21,7 @@ type Model struct {
 	width   int
 	height  int
 	err     error
-	welcome *WelcomeModel
+	welcome *Welcome
 	editor  *EditorModel
 }
 
@@ -30,8 +30,8 @@ func NewApp(mode string) *Model {
 	return &Model{
 		state:   StateWelcome,
 		mode:    mode,
-		welcome: NewWelcomeModel(mode),
-		editor:  NewEditorModel(),
+		welcome: NewWelcome(mode),
+		editor:  NewEditor(),
 	}
 }
 
@@ -42,11 +42,12 @@ func (m *Model) Init() tea.Cmd {
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		// Only quit from welcome screen, not from editor
+		// only quit from welcome screen, not from editor
 		if msg.String() == "ctrl+c" && m.state == StateWelcome {
 			return m, tea.Quit
 		}
-		// In editor, Ctrl+C should go back to welcome
+
+		// in editor, ctrl+c should go back to welcome
 		if msg.String() == "ctrl+c" && m.state == StateEditor {
 			m.state = StateWelcome
 			return m, nil

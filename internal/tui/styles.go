@@ -5,11 +5,18 @@ import (
 )
 
 var (
-	colorWhite     = lipgloss.Color("#FFFFFF")
-	colorLightGray = lipgloss.Color("#CCCCCC")
-	colorGray      = lipgloss.Color("#888888")
-	colorDarkGray  = lipgloss.Color("#444444")
-	colorBlack     = lipgloss.Color("#000000")
+	colorWhite        = lipgloss.Color("#FFFFFF")
+	colorLightGray    = lipgloss.Color("#CCCCCC")
+	colorGray         = lipgloss.Color("#888888")
+	colorDarkGray     = lipgloss.Color("#444444")
+	colorVeryDarkGray = lipgloss.Color("#222222")
+	colorBlack        = lipgloss.Color("#000001")
+	colorDarkGreen    = lipgloss.Color("#020f0e")
+	colorPurple       = lipgloss.Color("#8524a6")
+	colorGreen        = lipgloss.Color("#00FF00")
+	colorYellow       = lipgloss.Color("#FFFF00")
+	colorRed          = lipgloss.Color("#FF0000")
+	colorTransparent  = lipgloss.Color("tansparent")
 )
 
 var (
