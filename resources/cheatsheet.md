@@ -7,17 +7,18 @@ A complete reference guide to the Strudel live coding music language - an offici
 ## TABLE OF CONTENTS
 
 1. [Quick Start](#quick-start)
-2. [Mini-Notation Syntax](#mini-notation-syntax)
-3. [Sound Functions](#sound-functions)
-4. [Note & Pitch Functions](#note--pitch-functions)
-5. [Audio Effects](#audio-effects)
-6. [Time Modifiers](#time-modifiers)
-7. [Random Modifiers](#random-modifiers)
-8. [Tonal Functions](#tonal-functions)
-9. [Synths & Oscillators](#synths--oscillators)
-10. [Sampler Effects](#sampler-effects)
-11. [Pattern Functions](#pattern-functions)
-12. [Tips & Best Practices](#tips--best-practices)
+2. [Strudel Editor Syntax](#strudel-editor-syntax-important)
+3. [Mini-Notation Syntax](#mini-notation-syntax)
+4. [Sound Functions](#sound-functions)
+5. [Note & Pitch Functions](#note--pitch-functions)
+6. [Audio Effects](#audio-effects)
+7. [Time Modifiers](#time-modifiers)
+8. [Random Modifiers](#random-modifiers)
+9. [Tonal Functions](#tonal-functions)
+10. [Synths & Oscillators](#synths--oscillators)
+11. [Sampler Effects](#sampler-effects)
+12. [Pattern Functions](#pattern-functions)
+13. [Tips & Best Practices](#tips--best-practices)
 
 ---
 
@@ -46,6 +47,58 @@ setcpm(120)                       // Cycles per minute
 ```javascript
 hush()                            // Stop all patterns
 ```
+
+---
+
+## STRUDEL EDITOR SYNTAX (IMPORTANT!)
+
+**When writing code in the Strudel editor, every pattern MUST start with `$:` or `$<name>:`**
+
+This is a requirement of the Strudel REPL editor. Without this prefix, your patterns will not play.
+
+### Basic Pattern Prefix
+```javascript
+$: sound("bd sd")                 // Single pattern
+$: note("c e g").sound("piano")   // Pattern with method chain
+$: s("bd*4").gain(0.8)            // Using shorthand (s = sound)
+```
+
+### Named Patterns
+```javascript
+$drums: sound("bd sd hh cp")      // Named pattern
+$bass: note("c2 e2").sound("sawtooth")
+$melody: n("0 2 4 7").scale("C:minor").sound("piano")
+```
+
+### Multiple Patterns Running Simultaneously
+```javascript
+$: sound("bd*4")                  // Kick drum
+$: sound("hh*8")                  // Hi-hats
+$: note("c e g").sound("piano")   // Piano chords
+```
+
+### Stack Multiple Patterns in One Line
+```javascript
+$: stack(
+  sound("bd*4"),
+  sound("hh*8"),
+  note("c e g").sound("piano")
+)
+```
+
+### Muting Patterns
+```javascript
+_$: sound("bd")                   // Mute with _ prefix
+_$drums: sound("bd sd")           // Mute named pattern
+```
+
+### Pattern Control Commands
+```javascript
+hush()                            // Stop all patterns
+setcpm(120)                       // Set tempo (cycles per minute)
+```
+
+**Note**: The examples in this cheatsheet show the pattern code WITHOUT the `$:` prefix for clarity. Remember to add `$:` or `$<name>:` when using them in the Strudel editor!
 
 ---
 
@@ -624,18 +677,6 @@ pattern.set(otherPattern)         // Set from pattern
 ```javascript
 cat(pattern1, pattern2)           // Concatenate in time
 stack(pattern1, pattern2)         // Overlay in time
-```
-
-### Using $ for Multiple Patterns
-```javascript
-$: sound("bd")
-$: sound("hh*8")
-$: note("c e g")
-```
-
-### Muting Patterns
-```javascript
-_$: sound("bd")                   // Mute with _$
 ```
 
 ---
