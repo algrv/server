@@ -4,13 +4,97 @@ title: Music Theory
 
 # Scales
 
-A scale is a set of notes that are played in a specific order. 
-There are many different scales, but some of the most common are:
+Ordered sets of notes that define a key's harmonic foundation.
 
 ## Major Scale
-
-The major scale is a scale that is played in a specific order.
+Pattern: W-W-H-W-W-W-H (whole/half steps)
+```javascript
+n("0 2 4 5 7 9 11 12").scale("C:major")
+```
 
 ## Minor Scale
+Pattern: W-H-W-W-H-W-W (natural minor)
+```javascript
+n("0 2 3 5 7 8 10 12").scale("C:minor")
+```
 
-The minor scale is a scale that is played in a specific order.
+## Pentatonic
+5-note scales, commonly used in pop, rock, blues.
+```javascript
+n("0 2 4 7 9").scale("C:major:pentatonic")    // major
+n("0 3 5 7 10").scale("C:minor:pentatonic")   // minor
+```
+
+# Intervals
+
+Distance between two notes, measured in semitones.
+
+| Interval | Semitones | Example (from C) |
+|----------|-----------|------------------|
+| Unison   | 0         | C                |
+| Minor 2nd| 1         | C#               |
+| Major 2nd| 2         | D                |
+| Minor 3rd| 3         | Eb               |
+| Major 3rd| 4         | E                |
+| Perfect 4th | 5      | F                |
+| Tritone  | 6         | F#               |
+| Perfect 5th | 7      | G                |
+| Minor 7th| 10        | Bb               |
+| Major 7th| 11        | B                |
+| Octave   | 12        | C                |
+
+# Chords
+
+Three or more notes played simultaneously.
+
+## Triads
+- **Major**: 0-4-7 (root, major 3rd, perfect 5th)
+- **Minor**: 0-3-7 (root, minor 3rd, perfect 5th)
+- **Diminished**: 0-3-6 (root, minor 3rd, diminished 5th)
+- **Augmented**: 0-4-8 (root, major 3rd, augmented 5th)
+
+```javascript
+n("0,4,7").scale("C:major")  // C major chord
+n("0,3,7").scale("C:major")  // C minor chord
+```
+
+## Seventh Chords
+- **Major 7th**: 0-4-7-11
+- **Dominant 7th**: 0-4-7-10
+- **Minor 7th**: 0-3-7-10
+
+```javascript
+n("0,4,7,11").scale("C:major")  // Cmaj7
+```
+
+# Time Signatures
+
+Defines beats per measure and note value.
+
+- **4/4** (common time): 4 beats per measure, quarter note = 1 beat
+- **3/4** (waltz): 3 beats per measure
+- **6/8**: 6 beats per measure, eighth note = 1 beat
+
+```javascript
+// 4/4 time with quarter note pulses
+s("bd sd bd sd").cpm(0.5)
+
+// 3/4 waltz pattern
+s("bd sd sd").cpm(0.5)
+```
+
+# Key Signatures
+
+Number of sharps (#) or flats (b) in a scale.
+
+| Key | Sharps/Flats |
+|-----|--------------|
+| C major / A minor | None |
+| G major / E minor | 1# (F#) |
+| D major / B minor | 2# (F#, C#) |
+| F major / D minor | 1b (Bb) |
+| Bb major / G minor | 2b (Bb, Eb) |
+
+```javascript
+n("0 2 4").scale("G:major")  // Uses F# automatically
+```
