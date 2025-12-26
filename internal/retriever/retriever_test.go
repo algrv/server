@@ -3,19 +3,20 @@ package retriever
 import (
 	"context"
 	"log"
-	"os"
 	"strings"
 	"testing"
 
+	"github.com/algorave/server/internal/llm"
 	"github.com/algorave/server/internal/strudel"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 )
 
-type mockTransformer struct{}
-
-type mockEmbedder struct {
-	embedding []float32
+type mockLLM struct {
+	model                  string
+	generateTextFunc       func(ctx context.Context, req llm.TextGenerationRequest) (string, error)
+	generateEmbeddingFunc  func(ctx context.Context, text string) ([]float32, error)
+	generateEmbeddingsFunc func(ctx context.Context, texts []string) ([][]float32, error)
+	transformQueryFunc     func(ctx context.Context, query string) (string, error)
 }
 
 func init() {
@@ -24,49 +25,30 @@ func init() {
 	}
 }
 
-func (m *mockEmbedder) GenerateEmbedding(ctx context.Context, text string) ([]float32, error) {
-	if m.embedding != nil {
-		return m.embedding, nil
-	}
+func (l *mockLLM) GenerateText(ctx context.Context, req llm.TextGenerationRequest) (string, error) {
+	return "sound(\"bd\").fast(4)", nil
+}
 
+func (l *mockLLM) Model() string {
+	return "mock-model"
+}
+
+func (l *mockLLM) GenerateEmbedding(ctx context.Context, text string) ([]float32, error) {
 	return make([]float32, 1536), nil
 }
 
-func (m *mockEmbedder) GenerateEmbeddings(ctx context.Context, texts []string) ([][]float32, error) {
+func (l *mockLLM) GenerateEmbeddings(ctx context.Context, texts []string) ([][]float32, error) {
 	embeddings := make([][]float32, len(texts))
 
 	for i := range texts {
-		if m.embedding != nil {
-			embeddings[i] = m.embedding
-		} else {
-			embeddings[i] = make([]float32, 1536)
-		}
+		embeddings[i] = make([]float32, 1536)
 	}
 
 	return embeddings, nil
 }
 
-func (m *mockTransformer) TransformQuery(ctx context.Context, query string) (string, error) {
+func (l *mockLLM) TransformQuery(ctx context.Context, query string) (string, error) {
 	return query + " expanded keywords", nil
-}
-
-// helper to create a test client with real DB connection
-func createTestClient(t *testing.T) *Client {
-	t.Helper()
-
-	ctx := context.Background()
-	connString := os.Getenv("SUPABASE_CONNECTION_STRING")
-
-	if connString == "" {
-		t.Skip("SUPABASE_CONNECTION_STRING not set, skipping integration test")
-	}
-
-	db, err := pgxpool.New(ctx, connString)
-	if err != nil {
-		t.Fatalf("Failed to connect to database: %v", err)
-	}
-
-	return New(db, &mockEmbedder{}, &mockTransformer{})
 }
 
 // verifies the merge logic works correctly

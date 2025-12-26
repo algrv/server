@@ -13,28 +13,26 @@ import (
 
 // New creates a retriever client with injected dependencies.
 // The caller owns the lifecycle of db, embedder, and transformer.
-func New(db *pgxpool.Pool, embedder llm.Embedder, transformer llm.QueryTransformer) *Client {
+func New(db *pgxpool.Pool, llm llm.LLM) *Client {
 	return &Client{
-		db:          db,
-		embedder:    embedder,
-		transformer: transformer,
-		topK:        defaultTopK,
+		db:   db,
+		llm:  llm,
+		topK: defaultTopK,
 	}
 }
 
 // NewWithTopK creates a retriever with a custom topK value
-func NewWithTopK(db *pgxpool.Pool, embedder llm.Embedder, transformer llm.QueryTransformer, topK int) *Client {
+func NewWithTopK(db *pgxpool.Pool, llm llm.LLM, topK int) *Client {
 	return &Client{
-		db:          db,
-		embedder:    embedder,
-		transformer: transformer,
-		topK:        topK,
+		db:   db,
+		llm:  llm,
+		topK: topK,
 	}
 }
 
 // VectorSearch performs a vector similarity search on doc_embeddings
 func (c *Client) VectorSearch(ctx context.Context, queryText string, topK int) ([]SearchResult, error) {
-	embedding, err := c.embedder.GenerateEmbedding(ctx, queryText)
+	embedding, err := c.llm.GenerateEmbedding(ctx, queryText)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate query embedding: %w", err)
 	}
@@ -86,7 +84,7 @@ func (c *Client) VectorSearch(ctx context.Context, queryText string, topK int) (
 
 // SearchExamples performs a vector similarity search on example_strudels
 func (c *Client) SearchExamples(ctx context.Context, queryText string, topK int) ([]ExampleResult, error) {
-	embedding, err := c.embedder.GenerateEmbedding(ctx, queryText)
+	embedding, err := c.llm.GenerateEmbedding(ctx, queryText)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate query embedding: %w", err)
 	}
@@ -141,7 +139,7 @@ func (c *Client) SearchExamples(ctx context.Context, queryText string, topK int)
 // HybridSearchDocs implements hybrid search (primary + contextual) for documentation
 func (c *Client) HybridSearchDocs(ctx context.Context, userQuery, editorState string, topK int) ([]SearchResult, error) {
 	// transform query to add technical keywords
-	searchQuery, err := c.transformer.TransformQuery(ctx, userQuery)
+	searchQuery, err := c.llm.TransformQuery(ctx, userQuery)
 	if err != nil {
 		log.Printf("query transformation failed, using original query: %v", err)
 		searchQuery = userQuery
@@ -204,7 +202,7 @@ func (c *Client) HybridSearchDocs(ctx context.Context, userQuery, editorState st
 // HybridSearchExamples implements hybrid search (primary + contextual) for examples
 func (c *Client) HybridSearchExamples(ctx context.Context, userQuery, editorState string, topK int) ([]ExampleResult, error) {
 	// transform query to add technical keywords
-	searchQuery, err := c.transformer.TransformQuery(ctx, userQuery)
+	searchQuery, err := c.llm.TransformQuery(ctx, userQuery)
 	if err != nil {
 		log.Printf("query transformation failed, using original query: %v", err)
 		searchQuery = userQuery

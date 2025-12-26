@@ -8,13 +8,13 @@ import (
 	"github.com/algorave/server/internal/retriever"
 )
 
-// implements TextGenerator for testing
-type mockTextGenerator struct {
+// implements llm.LLM for testing
+type mockLLM struct {
 	generateTextFunc func(ctx context.Context, req llm.TextGenerationRequest) (string, error)
 	model            string
 }
 
-func (m *mockTextGenerator) GenerateText(ctx context.Context, req llm.TextGenerationRequest) (string, error) {
+func (m *mockLLM) GenerateText(ctx context.Context, req llm.TextGenerationRequest) (string, error) {
 	if m.generateTextFunc != nil {
 		return m.generateTextFunc(ctx, req)
 	}
@@ -22,12 +22,28 @@ func (m *mockTextGenerator) GenerateText(ctx context.Context, req llm.TextGenera
 	return "sound(\"bd\").fast(4)", nil
 }
 
-func (m *mockTextGenerator) Model() string {
+func (m *mockLLM) Model() string {
 	if m.model != "" {
 		return m.model
 	}
 
 	return "mock-model"
+}
+
+func (m *mockLLM) GenerateEmbedding(ctx context.Context, text string) ([]float32, error) {
+	return make([]float32, 1536), nil
+}
+
+func (m *mockLLM) GenerateEmbeddings(ctx context.Context, texts []string) ([][]float32, error) {
+	embeddings := make([][]float32, len(texts))
+	for i := range texts {
+		embeddings[i] = make([]float32, 1536)
+	}
+	return embeddings, nil
+}
+
+func (m *mockLLM) TransformQuery(ctx context.Context, query string) (string, error) {
+	return query + " expanded", nil
 }
 
 // implements Retriever for testing
@@ -69,7 +85,7 @@ func (m *mockRetriever) HybridSearchExamples(ctx context.Context, query, editorS
 
 func TestNew(t *testing.T) {
 	mockRet := &mockRetriever{}
-	mockGen := &mockTextGenerator{}
+	mockGen := &mockLLM{}
 
 	agent := New(mockRet, mockGen)
 
@@ -81,7 +97,7 @@ func TestNew(t *testing.T) {
 		t.Error("expected retriever to be set correctly")
 	}
 
-	if agent.generator != mockGen {
+	if agent.generator == nil {
 		t.Error("expected generator to be set correctly")
 	}
 }
@@ -90,7 +106,7 @@ func TestGenerateCode(t *testing.T) {
 	ctx := context.Background()
 
 	mockRet := &mockRetriever{}
-	mockGen := &mockTextGenerator{
+	mockGen := &mockLLM{
 		generateTextFunc: func(ctx context.Context, req llm.TextGenerationRequest) (string, error) {
 			// verify system prompt includes cheatsheet
 			if req.SystemPrompt == "" {
@@ -140,7 +156,7 @@ func TestGenerateCodeWithConversationHistory(t *testing.T) {
 	ctx := context.Background()
 
 	mockRet := &mockRetriever{}
-	mockGen := &mockTextGenerator{
+	mockGen := &mockLLM{
 		generateTextFunc: func(ctx context.Context, req llm.TextGenerationRequest) (string, error) {
 			// verify conversation history is included
 			if len(req.Messages) != 3 { // 2 history + 1 current

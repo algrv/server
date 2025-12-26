@@ -49,17 +49,22 @@ const (
 
 // holds configuration for LLM initialization
 type Config struct {
-	// transformer configuration
+	// transformer configuration (query expansion)
 	TransformerProvider Provider
 	TransformerAPIKey   string
-	TransformerModel    string // e.g., "claude-3-haiku-20240307"
+	TransformerModel    string  // e.g., "claude-3-haiku-20240307"
+	TransformerMaxTokens   int     // e.g., 200
+	TransformerTemperature float32 // e.g., 0.3
+
+	// generator configuration (code generation)
+	GeneratorProvider Provider
+	GeneratorAPIKey   string
+	GeneratorModel    string  // e.g., "claude-sonnet-4-20250514"
+	GeneratorMaxTokens   int     // e.g., 4096
+	GeneratorTemperature float32 // e.g., 0.7
 
 	// embedder configuration
 	EmbedderProvider Provider
 	EmbedderAPIKey   string
 	EmbedderModel    string // e.g., "text-embedding-3-small"
-
-	// optional parameters
-	MaxTokens   int     // for transformer
-	Temperature float32 // for transformer
 }

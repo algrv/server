@@ -29,22 +29,34 @@ func NewLLMWithConfig(ctx context.Context, config *Config) (LLM, error) {
 		return nil, fmt.Errorf("config cannot be nil")
 	}
 
-	// create transformer based on provider
+	// create transformer based on provider (for query transformation)
 	var transformer QueryTransformer
-	var textGenerator TextGenerator
 
 	switch config.TransformerProvider {
 	case ProviderAnthropic:
-		anthropic := NewAnthropicTransformer(AnthropicConfig{
+		transformer = NewAnthropicTransformer(AnthropicConfig{
 			APIKey:      config.TransformerAPIKey,
 			Model:       config.TransformerModel,
-			MaxTokens:   config.MaxTokens,
-			Temperature: config.Temperature,
+			MaxTokens:   config.TransformerMaxTokens,
+			Temperature: config.TransformerTemperature,
 		})
-		transformer = anthropic
-		textGenerator = anthropic // AnthropicTransformer implements both interfaces
 	default:
 		return nil, fmt.Errorf("unsupported transformer provider: %s", config.TransformerProvider)
+	}
+
+	// create generator based on provider (for code generation)
+	var textGenerator TextGenerator
+
+	switch config.GeneratorProvider {
+	case ProviderAnthropic:
+		textGenerator = NewAnthropicTransformer(AnthropicConfig{
+			APIKey:      config.GeneratorAPIKey,
+			Model:       config.GeneratorModel,
+			MaxTokens:   config.GeneratorMaxTokens,
+			Temperature: config.GeneratorTemperature,
+		})
+	default:
+		return nil, fmt.Errorf("unsupported generator provider: %s", config.GeneratorProvider)
 	}
 
 	// create embedder based on provider

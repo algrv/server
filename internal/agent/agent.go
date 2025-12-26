@@ -7,10 +7,10 @@ import (
 	"github.com/algorave/server/internal/llm"
 )
 
-func New(ret Retriever, gen TextGenerator) *Agent {
+func New(ret Retriever, llmClient llm.LLM) *Agent {
 	return &Agent{
 		retriever: ret,
-		generator: gen,
+		generator: llmClient,
 	}
 }
 

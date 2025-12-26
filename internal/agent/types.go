@@ -13,16 +13,10 @@ type Retriever interface {
 	HybridSearchExamples(ctx context.Context, query, editorState string, k int) ([]retriever.ExampleResult, error)
 }
 
-// generates text/code from prompts (narrow interface)
-type TextGenerator interface {
-	GenerateText(ctx context.Context, req llm.TextGenerationRequest) (string, error)
-	Model() string
-}
-
 // orchestrates RAG-powered code generation
 type Agent struct {
 	retriever Retriever
-	generator TextGenerator
+	generator llm.LLM
 }
 
 // contains all inputs for code generation

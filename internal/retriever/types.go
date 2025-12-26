@@ -7,10 +7,9 @@ import (
 
 // Client performs vector similarity search on documentation and examples
 type Client struct {
-	db          *pgxpool.Pool
-	embedder    llm.Embedder
-	transformer llm.QueryTransformer
-	topK        int
+	db   *pgxpool.Pool
+	llm  llm.LLM
+	topK int
 }
 
 // SearchResult represents a document chunk from vector search
