@@ -119,21 +119,8 @@ func (c *Client) organizeByPage(ctx context.Context, chunks []SearchResult) ([]S
 
 // fetchSpecialChunk fetches a special chunk (PAGE_SUMMARY or PAGE_EXAMPLES) by page name
 func (c *Client) fetchSpecialChunk(ctx context.Context, pageName, sectionTitle string) (*SearchResult, error) {
-	query := `
-		SELECT
-			id::text,
-			page_name,
-			page_url,
-			section_title,
-			content,
-			0.0 as similarity
-		FROM doc_embeddings
-		WHERE page_name = $1 AND section_title = $2
-		LIMIT 1
-	`
-
 	var result SearchResult
-	err := c.db.QueryRow(ctx, query, pageName, sectionTitle).Scan(
+	err := c.db.QueryRow(ctx, fetchSpecialChunkQuery, pageName, sectionTitle).Scan(
 		&result.ID,
 		&result.PageName,
 		&result.PageURL,

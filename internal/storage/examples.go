@@ -10,9 +10,9 @@ import (
 	"github.com/pgvector/pgvector-go"
 )
 
-// ClearAllExamples deletes all existing examples from the database
+// deletes all existing examples from the database
 func (c *Client) ClearAllExamples(ctx context.Context) error {
-	_, err := c.pool.Exec(ctx, "DELETE FROM example_strudels")
+	_, err := c.pool.Exec(ctx, deleteAllExamplesQuery)
 	if err != nil {
 		return fmt.Errorf("failed to clear examples: %w", err)
 	}
@@ -43,13 +43,9 @@ func (c *Client) InsertExamplesBatch(ctx context.Context, examples []examples.Ex
 	}()
 
 	batch := &pgx.Batch{}
-	query := `
-		INSERT INTO example_strudels (title, description, code, tags, embedding, url)
-		VALUES ($1, $2, $3, $4, $5, $6)
-	`
 
 	for index, example := range examples {
-		batch.Queue(query,
+		batch.Queue(insertExampleQuery,
 			example.Title,
 			example.Description,
 			example.Code,
@@ -81,11 +77,11 @@ func (c *Client) InsertExamplesBatch(ctx context.Context, examples []examples.Ex
 	return nil
 }
 
-// GetExampleCount returns the total number of examples in the database
+// returns the total number of examples in the database
 func (c *Client) GetExampleCount(ctx context.Context) (int, error) {
 	var count int
 
-	err := c.pool.QueryRow(ctx, "SELECT COUNT(*) FROM example_strudels").Scan(&count)
+	err := c.pool.QueryRow(ctx, getExampleCountQuery).Scan(&count)
 	if err != nil {
 		return 0, fmt.Errorf("failed to get example count: %w", err)
 	}

@@ -12,7 +12,7 @@ import (
 
 // deletes all existing chunks from the database
 func (c *Client) ClearAllChunks(ctx context.Context) error {
-	_, err := c.pool.Exec(ctx, "DELETE FROM doc_embeddings")
+	_, err := c.pool.Exec(ctx, deleteAllChunksQuery)
 	if err != nil {
 		return fmt.Errorf("failed to clear chunks: %w", err)
 	}
@@ -22,13 +22,8 @@ func (c *Client) ClearAllChunks(ctx context.Context) error {
 
 // inserts a single chunk with its embedding into the database
 func (c *Client) InsertChunk(ctx context.Context, chunk chunker.Chunk, embedding []float32) error {
-	query := `
-		INSERT INTO doc_embeddings (page_name, page_url, section_title, content, embedding, metadata)
-		VALUES ($1, $2, $3, $4, $5, $6)
-	`
-
 	_, err := c.pool.Exec(ctx,
-		query,
+		insertChunkQuery,
 		chunk.PageName,
 		chunk.PageURL,
 		chunk.SectionTitle,
@@ -63,13 +58,9 @@ func (c *Client) InsertChunksBatch(ctx context.Context, chunks []chunker.Chunk, 
 	}()
 
 	batch := &pgx.Batch{}
-	query := `
-		INSERT INTO doc_embeddings (page_name, page_url, section_title, content, embedding, metadata)
-		VALUES ($1, $2, $3, $4, $5, $6)
-	`
 
 	for i, chunk := range chunks {
-		batch.Queue(query,
+		batch.Queue(insertChunkQuery,
 			chunk.PageName,
 			chunk.PageURL,
 			chunk.SectionTitle,
@@ -105,7 +96,7 @@ func (c *Client) InsertChunksBatch(ctx context.Context, chunks []chunker.Chunk, 
 func (c *Client) GetChunkCount(ctx context.Context) (int, error) {
 	var count int
 
-	err := c.pool.QueryRow(ctx, "SELECT COUNT(*) FROM doc_embeddings").Scan(&count)
+	err := c.pool.QueryRow(ctx, getChunkCountQuery).Scan(&count)
 	if err != nil {
 		return 0, fmt.Errorf("failed to get chunk count: %w", err)
 	}

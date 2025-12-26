@@ -5,6 +5,17 @@ Building a RAG system that helps users create music via Strudel with text comman
 
 Strudel is a live coding language for creating music patterns in the browser. Users write code that generates audio in real-time.
 
+## Documentation
+
+For comprehensive architecture documentation, see:
+
+- **[RAG Architecture](./docs/system-specs/RAG_ARCHITECTURE.md)** - Overview of the RAG system
+- **[Product Architecture](./docs/system-specs/PRODUCT_ARCHITECTURE.md)** - User features (auth, strudels, collaboration)
+- **[Hybrid Retrieval Guide](./docs/system-specs/HYBRID_RETRIEVAL_GUIDE.md)** - Detailed retrieval implementation
+- **[Strudel Code Analysis](./docs/system-specs/STRUDEL_CODE_ANALYSIS.md)** - Code pattern analysis
+
+This file contains detailed implementation decisions and technical context for the RAG system.
+
 ## Architecture Overview
 
 ### Two-Binary Approach

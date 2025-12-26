@@ -37,18 +37,7 @@ func (c *Client) VectorSearch(ctx context.Context, queryText string, topK int) (
 		return nil, fmt.Errorf("failed to generate query embedding: %w", err)
 	}
 
-	query := `
-		SELECT
-			id::text,
-			page_name,
-			page_url,
-			section_title,
-			content,
-			similarity
-		FROM search_docs($1, $2)
-	`
-
-	rows, err := c.db.Query(ctx, query, pgvector.NewVector(embedding), topK)
+	rows, err := c.db.Query(ctx, vectorSearchQuery, pgvector.NewVector(embedding), topK)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute search query: %w", err)
 	}
@@ -89,19 +78,7 @@ func (c *Client) SearchExamples(ctx context.Context, queryText string, topK int)
 		return nil, fmt.Errorf("failed to generate query embedding: %w", err)
 	}
 
-	query := `
-		SELECT
-			id::text,
-			title,
-			description,
-			code,
-			tags,
-			url,
-			similarity
-		FROM search_examples($1, $2)
-	`
-
-	rows, err := c.db.Query(ctx, query, pgvector.NewVector(embedding), topK)
+	rows, err := c.db.Query(ctx, searchExamplesQuery, pgvector.NewVector(embedding), topK)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute search query: %w", err)
 	}
@@ -138,21 +115,7 @@ func (c *Client) SearchExamples(ctx context.Context, queryText string, topK int)
 
 // BM25Search performs keyword-based full-text search on doc_embeddings
 func (c *Client) BM25Search(ctx context.Context, queryText string, topK int) ([]SearchResult, error) {
-	query := `
-		SELECT
-			id::text,
-			page_name,
-			page_url,
-			section_title,
-			content,
-			ts_rank(content_tsvector, websearch_to_tsquery('english', $1)) as rank
-		FROM doc_embeddings
-		WHERE content_tsvector @@ websearch_to_tsquery('english', $1)
-		ORDER BY rank DESC
-		LIMIT $2
-	`
-
-	rows, err := c.db.Query(ctx, query, queryText, topK)
+	rows, err := c.db.Query(ctx, bm25SearchDocsQuery, queryText, topK)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute BM25 search: %w", err)
 	}
@@ -189,22 +152,7 @@ func (c *Client) BM25Search(ctx context.Context, queryText string, topK int) ([]
 
 // BM25SearchExamples performs keyword-based full-text search on example_strudels
 func (c *Client) BM25SearchExamples(ctx context.Context, queryText string, topK int) ([]ExampleResult, error) {
-	query := `
-		SELECT
-			id,
-			title,
-			description,
-			code,
-			tags,
-			url,
-			ts_rank(searchable_tsvector, websearch_to_tsquery('english', $1)) as rank
-		FROM example_strudels
-		WHERE searchable_tsvector @@ websearch_to_tsquery('english', $1)
-		ORDER BY rank DESC
-		LIMIT $2
-	`
-
-	rows, err := c.db.Query(ctx, query, queryText, topK)
+	rows, err := c.db.Query(ctx, bm25SearchExamplesQuery, queryText, topK)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute BM25 example search: %w", err)
 	}
