@@ -12,7 +12,21 @@ Algorave is evolving from a simple code generation tool into a collaborative liv
 
 ## System Components
 
-### 1. Authentication System
+### 1. CLI/TUI Interface
+
+**Location**: `cmd/algorave/`, `internal/tui/`, `internal/ssh/`
+
+**Status**: Planned (Phases 1-3)
+
+Interactive terminal interface for local development and remote access:
+- Welcome screen with command menu
+- Live code editor with AI assistance
+- Remote SSH access for collaborative coding
+- Production-safe command filtering
+
+See [CLI Architecture](./CLI_ARCHITECTURE.md) for detailed design.
+
+### 2. Authentication System
 
 **Location**: `internal/auth/`, `api/rest/auth/`, `algorave/users/`
 
@@ -54,7 +68,7 @@ CREATE TABLE users (
 - `POST /api/v1/auth/logout` - Clear session
 - `GET /api/v1/auth/me` - Get current user (protected)
 
-### 2. User Strudels
+### 3. User Strudels
 
 **Location**: `algorave/strudels/`, `api/rest/strudels/`
 
@@ -101,7 +115,7 @@ Protected (require authentication):
 Public:
 - `GET /api/v1/public/strudels?limit=50` - List public strudels
 
-### 3. Collaborative Sessions (Phase 1)
+### 4. Collaborative Sessions (Phase 1)
 
 **Status**: Planned, not yet implemented
 
@@ -227,7 +241,7 @@ CREATE TABLE invite_tokens (
 5. **Save**: Users can save session code to their strudels
 6. **End**: Host ends session, code snapshot saved
 
-### 4. Events & Scheduled Sessions (Phase 2)
+### 5. Events & Scheduled Sessions (Phase 2)
 
 **Status**: Planned for future
 
@@ -344,6 +358,7 @@ Shared infrastructure:
 
 ## Related Documentation
 
+- [CLI Architecture](./CLI_ARCHITECTURE.md) - Terminal interface design
 - [RAG Architecture](./RAG_ARCHITECTURE.md) - Code generation system
 - [Hybrid Retrieval Guide](./HYBRID_RETRIEVAL_GUIDE.md) - Retrieval implementation
 - [AUTH_SETUP.md](../../AUTH_SETUP.md) - OAuth provider setup guide
