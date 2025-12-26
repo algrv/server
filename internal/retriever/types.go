@@ -1,26 +1,15 @@
 package retriever
 
 import (
-	"context"
-
+	"github.com/algorave/server/internal/llm"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
-
-// Embedder generates embeddings from text (narrow interface)
-type Embedder interface {
-	GenerateEmbedding(ctx context.Context, text string) ([]float32, error)
-}
-
-// QueryTransformer expands user queries with technical keywords (narrow interface)
-type QueryTransformer interface {
-	TransformQuery(ctx context.Context, userQuery string) (string, error)
-}
 
 // Client performs vector similarity search on documentation and examples
 type Client struct {
 	db          *pgxpool.Pool
-	embedder    Embedder
-	transformer QueryTransformer
+	embedder    llm.Embedder
+	transformer llm.QueryTransformer
 	topK        int
 }
 

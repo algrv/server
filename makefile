@@ -29,11 +29,16 @@ ingest-no-clear: ## Run ingestion without clearing existing data
 	@echo "Ingesting documentation (no clear)..."
 	go run ./cmd/ingester all
 
+server: ## Run API server
+	@echo "Starting API server..."
+	go run ./cmd/server
+
 build: ## Build binaries
 	@echo "Building binaries..."
 	@mkdir -p bin
 	go build -o bin/ingester ./cmd/ingester
-	@echo "✓ Built bin/ingester"
+	go build -o bin/server ./cmd/server
+	@echo "✓ Built bin/ingester and bin/server"
 
 test: ## Run tests
 	go test -v ./...

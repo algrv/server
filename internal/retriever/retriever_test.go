@@ -28,8 +28,22 @@ func (m *mockEmbedder) GenerateEmbedding(ctx context.Context, text string) ([]fl
 	if m.embedding != nil {
 		return m.embedding, nil
 	}
-	// return a fixed embedding for testing
+
 	return make([]float32, 1536), nil
+}
+
+func (m *mockEmbedder) GenerateEmbeddings(ctx context.Context, texts []string) ([][]float32, error) {
+	embeddings := make([][]float32, len(texts))
+
+	for i := range texts {
+		if m.embedding != nil {
+			embeddings[i] = m.embedding
+		} else {
+			embeddings[i] = make([]float32, 1536)
+		}
+	}
+
+	return embeddings, nil
 }
 
 func (m *mockTransformer) TransformQuery(ctx context.Context, query string) (string, error) {
@@ -42,6 +56,7 @@ func createTestClient(t *testing.T) *Client {
 
 	ctx := context.Background()
 	connString := os.Getenv("SUPABASE_CONNECTION_STRING")
+
 	if connString == "" {
 		t.Skip("SUPABASE_CONNECTION_STRING not set, skipping integration test")
 	}

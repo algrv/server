@@ -6,13 +6,14 @@ import (
 	"log"
 	"sync"
 
+	"github.com/algorave/server/internal/llm"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/pgvector/pgvector-go"
 )
 
 // New creates a retriever client with injected dependencies.
 // The caller owns the lifecycle of db, embedder, and transformer.
-func New(db *pgxpool.Pool, embedder Embedder, transformer QueryTransformer) *Client {
+func New(db *pgxpool.Pool, embedder llm.Embedder, transformer llm.QueryTransformer) *Client {
 	return &Client{
 		db:          db,
 		embedder:    embedder,
@@ -22,7 +23,7 @@ func New(db *pgxpool.Pool, embedder Embedder, transformer QueryTransformer) *Cli
 }
 
 // NewWithTopK creates a retriever with a custom topK value
-func NewWithTopK(db *pgxpool.Pool, embedder Embedder, transformer QueryTransformer, topK int) *Client {
+func NewWithTopK(db *pgxpool.Pool, embedder llm.Embedder, transformer llm.QueryTransformer, topK int) *Client {
 	return &Client{
 		db:          db,
 		embedder:    embedder,
@@ -158,6 +159,7 @@ func (c *Client) HybridSearchDocs(ctx context.Context, userQuery, editorState st
 
 	// primary search (60% weight) - user intent only
 	wg.Add(1)
+
 	go func() {
 		defer wg.Done()
 		primaryResults, primaryErr = c.VectorSearch(ctx, searchQuery, primaryK)
@@ -166,6 +168,7 @@ func (c *Client) HybridSearchDocs(ctx context.Context, userQuery, editorState st
 	// contextual search (40% weight) - if editor has content
 	if editorContext != "" {
 		wg.Add(1)
+
 		go func() {
 			defer wg.Done()
 			contextualQuery := searchQuery + " " + editorContext
@@ -218,6 +221,7 @@ func (c *Client) HybridSearchExamples(ctx context.Context, userQuery, editorStat
 
 	// primary search (60% weight) - user intent only
 	wg.Add(1)
+
 	go func() {
 		defer wg.Done()
 		primaryResults, primaryErr = c.SearchExamples(ctx, searchQuery, primaryK)
