@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 )
 
 const (
@@ -16,6 +17,18 @@ const (
 	defaultMaxTokens     = 200
 	defaultTemperature   = 0.3
 )
+
+// shared HTTP client with proper timeouts and connection pooling
+// reused across all Anthropic API calls to prevent connection exhaustion
+var anthropicHTTPClient = &http.Client{
+	Timeout: 60 * time.Second, // total request timeout (includes response body read)
+	Transport: &http.Transport{
+		MaxIdleConns:        100,              // total idle connections across all hosts
+		MaxIdleConnsPerHost: 10,               // idle connections per host
+		IdleConnTimeout:     90 * time.Second, // how long idle connections stay alive
+		TLSHandshakeTimeout: 10 * time.Second, // TLS handshake timeout
+	},
+}
 
 type transformRequest struct {
 	Model       string    `json:"model"`
@@ -64,7 +77,7 @@ func NewAnthropicTransformer(config AnthropicConfig) *AnthropicTransformer {
 
 	return &AnthropicTransformer{
 		config:     config,
-		httpClient: &http.Client{},
+		httpClient: anthropicHTTPClient,
 	}
 }
 

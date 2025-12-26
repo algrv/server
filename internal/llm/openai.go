@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 )
 
 const (
@@ -14,6 +15,18 @@ const (
 	defaultOpenAIModel       = "text-embedding-3-small"
 	openaiEmbeddingDimension = 1536
 )
+
+// shared HTTP client for OpenAI API calls
+// reuses connection pool and timeout configuration
+var openaiHTTPClient = &http.Client{
+	Timeout: 60 * time.Second, // total request timeout
+	Transport: &http.Transport{
+		MaxIdleConns:        100,
+		MaxIdleConnsPerHost: 10,
+		IdleConnTimeout:     90 * time.Second,
+		TLSHandshakeTimeout: 10 * time.Second,
+	},
+}
 
 type embeddingRequest struct {
 	Input    []string `json:"input"`
@@ -52,7 +65,7 @@ func NewOpenAIEmbedder(config OpenAIConfig) *OpenAIEmbedder {
 
 	return &OpenAIEmbedder{
 		config:     config,
-		httpClient: &http.Client{},
+		httpClient: openaiHTTPClient, // use shared client with proper timeouts and connection pooling
 	}
 }
 
