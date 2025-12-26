@@ -9,6 +9,11 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+type Message struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+
 type EditorModel struct {
 	input               textinput.Model
 	width               int
@@ -16,6 +21,7 @@ type EditorModel struct {
 	outputCode          string
 	outputMetadata      string
 	clarifyingQuestions []string
+	conversationHistory []Message
 	showInitialMessage  bool
 	isFetching          bool
 }
@@ -32,9 +38,10 @@ func NewEditorModel() *EditorModel {
 	ti.TextStyle = lipgloss.NewStyle().Foreground(colorWhite)
 
 	return &EditorModel{
-		input:              ti,
-		showInitialMessage: true,
-		isFetching:         false,
+		input:               ti,
+		conversationHistory: []Message{},
+		showInitialMessage:  true,
+		isFetching:          false,
 	}
 }
 
@@ -49,7 +56,14 @@ func (m *EditorModel) Update(msg tea.Msg) (*EditorModel, tea.Cmd) {
 			if strings.TrimSpace(query) != "" {
 				m.isFetching = true
 				m.input.SetValue("")
-				return m, sendToAgent(query)
+
+				// Append user message to history
+				m.conversationHistory = append(m.conversationHistory, Message{
+					Role:    "user",
+					Content: query,
+				})
+
+				return m, sendToAgent(query, m.outputCode, m.conversationHistory)
 			}
 			return m, nil
 
@@ -58,6 +72,7 @@ func (m *EditorModel) Update(msg tea.Msg) (*EditorModel, tea.Cmd) {
 			m.outputCode = ""
 			m.outputMetadata = ""
 			m.clarifyingQuestions = nil
+			m.conversationHistory = []Message{}
 			m.showInitialMessage = true
 			m.isFetching = false
 			return m, nil
@@ -69,6 +84,15 @@ func (m *EditorModel) Update(msg tea.Msg) (*EditorModel, tea.Cmd) {
 		m.clarifyingQuestions = msg.questions
 		m.showInitialMessage = false
 		m.isFetching = false
+
+		// Append assistant message to history
+		if msg.code != "" {
+			m.conversationHistory = append(m.conversationHistory, Message{
+				Role:    "assistant",
+				Content: msg.code,
+			})
+		}
+
 		m.input.Focus()
 		return m, nil
 

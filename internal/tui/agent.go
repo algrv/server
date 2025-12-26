@@ -20,7 +20,7 @@ type agentResponse struct {
 	ClarifyingQuestions []string `json:"clarifying_questions"`
 }
 
-func sendToAgent(code string) tea.Cmd {
+func sendToAgent(userQuery, editorState string, conversationHistory []Message) tea.Cmd {
 	return func() tea.Msg {
 		endpoint := os.Getenv("ALGORAVE_AGENT_ENDPOINT")
 		if endpoint == "" {
@@ -28,7 +28,9 @@ func sendToAgent(code string) tea.Cmd {
 		}
 
 		payload := map[string]interface{}{
-			"user_query": code,
+			"user_query":           userQuery,
+			"editor_state":         editorState,
+			"conversation_history": conversationHistory,
 		}
 
 		jsonData, err := json.Marshal(payload)
