@@ -92,7 +92,8 @@ func (t *AnthropicTransformer) Model() string {
 	return t.config.Model
 }
 
-func (t *AnthropicTransformer) TransformQuery(ctx context.Context, userQuery string) (string, error) {
+// AnalyzeQuery analyzes the user query and returns structured actionability data
+func (t *AnthropicTransformer) AnalyzeQuery(ctx context.Context, userQuery string) (*QueryAnalysis, error) {
 	reqBody := transformRequest{
 		Model:       t.config.Model,
 		MaxTokens:   t.config.MaxTokens,
@@ -107,12 +108,12 @@ func (t *AnthropicTransformer) TransformQuery(ctx context.Context, userQuery str
 
 	jsonData, err := json.Marshal(reqBody)
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal request: %w", err)
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
 	req, err := http.NewRequestWithContext(ctx, "POST", anthropicMessagesURL, bytes.NewBuffer(jsonData))
 	if err != nil {
-		return "", fmt.Errorf("failed to create request: %w", err)
+		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
 	req.Header.Set("Content-Type", "application/json")
@@ -121,35 +122,51 @@ func (t *AnthropicTransformer) TransformQuery(ctx context.Context, userQuery str
 
 	// apply rate limiting before making the request
 	if err := anthropicRateLimiter.Wait(ctx); err != nil {
-		return "", fmt.Errorf("rate limiter error: %w", err)
+		return nil, fmt.Errorf("rate limiter error: %w", err)
 	}
 
 	resp, err := t.httpClient.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("failed to send request: %w", err)
+		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
-		return "", fmt.Errorf("API request failed with status %d: %s", resp.StatusCode, string(body))
+		return nil, fmt.Errorf("API request failed with status %d: %s", resp.StatusCode, string(body))
 	}
 
 	var transformResp transformResponse
 	if err := json.NewDecoder(resp.Body).Decode(&transformResp); err != nil {
-		return "", fmt.Errorf("failed to decode response: %w", err)
+		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
 	if len(transformResp.Content) == 0 {
-		return "", fmt.Errorf("no content in response")
+		return nil, fmt.Errorf("no content in response")
 	}
 
-	// extract the transformed query text
-	transformed := strings.TrimSpace(transformResp.Content[0].Text)
+	// extract the JSON response text
+	responseText := strings.TrimSpace(transformResp.Content[0].Text)
+
+	// parse the JSON response
+	var analysis QueryAnalysis
+	if err := json.Unmarshal([]byte(responseText), &analysis); err != nil {
+		return nil, fmt.Errorf("failed to parse query analysis JSON: %w", err)
+	}
+
+	return &analysis, nil
+}
+
+// TransformQuery transforms the user query for vector search (backward compatible)
+func (t *AnthropicTransformer) TransformQuery(ctx context.Context, userQuery string) (string, error) {
+	analysis, err := t.AnalyzeQuery(ctx, userQuery)
+	if err != nil {
+		return "", err
+	}
 
 	// combine original query with transformed keywords for hybrid search
-	return userQuery + " " + transformed, nil
+	return userQuery + " " + analysis.TransformedQuery, nil
 }
 
 func (t *AnthropicTransformer) GenerateText(ctx context.Context, req TextGenerationRequest) (string, error) {
@@ -231,20 +248,55 @@ func (t *AnthropicTransformer) GenerateText(ctx context.Context, req TextGenerat
 
 // returns the system prompt for query transformation
 func buildTransformationPrompt() string {
-	const prompt = `You are a technical query expander for Strudel music documentation.
-	Your task: Extract 3-5 technical keywords/concepts that would help search for relevant documentation.
+	const prompt = `You are a query analyzer for Strudel music code generation.
 
-	Examples:
-	- "play a loud pitched sound" → "audio playback, frequency, pitch, volume, amplitude, sound synthesis"
-	- "make a drum pattern" → "rhythm, beat, drum samples, percussion, pattern sequencing"
-	- "add reverb effect" → "audio effects, reverb, wet/dry mix, signal processing, DSP"
+Your task: Analyze the user's query and determine if it's actionable (specific enough to generate code).
 
-	Rules:
-	- Focus on technical terms found in music/audio documentation
-	- Include synonyms (e.g., "loud" → "volume, amplitude")
-	- Return ONLY the keywords as comma-separated text
-	- Keep it concise (3-5 concepts)
-	- Do not include explanations or formatting`
+Return a JSON object with this structure:
+{
+  "transformed_query": "3-5 technical keywords for search (comma-separated)",
+  "is_actionable": true/false,
+  "concrete_requests": ["list", "of", "specific", "things", "to", "do"],
+  "clarifying_questions": ["list", "of", "questions", "if", "vague"]
+}
+
+ACTIONABLE queries (specific, can generate code):
+- "set the bpm to 120" → actionable, clear instruction
+- "add a kick drum on every beat" → actionable, specific sound + timing
+- "make the hi-hats play 8 times per cycle" → actionable, clear pattern
+
+VAGUE queries (need clarification):
+- "create a house beat" → vague, no specifics about which elements
+- "make it sound better" → vague, no concrete direction
+- "add some drums" → vague, which drums? what pattern?
+
+Examples:
+
+Input: "set the bpm to 120"
+{
+  "transformed_query": "tempo, bpm, speed, setcpm",
+  "is_actionable": true,
+  "concrete_requests": ["set tempo to 120 BPM"],
+  "clarifying_questions": []
+}
+
+Input: "create a house beat"
+{
+  "transformed_query": "house music, beat, rhythm, drums, pattern",
+  "is_actionable": false,
+  "concrete_requests": [],
+  "clarifying_questions": ["What BPM would you like?", "Which elements should I add? (kick, hi-hat, snare, etc.)", "Any specific pattern or style in mind?"]
+}
+
+Input: "add a kick drum on every beat"
+{
+  "transformed_query": "kick drum, bd, bass drum, four on the floor, rhythm",
+  "is_actionable": true,
+  "concrete_requests": ["add kick drum pattern with hits on every beat"],
+  "clarifying_questions": []
+}
+
+Return ONLY valid JSON, no markdown or explanations.`
 
 	return prompt
 }

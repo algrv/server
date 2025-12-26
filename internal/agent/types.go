@@ -28,10 +28,12 @@ type GenerateRequest struct {
 
 // contains the generated code and metadata
 type GenerateResponse struct {
-	Code              string
-	DocsRetrieved     int
-	ExamplesRetrieved int
-	Model             string
+	Code                string   `json:"code,omitempty"`
+	DocsRetrieved       int      `json:"docs_retrieved"`
+	ExamplesRetrieved   int      `json:"examples_retrieved"`
+	Model               string   `json:"model"`
+	IsActionable        bool     `json:"is_actionable"`
+	ClarifyingQuestions []string `json:"clarifying_questions,omitempty"`
 }
 
 // represents a single conversation turn

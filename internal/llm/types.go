@@ -15,6 +15,15 @@ type Provider string
 // transforms user queries into technical search terms
 type QueryTransformer interface {
 	TransformQuery(ctx context.Context, userQuery string) (string, error)
+	AnalyzeQuery(ctx context.Context, userQuery string) (*QueryAnalysis, error)
+}
+
+// QueryAnalysis contains the result of query transformation with actionability metadata
+type QueryAnalysis struct {
+	TransformedQuery    string   `json:"transformed_query"`
+	IsActionable        bool     `json:"is_actionable"`
+	ConcreteRequests    []string `json:"concrete_requests"`
+	ClarifyingQuestions []string `json:"clarifying_questions"`
 }
 
 // generates embeddings from text

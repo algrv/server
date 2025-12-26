@@ -46,6 +46,15 @@ func (m *mockLLM) TransformQuery(ctx context.Context, query string) (string, err
 	return query + " expanded", nil
 }
 
+func (m *mockLLM) AnalyzeQuery(ctx context.Context, query string) (*llm.QueryAnalysis, error) {
+	return &llm.QueryAnalysis{
+		TransformedQuery:    query + " expanded",
+		IsActionable:        true,
+		ConcreteRequests:    []string{query},
+		ClarifyingQuestions: []string{},
+	}, nil
+}
+
 // implements Retriever for testing
 type mockRetriever struct {
 	hybridSearchDocsFunc     func(ctx context.Context, query, editorState string, k int) ([]retriever.SearchResult, error)

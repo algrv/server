@@ -15,6 +15,24 @@ func New(ret Retriever, llmClient llm.LLM) *Agent {
 }
 
 func (a *Agent) Generate(ctx context.Context, req GenerateRequest) (*GenerateResponse, error) {
+	// analyze query for actionability
+	analysis, err := a.generator.AnalyzeQuery(ctx, req.UserQuery)
+	if err != nil {
+		return nil, fmt.Errorf("failed to analyze query: %w", err)
+	}
+
+	// if query is not actionable, return clarifying questions
+	if !analysis.IsActionable {
+		return &GenerateResponse{
+			IsActionable:        false,
+			ClarifyingQuestions: analysis.ClarifyingQuestions,
+			DocsRetrieved:       0,
+			ExamplesRetrieved:   0,
+			Model:               a.generator.Model(),
+		}, nil
+	}
+
+	// proceed with code generation for actionable queries
 	docs, err := a.retriever.HybridSearchDocs(ctx, req.UserQuery, req.EditorState, 5)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve docs: %w", err)
@@ -44,6 +62,7 @@ func (a *Agent) Generate(ctx context.Context, req GenerateRequest) (*GenerateRes
 		DocsRetrieved:     len(docs),
 		ExamplesRetrieved: len(examples),
 		Model:             a.generator.Model(),
+		IsActionable:      true,
 	}, nil
 }
 
