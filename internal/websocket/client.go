@@ -162,7 +162,14 @@ func (c *Client) WritePump() {
 }
 
 // sends a message to this client
-func (c *Client) Send(msg *Message) error {
+func (c *Client) Send(msg *Message) (err error) {
+	// recover from panic if channel is closed
+	defer func() {
+		if r := recover(); r != nil {
+			err = ErrConnectionClosed
+		}
+	}()
+
 	c.mu.RLock()
 	if c.closed {
 		c.mu.RUnlock()
@@ -170,9 +177,9 @@ func (c *Client) Send(msg *Message) error {
 	}
 	c.mu.RUnlock()
 
-	messageBytes, err := json.Marshal(msg)
-	if err != nil {
-		return err
+	messageBytes, marshalErr := json.Marshal(msg)
+	if marshalErr != nil {
+		return marshalErr
 	}
 
 	select {

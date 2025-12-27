@@ -47,12 +47,14 @@ cli: ## Build local CLI
 	go build -o bin/algorave ./cmd/tui
 	@echo "✓ Built bin/algorave"
 
-test: ## Run tests
-	go test -v ./...
+test: ## Run all tests (fast, no external dependencies)
+	@echo "Running tests..."
+	@go test -v ./...
 
 test-coverage: ## Run tests with coverage
-	go test -v -coverprofile=coverage.out ./...
-	go tool cover -html=coverage.out -o coverage.html
+	@echo "Running tests with coverage..."
+	@go test -v -coverprofile=coverage.out ./...
+	@go tool cover -html=coverage.out -o coverage.html
 	@echo "Coverage report: coverage.html"
 
 clean: ## Clean build artifacts
@@ -72,7 +74,7 @@ deps: ## Download dependencies
 	go mod tidy
 	@echo "✓ Dependencies updated"
 
-ci: ## Run CI checks locally (lint + test)
+ci: ## Run CI checks locally (lint + unit tests)
 	@echo "Running CI checks..."
 	@echo "\n→ Checking formatting..."
 	@if [ -n "$$(gofmt -s -l .)" ]; then \

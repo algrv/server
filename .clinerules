@@ -18,6 +18,8 @@ Building a RAG system for creating music via strudel with text commands using do
 - Group imports in order: stdlib, external packages, internal packages
 - Error messages: lowercase, no trailing punctuation
 - Comments explain "why" not "what"
+- USE ONLY lowercase for comments except for abbreviated words
+- DO not include function names in the comments above them
 - Keep functions focused and under 50 lines when possible
 
 ### Code Formatting & Spacing
