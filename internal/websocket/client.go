@@ -40,6 +40,9 @@ type Client struct {
 	// role in the session (host, co-author, viewer)
 	Role string
 
+	// whether this client has an authenticated user account
+	IsAuthenticated bool
+
 	// webSocket connection
 	conn *websocket.Conn
 
@@ -57,17 +60,18 @@ type Client struct {
 }
 
 // creates a new webSocket client
-func NewClient(id, sessionID, userID, displayName, role string, conn *websocket.Conn, hub *Hub) *Client {
+func NewClient(id, sessionID, userID, displayName, role string, isAuthenticated bool, conn *websocket.Conn, hub *Hub) *Client {
 	return &Client{
-		ID:          id,
-		SessionID:   sessionID,
-		UserID:      userID,
-		DisplayName: displayName,
-		Role:        role,
-		conn:        conn,
-		hub:         hub,
-		send:        make(chan []byte, 256),
-		closed:      false,
+		ID:              id,
+		SessionID:       sessionID,
+		UserID:          userID,
+		DisplayName:     displayName,
+		Role:            role,
+		IsAuthenticated: isAuthenticated,
+		conn:            conn,
+		hub:             hub,
+		send:            make(chan []byte, 256),
+		closed:          false,
 	}
 }
 

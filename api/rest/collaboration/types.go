@@ -35,8 +35,8 @@ type SessionResponse struct {
 // ParticipantResponse represents a participant in API responses
 type ParticipantResponse struct {
 	ID          string     `json:"id"`
-	UserID      string     `json:"user_id,omitempty"`
-	DisplayName string     `json:"display_name"`
+	UserID      *string    `json:"user_id,omitempty"`
+	DisplayName *string    `json:"display_name,omitempty"`
 	Role        string     `json:"role"`
 	Status      string     `json:"status"`
 	JoinedAt    time.Time  `json:"joined_at"`

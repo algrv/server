@@ -113,14 +113,25 @@ func WebSocketHandler(hub *ws.Hub, sessionRepo sessions.Repository) gin.HandlerF
 			return
 		}
 
-		// create client
-		client := ws.NewClient(clientID, params.SessionID, userID, displayName, role, conn, hub)
+		// determine if user is authenticated
+		isAuthenticated := userID != ""
 
-		// add participant to session (if not already added)
-		_, err = sessionRepo.AddParticipant(ctx, params.SessionID, userID, displayName, role)
-		if err != nil {
-			log.Printf("Failed to add participant: %v", err)
-			// continue anyway - this might be a duplicate participant
+		// create client
+		client := ws.NewClient(clientID, params.SessionID, userID, displayName, role, isAuthenticated, conn, hub)
+
+		// add participant to session (authenticated or anonymous)
+		if isAuthenticated {
+			_, err = sessionRepo.AddAuthenticatedParticipant(ctx, params.SessionID, userID, displayName, role)
+			if err != nil {
+				log.Printf("Failed to add authenticated participant: %v", err)
+				// continue anyway - this might be a duplicate participant
+			}
+		} else {
+			_, err = sessionRepo.AddAnonymousParticipant(ctx, params.SessionID, displayName, role)
+			if err != nil {
+				log.Printf("Failed to add anonymous participant: %v", err)
+				// continue anyway - participant might already exist
+			}
 		}
 
 		// register client with hub

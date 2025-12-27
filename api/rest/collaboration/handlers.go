@@ -64,8 +64,8 @@ func GetSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 			return
 		}
 
-		// get participants
-		participants, err := sessionRepo.ListParticipants(c.Request.Context(), sessionID)
+		// get participants (both authenticated and anonymous)
+		participants, err := sessionRepo.ListAllParticipants(c.Request.Context(), sessionID)
 		if err != nil {
 			log.Printf("Failed to list participants: %v", err)
 		}
@@ -76,7 +76,7 @@ func GetSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 			participantResponses = append(participantResponses, ParticipantResponse{
 				ID:          p.ID,
 				UserID:      p.UserID,
-				DisplayName: p.DisplayName,
+				DisplayName: &p.DisplayName,
 				Role:        p.Role,
 				Status:      p.Status,
 				JoinedAt:    p.JoinedAt,
@@ -160,8 +160,8 @@ func UpdateSessionCodeHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 			return
 		}
 
-		// check if user is host or co-author
-		participant, err := sessionRepo.GetParticipant(c.Request.Context(), sessionID, userID)
+		// check if user is host or co-author (must be authenticated)
+		participant, err := sessionRepo.GetAuthenticatedParticipant(c.Request.Context(), sessionID, userID)
 		if err != nil || (participant.Role != "host" && participant.Role != "co-author") {
 			c.JSON(http.StatusForbidden, gin.H{"error": "forbidden", "message": "You don't have permission to edit this session"})
 			return
@@ -284,8 +284,8 @@ func ListParticipantsHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		sessionID := c.Param("id")
 
-		// get participants
-		participants, err := sessionRepo.ListParticipants(c.Request.Context(), sessionID)
+		// get participants (both authenticated and anonymous)
+		participants, err := sessionRepo.ListAllParticipants(c.Request.Context(), sessionID)
 		if err != nil {
 			log.Printf("Failed to list participants: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "server_error", "message": "Failed to retrieve participants"})
@@ -298,7 +298,7 @@ func ListParticipantsHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 			responses = append(responses, ParticipantResponse{
 				ID:          p.ID,
 				UserID:      p.UserID,
-				DisplayName: p.DisplayName,
+				DisplayName: &p.DisplayName,
 				Role:        p.Role,
 				Status:      p.Status,
 				JoinedAt:    p.JoinedAt,
@@ -340,12 +340,23 @@ func JoinSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 			}
 		}
 
-		// add participant
-		_, err = sessionRepo.AddParticipant(c.Request.Context(), token.SessionID, userID, displayName, token.Role)
-		if err != nil {
-			log.Printf("Failed to add participant: %v", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "server_error", "message": "Failed to join session"})
-			return
+		// add participant (authenticated or anonymous based on userID)
+		if userID != "" {
+			// authenticated user
+			_, err = sessionRepo.AddAuthenticatedParticipant(c.Request.Context(), token.SessionID, userID, displayName, token.Role)
+			if err != nil {
+				log.Printf("Failed to add authenticated participant: %v", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "server_error", "message": "Failed to join session"})
+				return
+			}
+		} else {
+			// anonymous user
+			_, err = sessionRepo.AddAnonymousParticipant(c.Request.Context(), token.SessionID, displayName, token.Role)
+			if err != nil {
+				log.Printf("Failed to add anonymous participant: %v", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "server_error", "message": "Failed to join session"})
+				return
+			}
 		}
 
 		// increment token uses
