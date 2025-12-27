@@ -3,11 +3,11 @@ package retriever
 import (
 	"context"
 	"fmt"
-	"log"
 	"slices"
 	"sort"
 	"sync"
 
+	"github.com/algorave/server/internal/logger"
 	"github.com/algorave/server/internal/strudel"
 )
 
@@ -38,7 +38,10 @@ func (c *Client) organizeByPage(ctx context.Context, chunks []SearchResult) ([]S
 			summary, err := c.fetchSpecialChunk(ctx, pName, "PAGE_SUMMARY")
 
 			if err != nil {
-				log.Printf("failed to fetch PAGE_SUMMARY for %s: %v", pName, err)
+				logger.Warn("failed to fetch PAGE_SUMMARY",
+					"page_name", pName,
+					"error", err,
+				)
 			} else if summary != nil {
 				mu.Lock()
 				specialChunks[pName] = append(specialChunks[pName], *summary)
@@ -49,7 +52,10 @@ func (c *Client) organizeByPage(ctx context.Context, chunks []SearchResult) ([]S
 			examples, err := c.fetchSpecialChunk(ctx, pName, "PAGE_EXAMPLES")
 
 			if err != nil {
-				log.Printf("failed to fetch PAGE_EXAMPLES for %s: %v", pName, err)
+				logger.Warn("failed to fetch PAGE_EXAMPLES",
+					"page_name", pName,
+					"error", err,
+				)
 			} else if examples != nil && len(examples.Content) < 500 {
 				mu.Lock()
 				specialChunks[pName] = append(specialChunks[pName], *examples)

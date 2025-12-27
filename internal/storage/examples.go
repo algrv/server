@@ -3,9 +3,9 @@ package storage
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/algorave/server/internal/examples"
+	"github.com/algorave/server/internal/logger"
 	"github.com/jackc/pgx/v5"
 	"github.com/pgvector/pgvector-go"
 )
@@ -38,7 +38,7 @@ func (c *Client) InsertExamplesBatch(ctx context.Context, examples []examples.Ex
 	// defer rollback - will be no-op if commit succeeds
 	defer func() {
 		if err := tx.Rollback(ctx); err != nil && err != pgx.ErrTxClosed {
-			log.Printf("failed to rollback transaction: %v", err)
+			logger.Warn("failed to rollback transaction", "error", err)
 		}
 	}()
 

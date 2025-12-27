@@ -2,11 +2,11 @@ package generate
 
 import (
 	"context"
-	"log"
 	"net/http"
 
 	"github.com/algorave/server/algorave/strudels"
 	"github.com/algorave/server/internal/agent"
+	"github.com/algorave/server/internal/logger"
 	"github.com/algorave/server/internal/sessions"
 	"github.com/gin-gonic/gin"
 )
@@ -41,7 +41,11 @@ func Handler(agentClient *agent.Agent, strudelRepo StrudelGetter, sessionMgr *se
 		if req.StrudelID != "" && isAuthenticated {
 			strudel, err := strudelRepo.Get(c.Request.Context(), req.StrudelID, userID.(string))
 			if err != nil {
-				log.Printf("failed to load strudel %s: %v", req.StrudelID, err)
+				logger.Warn("failed to load strudel",
+					"strudel_id", req.StrudelID,
+					"user_id", userID,
+					"error", err,
+				)
 			} else {
 				// use strudel's conversation history
 				conversationHistory = strudel.ConversationHistory
@@ -61,7 +65,7 @@ func Handler(agentClient *agent.Agent, strudelRepo StrudelGetter, sessionMgr *se
 					// session expired or invalid, create new one
 					newSession, err := sessionMgr.CreateSession()
 					if err != nil {
-						log.Printf("failed to create session: %v", err)
+						logger.ErrorErr(err, "failed to create session")
 					} else {
 						sessionID = newSession.ID
 					}
@@ -70,7 +74,7 @@ func Handler(agentClient *agent.Agent, strudelRepo StrudelGetter, sessionMgr *se
 				// no session_id provided, create new session
 				newSession, err := sessionMgr.CreateSession()
 				if err != nil {
-					log.Printf("failed to create session: %v", err)
+					logger.ErrorErr(err, "failed to create session")
 				} else {
 					sessionID = newSession.ID
 				}
@@ -84,7 +88,10 @@ func Handler(agentClient *agent.Agent, strudelRepo StrudelGetter, sessionMgr *se
 		})
 
 		if err != nil {
-			log.Printf("failed to generate code: %v", err)
+			logger.ErrorErr(err, "failed to generate code",
+				"session_id", sessionID,
+				"authenticated", isAuthenticated,
+			)
 
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error":   "generation_failed",
@@ -104,7 +111,9 @@ func Handler(agentClient *agent.Agent, strudelRepo StrudelGetter, sessionMgr *se
 
 			err := sessionMgr.UpdateSession(sessionID, updatedHistory, resp.Code)
 			if err != nil {
-				log.Printf("failed to update session %s: %v", sessionID, err)
+				logger.ErrorErr(err, "failed to update session",
+					"session_id", sessionID,
+				)
 			}
 		}
 

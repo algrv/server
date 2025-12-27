@@ -3,10 +3,10 @@ package retriever
 import (
 	"context"
 	"fmt"
-	"log"
 	"sync"
 
 	"github.com/algorave/server/internal/llm"
+	"github.com/algorave/server/internal/logger"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/pgvector/pgvector-go"
 )
@@ -193,7 +193,7 @@ func (c *Client) HybridSearchDocs(ctx context.Context, userQuery, editorState st
 	// transform query to add technical keywords for vector search
 	searchQuery, err := c.llm.TransformQuery(ctx, userQuery)
 	if err != nil {
-		log.Printf("query transformation failed, using original query: %v", err)
+		logger.Warn("query transformation failed, using original query", "error", err)
 		searchQuery = userQuery
 	}
 
@@ -227,7 +227,7 @@ func (c *Client) HybridSearchDocs(ctx context.Context, userQuery, editorState st
 
 	if bm25Err != nil {
 		// don't fail completely, just log and use vector only
-		log.Printf("BM25 search failed, using vector only: %v", bm25Err)
+		logger.Warn("BM25 search failed, using vector only", "error", bm25Err)
 		bm25Results = []SearchResult{}
 	}
 
@@ -248,7 +248,7 @@ func (c *Client) HybridSearchExamples(ctx context.Context, userQuery, editorStat
 	// transform query to add technical keywords for vector search
 	searchQuery, err := c.llm.TransformQuery(ctx, userQuery)
 	if err != nil {
-		log.Printf("query transformation failed, using original query: %v", err)
+		logger.Warn("query transformation failed, using original query", "error", err)
 		searchQuery = userQuery
 	}
 
@@ -282,7 +282,7 @@ func (c *Client) HybridSearchExamples(ctx context.Context, userQuery, editorStat
 
 	if bm25Err != nil {
 		// don't fail completely, just log and use vector only
-		log.Printf("BM25 search failed, using vector only: %v", bm25Err)
+		logger.Warn("BM25 search failed, using vector only", "error", bm25Err)
 		bm25Results = []ExampleResult{}
 	}
 

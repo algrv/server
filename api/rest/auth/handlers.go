@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"log"
 	"net/http"
 	"os"
 
@@ -9,6 +8,7 @@ import (
 
 	"github.com/algorave/server/algorave/users"
 	"github.com/algorave/server/internal/auth"
+	"github.com/algorave/server/internal/logger"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/sessions"
 	"github.com/markbates/goth/gothic"
@@ -60,7 +60,9 @@ func CallbackHandler(userRepo *users.Repository) gin.HandlerFunc {
 		// complete OAuth flow
 		gothUser, err := gothic.CompleteUserAuth(c.Writer, c.Request)
 		if err != nil {
-			log.Printf("OAuth authentication failed for provider %s: %v", provider, err)
+			logger.ErrorErr(err, "OAuth authentication failed",
+				"provider", provider,
+			)
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "authentication failed"})
 			return
 		}

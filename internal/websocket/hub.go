@@ -1,8 +1,9 @@
 package websocket
 
 import (
-	"log"
 	"sync"
+
+	"github.com/algorave/server/internal/logger"
 )
 
 const (
@@ -107,8 +108,13 @@ func (h *Hub) registerClient(client *Client) {
 		h.userConnections[client.UserID]++
 	}
 
-	log.Printf("Client registered: %s (session: %s, role: %s, name: %s)",
-		client.ID, client.SessionID, client.Role, client.DisplayName)
+	logger.Info("client registered",
+		"client_id", client.ID,
+		"session_id", client.SessionID,
+		"role", client.Role,
+		"display_name", client.DisplayName,
+		"user_id", client.UserID,
+	)
 
 	userJoinedMsg, err := NewMessage(TypeUserJoined, client.SessionID, client.UserID, UserJoinedPayload{
 		UserID:      client.UserID,
@@ -145,11 +151,16 @@ func (h *Hub) unregisterClient(client *Client) {
 			h.UntrackIPConnection(client.IPAddress)
 		}
 
-		log.Printf("client unregistered: %s (session: %s)", client.ID, client.SessionID)
+		logger.Info("client unregistered",
+			"client_id", client.ID,
+			"session_id", client.SessionID,
+		)
 
 		if len(sessionClients) == 0 {
 			delete(h.sessions, client.SessionID)
-			log.Printf("session %s has no more clients, removed", client.SessionID)
+			logger.Info("session has no more clients, removed",
+				"session_id", client.SessionID,
+			)
 		} else {
 			userLeftMsg, err := NewMessage(TypeUserLeft, client.SessionID, client.UserID, UserLeftPayload{
 				UserID:      client.UserID,
@@ -169,7 +180,10 @@ func (h *Hub) handleMessage(msg *Message) {
 	sessionClients, exists := h.sessions[msg.SessionID]
 	if !exists {
 		h.mu.RUnlock()
-		log.Printf("session not found for message: %s", msg.SessionID)
+		logger.Warn("session not found for message",
+			"session_id", msg.SessionID,
+			"message_type", msg.Type,
+		)
 		return
 	}
 
@@ -177,7 +191,11 @@ func (h *Hub) handleMessage(msg *Message) {
 	h.mu.RUnlock()
 
 	if !exists {
-		log.Printf("sender client %s not found for message in session %s", msg.ClientID, msg.SessionID)
+		logger.Warn("sender client not found for message",
+			"client_id", msg.ClientID,
+			"session_id", msg.SessionID,
+			"message_type", msg.Type,
+		)
 		return
 	}
 
@@ -187,7 +205,11 @@ func (h *Hub) handleMessage(msg *Message) {
 
 	if exists {
 		if err := handler(h, sender, msg); err != nil {
-			log.Printf("Handler error for message type %s: %v", msg.Type, err)
+			logger.ErrorErr(err, "handler error",
+				"message_type", msg.Type,
+				"client_id", sender.ID,
+				"session_id", msg.SessionID,
+			)
 			sender.SendError("HANDLER_ERROR", "Failed to process message", err.Error())
 		}
 	} else {
@@ -215,7 +237,10 @@ func (h *Hub) broadcastToSession(sessionID string, msg *Message, excludeClientID
 		}
 
 		if err := client.Send(msg); err != nil {
-			log.Printf("Failed to send message to client %s: %v", clientID, err)
+			logger.ErrorErr(err, "failed to send message to client",
+				"client_id", clientID,
+				"session_id", sessionID,
+			)
 		}
 	}
 }
@@ -268,12 +293,15 @@ func (h *Hub) closeAllConnections() {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
-	log.Println("Closing all WebSocket connections...")
+	logger.Info("closing all websocket connections")
 
 	for sessionID, sessionClients := range h.sessions {
 		for clientID, client := range sessionClients {
 			client.Close()
-			log.Printf("Closed client %s in session %s", clientID, sessionID)
+			logger.Debug("closed client",
+				"client_id", clientID,
+				"session_id", sessionID,
+			)
 		}
 	}
 

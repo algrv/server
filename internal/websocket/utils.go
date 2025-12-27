@@ -3,11 +3,12 @@ package websocket
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"log"
 	"net/http"
 	"os"
 	"slices"
 	"strings"
+
+	"github.com/algorave/server/internal/logger"
 )
 
 func GetAllowedWebSocketOrigins() []string {
@@ -35,20 +36,22 @@ func CheckOrigin(r *http.Request) bool {
 			return true
 		}
 
-		log.Printf("webSocket connection with no Origin header")
+		logger.Warn("websocket connection with no origin header")
 		return false
 	}
 
 	env := os.Getenv("ENVIRONMENT")
 	if env != "production" {
-
 		return true
 	}
 
 	// production: validate against allowed origins
 	allowedOrigins := GetAllowedWebSocketOrigins()
+
 	if len(allowedOrigins) == 0 {
-		log.Printf("webSocket origin rejected: %s (ALLOWED_ORIGINS not configured in production)", origin)
+		logger.Warn("websocket origin rejected - ALLOWED_ORIGINS not configured",
+			"origin", origin,
+		)
 		return false
 	}
 
@@ -56,7 +59,11 @@ func CheckOrigin(r *http.Request) bool {
 		return true
 	}
 
-	log.Printf("webSocket origin rejected: %s (not in allowed origins: %v)", origin, allowedOrigins)
+	logger.Warn("websocket origin rejected - not in allowed origins",
+		"origin", origin,
+		"allowed_origins", allowedOrigins,
+	)
+
 	return false
 }
 

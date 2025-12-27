@@ -2,7 +2,6 @@ package websocket
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -10,6 +9,7 @@ import (
 
 	"github.com/algorave/server/algorave/sessions"
 	"github.com/algorave/server/internal/auth"
+	"github.com/algorave/server/internal/logger"
 	ws "github.com/algorave/server/internal/websocket"
 )
 
@@ -120,7 +120,10 @@ func WebSocketHandler(hub *ws.Hub, sessionRepo sessions.Repository) gin.HandlerF
 		// upgrade HTTP connection to WebSocket
 		conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 		if err != nil {
-			log.Printf("Failed to upgrade connection: %v", err)
+			logger.ErrorErr(err, "failed to upgrade connection",
+				"session_id", params.SessionID,
+				"ip", ipAddress,
+			)
 			return
 		}
 
@@ -134,13 +137,20 @@ func WebSocketHandler(hub *ws.Hub, sessionRepo sessions.Repository) gin.HandlerF
 		if isAuthenticated {
 			_, err = sessionRepo.AddAuthenticatedParticipant(ctx, params.SessionID, userID, displayName, role)
 			if err != nil {
-				log.Printf("Failed to add authenticated participant: %v", err)
+				logger.Warn("failed to add authenticated participant",
+					"session_id", params.SessionID,
+					"user_id", userID,
+					"error", err,
+				)
 				// continue anyway - this might be a duplicate participant
 			}
 		} else {
 			_, err = sessionRepo.AddAnonymousParticipant(ctx, params.SessionID, displayName, role)
 			if err != nil {
-				log.Printf("Failed to add anonymous participant: %v", err)
+				logger.Warn("failed to add anonymous participant",
+					"session_id", params.SessionID,
+					"error", err,
+				)
 				// continue anyway - participant might already exist
 			}
 		}
@@ -152,7 +162,12 @@ func WebSocketHandler(hub *ws.Hub, sessionRepo sessions.Repository) gin.HandlerF
 		go client.WritePump()
 		go client.ReadPump()
 
-		log.Printf("WebSocket connection established: client=%s, session=%s, role=%s",
-			clientID, params.SessionID, role)
+		logger.Info("websocket connection established",
+			"client_id", clientID,
+			"session_id", params.SessionID,
+			"role", role,
+			"user_id", userID,
+			"ip", ipAddress,
+		)
 	}
 }

@@ -2,10 +2,10 @@ package websocket
 
 import (
 	"context"
-	"log"
 
 	"github.com/algorave/server/algorave/sessions"
 	"github.com/algorave/server/internal/agent"
+	"github.com/algorave/server/internal/logger"
 )
 
 // handles code update messages
@@ -40,7 +40,10 @@ func CodeUpdateHandler(sessionRepo sessions.Repository) MessageHandler {
 		// update session code in database
 		ctx := context.Background()
 		if err := sessionRepo.UpdateSessionCode(ctx, client.SessionID, payload.Code); err != nil {
-			log.Printf("Failed to update session code: %v", err)
+			logger.ErrorErr(err, "failed to update session code",
+				"client_id", client.ID,
+				"session_id", client.SessionID,
+			)
 			client.SendError("DATABASE_ERROR", "Failed to save code update", err.Error())
 			return err
 		}
@@ -51,13 +54,20 @@ func CodeUpdateHandler(sessionRepo sessions.Repository) MessageHandler {
 		// create new message with updated payload
 		broadcastMsg, err := NewMessage(TypeCodeUpdate, client.SessionID, client.UserID, payload)
 		if err != nil {
-			log.Printf("failed to create broadcast message: %v", err)
+			logger.ErrorErr(err, "failed to create broadcast message",
+				"client_id", client.ID,
+				"session_id", client.SessionID,
+			)
 			return err
 		}
 
 		// broadcast to all other clients in the session
 		hub.BroadcastToSession(client.SessionID, broadcastMsg, client.ID)
-		log.Printf("code updated by %s in session %s", client.DisplayName, client.SessionID)
+		logger.Info("code updated",
+			"client_id", client.ID,
+			"session_id", client.SessionID,
+			"display_name", client.DisplayName,
+		)
 
 		return nil
 	}
@@ -99,7 +109,10 @@ func GenerateHandler(agentClient *agent.Agent, sessionRepo sessions.Repository) 
 		ctx := context.Background()
 		response, err := agentClient.Generate(ctx, agentReq)
 		if err != nil {
-			log.Printf("failed to generate code: %v", err)
+			logger.ErrorErr(err, "failed to generate code",
+				"client_id", client.ID,
+				"session_id", client.SessionID,
+			)
 			client.SendError("GENERATION_ERROR", "Failed to generate code", err.Error())
 			return err
 		}
@@ -108,21 +121,30 @@ func GenerateHandler(agentClient *agent.Agent, sessionRepo sessions.Repository) 
 		if payload.UserQuery != "" {
 			_, err := sessionRepo.AddMessage(ctx, client.SessionID, client.UserID, "user", payload.UserQuery)
 			if err != nil {
-				log.Printf("failed to save user message: %v", err)
+				logger.ErrorErr(err, "failed to save user message",
+					"client_id", client.ID,
+					"session_id", client.SessionID,
+				)
 			}
 		}
 
 		if response.Code != "" {
 			_, err := sessionRepo.AddMessage(ctx, client.SessionID, "", "assistant", response.Code)
 			if err != nil {
-				log.Printf("failed to save assistant message: %v", err)
+				logger.ErrorErr(err, "failed to save assistant message",
+					"client_id", client.ID,
+					"session_id", client.SessionID,
+				)
 			}
 		}
 
 		// update session code if generation was successful
 		if response.IsActionable && response.Code != "" {
 			if err := sessionRepo.UpdateSessionCode(ctx, client.SessionID, response.Code); err != nil {
-				log.Printf("failed to update session code: %v", err)
+				logger.ErrorErr(err, "failed to update session code",
+					"client_id", client.ID,
+					"session_id", client.SessionID,
+				)
 			}
 		}
 
@@ -139,7 +161,10 @@ func GenerateHandler(agentClient *agent.Agent, sessionRepo sessions.Repository) 
 		// create response message
 		responseMsg, err := NewMessage(TypeAgentResponse, client.SessionID, client.UserID, responsePayload)
 		if err != nil {
-			log.Printf("failed to create response message: %v", err)
+			logger.ErrorErr(err, "failed to create response message",
+				"client_id", client.ID,
+				"session_id", client.SessionID,
+			)
 			return err
 		}
 
@@ -148,10 +173,20 @@ func GenerateHandler(agentClient *agent.Agent, sessionRepo sessions.Repository) 
 
 		// update last activity
 		if err := sessionRepo.UpdateLastActivity(ctx, client.SessionID); err != nil {
-			log.Printf("failed to update last activity: %v", err)
+			logger.ErrorErr(err, "failed to update last activity",
+				"client_id", client.ID,
+				"session_id", client.SessionID,
+			)
 		}
 
-		log.Printf("code generated for session %s by %s", client.SessionID, client.DisplayName)
+		logger.Info("code generated",
+			"client_id", client.ID,
+			"session_id", client.SessionID,
+			"display_name", client.DisplayName,
+			"model", response.Model,
+			"docs_retrieved", response.DocsRetrieved,
+			"examples_retrieved", response.ExamplesRetrieved,
+		)
 
 		return nil
 	}

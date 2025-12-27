@@ -2,10 +2,11 @@ package chunker
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/algorave/server/internal/logger"
 )
 
 func DefaultOptions() ChunkOptions {
@@ -112,7 +113,10 @@ func ChunkDocuments(docsPath string) ([]Chunk, []error) {
 	// walk the directory tree to find all markdown files
 	walkErr := filepath.Walk(docsPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			log.Printf("warning: error accessing path %s: %v", path, err)
+			logger.Warn("error accessing path",
+				"path", path,
+				"error", err,
+			)
 			errors = append(errors, fmt.Errorf("path %s: %w", path, err))
 			return nil // continue walking
 		}
@@ -131,7 +135,10 @@ func ChunkDocuments(docsPath string) ([]Chunk, []error) {
 		// read file content
 		content, err := os.ReadFile(path)
 		if err != nil {
-			log.Printf("warning: failed to read file %s: %v", path, err)
+			logger.Warn("failed to read file",
+				"path", path,
+				"error", err,
+			)
 			errors = append(errors, fmt.Errorf("read %s: %w", path, err))
 			return nil // continue with other files
 		}
@@ -145,7 +152,10 @@ func ChunkDocuments(docsPath string) ([]Chunk, []error) {
 		// chunk the document
 		chunks, err := ChunkDocument(string(content), strings.TrimPrefix(docsPath, "./"), pageName, opts)
 		if err != nil {
-			log.Printf("warning: failed to chunk document %s: %v", path, err)
+			logger.Warn("failed to chunk document",
+				"path", path,
+				"error", err,
+			)
 			errors = append(errors, fmt.Errorf("chunk %s: %w", path, err))
 			return nil // continue with other files
 		}
@@ -159,8 +169,11 @@ func ChunkDocuments(docsPath string) ([]Chunk, []error) {
 		errors = append(errors, fmt.Errorf("walk error: %w", walkErr))
 	}
 
-	log.Printf("processed %d markdown files, generated %d chunks, encountered %d errors",
-		fileCount, len(allChunks), len(errors))
+	logger.Info("processed markdown files",
+		"file_count", fileCount,
+		"chunks_generated", len(allChunks),
+		"errors", len(errors),
+	)
 
 	return allChunks, errors
 }

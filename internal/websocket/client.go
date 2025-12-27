@@ -2,10 +2,10 @@ package websocket
 
 import (
 	"encoding/json"
-	"log"
 	"sync"
 	"time"
 
+	"github.com/algorave/server/internal/logger"
 	"github.com/gorilla/websocket"
 )
 
@@ -112,7 +112,11 @@ func (c *Client) ReadPump() {
 		_, messageBytes, err := c.conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("webSocket error: %v", err)
+				logger.Warn("websocket error",
+					"client_id", c.ID,
+					"session_id", c.SessionID,
+					"error", err,
+				)
 			}
 			break
 		}
@@ -120,7 +124,10 @@ func (c *Client) ReadPump() {
 		// parse the message
 		var msg Message
 		if err := json.Unmarshal(messageBytes, &msg); err != nil {
-			log.Printf("failed to unmarshal message: %v", err)
+			logger.ErrorErr(err, "failed to unmarshal message",
+				"client_id", c.ID,
+				"session_id", c.SessionID,
+			)
 			c.SendError("INVALID_MESSAGE", "Invalid message format", err.Error())
 			continue
 		}
@@ -227,7 +234,11 @@ func (c *Client) SendError(code, message, details string) {
 		Details: sanitizedDetails,
 	})
 	if err != nil {
-		log.Printf("failed to create error message: %v", err)
+		logger.ErrorErr(err, "failed to create error message",
+			"client_id", c.ID,
+			"session_id", c.SessionID,
+			"error_code", code,
+		)
 		return
 	}
 

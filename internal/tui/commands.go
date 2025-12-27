@@ -2,10 +2,10 @@ package tui
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 
+	"github.com/algorave/server/internal/logger"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -25,7 +25,7 @@ func startServer() tea.Msg {
 
 	go func() {
 		if err := cmd.Run(); err != nil {
-			log.Printf("Server error: %v", err)
+			logger.ErrorErr(err, "server error")
 		}
 	}()
 
