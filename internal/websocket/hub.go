@@ -214,7 +214,14 @@ func (h *Hub) handleMessage(msg *Message) {
 			sender.SendError("server_error", "failed to process message", err.Error())
 		}
 	} else {
-		h.BroadcastToSession(msg.SessionID, msg, sender.ID)
+		// reject unhandled message types
+		logger.Warn("unhandled message type received",
+			"message_type", msg.Type,
+			"client_id", sender.ID,
+			"session_id", msg.SessionID,
+		)
+
+		sender.SendError("bad_request", "unsupported message type", "message type not recognized")
 	}
 }
 
