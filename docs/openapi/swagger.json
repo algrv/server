@@ -30,10 +30,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/api_rest_auth.MessageResponse"
                         }
                     }
                 }
@@ -56,10 +53,9 @@
                 "summary": "Get current user",
                 "responses": {
                     "200": {
-                        "description": "user object",
+                        "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/api_rest_auth.UserResponse"
                         }
                     },
                     "401": {
@@ -106,24 +102,15 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
-                            "properties": {
-                                "avatar_url": {
-                                    "type": "string"
-                                },
-                                "name": {
-                                    "type": "string"
-                                }
-                            }
+                            "$ref": "#/definitions/api_rest_auth.UpdateProfileRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "updated user",
+                        "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/api_rest_auth.UserResponse"
                         }
                     },
                     "400": {
@@ -222,10 +209,9 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "user and token",
+                        "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/api_rest_auth.AuthResponse"
                         }
                     },
                     "400": {
@@ -352,13 +338,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "array",
-                                "items": {
-                                    "$ref": "#/definitions/github_com_algorave_server_algorave_strudels.Strudel"
-                                }
-                            }
+                            "$ref": "#/definitions/api_rest_strudels.StrudelsListResponse"
                         }
                     },
                     "500": {
@@ -401,13 +381,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "array",
-                                "items": {
-                                    "$ref": "#/definitions/api_rest_collaboration.SessionResponse"
-                                }
-                            }
+                            "$ref": "#/definitions/api_rest_collaboration.SessionsListResponse"
                         }
                     },
                     "401": {
@@ -592,10 +566,9 @@
                 ],
                 "responses": {
                     "201": {
-                        "description": "message, strudel, strudel_id",
+                        "description": "Created",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/api_rest_sessions.TransferSessionResponse"
                         }
                     },
                     "400": {
@@ -722,8 +695,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/api_rest_collaboration.UpdateSessionCodeResponse"
                         }
                     },
                     "400": {
@@ -800,10 +772,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/api_rest_collaboration.MessageResponse"
                         }
                     },
                     "400": {
@@ -882,13 +851,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "array",
-                                "items": {
-                                    "$ref": "#/definitions/api_rest_collaboration.InviteTokenResponse"
-                                }
-                            }
+                            "$ref": "#/definitions/api_rest_collaboration.InviteTokensListResponse"
                         }
                     },
                     "400": {
@@ -1063,10 +1026,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/api_rest_collaboration.MessageResponse"
                         }
                     },
                     "400": {
@@ -1145,10 +1105,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/api_rest_collaboration.MessageResponse"
                         }
                     },
                     "400": {
@@ -1220,8 +1177,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/api_rest_collaboration.MessagesResponse"
                         }
                     },
                     "400": {
@@ -1268,13 +1224,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "array",
-                                "items": {
-                                    "$ref": "#/definitions/api_rest_collaboration.ParticipantResponse"
-                                }
-                            }
+                            "$ref": "#/definitions/api_rest_collaboration.ParticipantsListResponse"
                         }
                     },
                     "400": {
@@ -1333,10 +1283,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/api_rest_collaboration.MessageResponse"
                         }
                     },
                     "400": {
@@ -1406,13 +1353,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "array",
-                                "items": {
-                                    "$ref": "#/definitions/github_com_algorave_server_algorave_strudels.Strudel"
-                                }
-                            }
+                            "$ref": "#/definitions/api_rest_strudels.StrudelsListResponse"
                         }
                     },
                     "401": {
@@ -1658,10 +1599,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/api_rest_strudels.MessageResponse"
                         }
                     },
                     "400": {
@@ -1811,6 +1749,49 @@
         }
     },
     "definitions": {
+        "api_rest_auth.AuthResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/github_com_algorave_server_algorave_users.User"
+                }
+            }
+        },
+        "api_rest_auth.MessageResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "api_rest_auth.UpdateProfileRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "avatar_url": {
+                    "type": "string",
+                    "maxLength": 500
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 100
+                }
+            }
+        },
+        "api_rest_auth.UserResponse": {
+            "type": "object",
+            "properties": {
+                "user": {
+                    "$ref": "#/definitions/github_com_algorave_server_algorave_users.User"
+                }
+            }
+        },
         "api_rest_collaboration.CreateInviteTokenRequest": {
             "type": "object",
             "required": [
@@ -1904,6 +1885,17 @@
                 }
             }
         },
+        "api_rest_collaboration.InviteTokensListResponse": {
+            "type": "object",
+            "properties": {
+                "tokens": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api_rest_collaboration.InviteTokenResponse"
+                    }
+                }
+            }
+        },
         "api_rest_collaboration.JoinSessionRequest": {
             "type": "object",
             "required": [
@@ -1933,6 +1925,25 @@
                 }
             }
         },
+        "api_rest_collaboration.MessageResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "api_rest_collaboration.MessagesResponse": {
+            "type": "object",
+            "properties": {
+                "messages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_algorave_server_algorave_sessions.Message"
+                    }
+                }
+            }
+        },
         "api_rest_collaboration.ParticipantResponse": {
             "type": "object",
             "properties": {
@@ -1956,6 +1967,17 @@
                 },
                 "user_id": {
                     "type": "string"
+                }
+            }
+        },
+        "api_rest_collaboration.ParticipantsListResponse": {
+            "type": "object",
+            "properties": {
+                "participants": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api_rest_collaboration.ParticipantResponse"
+                    }
                 }
             }
         },
@@ -1994,6 +2016,17 @@
                 }
             }
         },
+        "api_rest_collaboration.SessionsListResponse": {
+            "type": "object",
+            "properties": {
+                "sessions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api_rest_collaboration.SessionResponse"
+                    }
+                }
+            }
+        },
         "api_rest_collaboration.UpdateSessionCodeRequest": {
             "type": "object",
             "required": [
@@ -2004,6 +2037,17 @@
                     "description": "1MB limit",
                     "type": "string",
                     "maxLength": 1048576
+                }
+            }
+        },
+        "api_rest_collaboration.UpdateSessionCodeResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
                 }
             }
         },
@@ -2092,6 +2136,67 @@
                     "type": "string"
                 },
                 "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "api_rest_sessions.TransferSessionResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "strudel": {
+                    "$ref": "#/definitions/github_com_algorave_server_algorave_strudels.Strudel"
+                },
+                "strudel_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "api_rest_strudels.MessageResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "api_rest_strudels.StrudelsListResponse": {
+            "type": "object",
+            "properties": {
+                "strudels": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_algorave_server_algorave_strudels.Strudel"
+                    }
+                }
+            }
+        },
+        "github_com_algorave_server_algorave_sessions.Message": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "messageType": {
+                    "description": "MessageTypeUserPrompt, MessageTypeAIResponse, MessageTypeChat",
+                    "type": "string"
+                },
+                "role": {
+                    "description": "user, assistant",
+                    "type": "string"
+                },
+                "sessionID": {
+                    "type": "string"
+                },
+                "userID": {
                     "type": "string"
                 }
             }
@@ -2231,6 +2336,32 @@
                 "title": {
                     "type": "string",
                     "maxLength": 200
+                }
+            }
+        },
+        "github_com_algorave_server_algorave_users.User": {
+            "type": "object",
+            "properties": {
+                "avatar_url": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "provider": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
                 }
             }
         },

@@ -129,7 +129,7 @@ func GetSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 // @Tags sessions
 // @Produce json
 // @Param active_only query boolean false "Only return active sessions" default(false)
-// @Success 200 {object} map[string][]SessionResponse
+// @Success 200 {object} SessionsListResponse
 // @Failure 401 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /api/v1/sessions [get]
@@ -167,7 +167,7 @@ func ListUserSessionsHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 			})
 		}
 
-		c.JSON(http.StatusOK, gin.H{"sessions": responses})
+		c.JSON(http.StatusOK, SessionsListResponse{Sessions: responses})
 	}
 }
 
@@ -179,7 +179,7 @@ func ListUserSessionsHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 // @Produce json
 // @Param id path string true "Session ID (UUID)"
 // @Param request body UpdateSessionCodeRequest true "Code update"
-// @Success 200 {object} map[string]interface{}
+// @Success 200 {object} UpdateSessionCodeResponse
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Failure 403 {object} map[string]string
@@ -226,7 +226,10 @@ func UpdateSessionCodeHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"message": "code updated successfully", "code": req.Code})
+		c.JSON(http.StatusOK, UpdateSessionCodeResponse{
+			Message: "code updated successfully",
+			Code:    req.Code,
+		})
 	}
 }
 
@@ -236,7 +239,7 @@ func UpdateSessionCodeHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 // @Tags sessions
 // @Produce json
 // @Param id path string true "Session ID (UUID)"
-// @Success 200 {object} map[string]string
+// @Success 200 {object} MessageResponse
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Failure 403 {object} map[string]string
@@ -274,7 +277,7 @@ func EndSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"message": "session ended successfully"})
+		c.JSON(http.StatusOK, MessageResponse{Message: "session ended successfully"})
 	}
 }
 
@@ -354,7 +357,7 @@ func CreateInviteTokenHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 // @Tags sessions
 // @Produce json
 // @Param id path string true "Session ID (UUID)"
-// @Success 200 {object} map[string][]ParticipantResponse
+// @Success 200 {object} ParticipantsListResponse
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /api/v1/sessions/{id}/participants [get]
@@ -386,7 +389,7 @@ func ListParticipantsHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 			})
 		}
 
-		c.JSON(http.StatusOK, gin.H{"participants": responses})
+		c.JSON(http.StatusOK, ParticipantsListResponse{Participants: responses})
 	}
 }
 
@@ -463,7 +466,7 @@ func JoinSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 // @Tags sessions
 // @Produce json
 // @Param id path string true "Session ID (UUID)"
-// @Success 200 {object} map[string]string
+// @Success 200 {object} MessageResponse
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Failure 404 {object} map[string]string
@@ -494,7 +497,7 @@ func LeaveSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"message": "successfully left session"})
+		c.JSON(http.StatusOK, MessageResponse{Message: "successfully left session"})
 	}
 }
 
@@ -505,7 +508,7 @@ func LeaveSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 // @Produce json
 // @Param id path string true "Session ID (UUID)"
 // @Param limit query int false "Max messages to return (max 1000)" default(100)
-// @Success 200 {object} map[string]interface{}
+// @Success 200 {object} MessagesResponse
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /api/v1/sessions/{id}/messages [get]
@@ -533,7 +536,7 @@ func GetSessionMessagesHandler(sessionRepo sessions.Repository) gin.HandlerFunc 
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"messages": messages})
+		c.JSON(http.StatusOK, MessagesResponse{Messages: messages})
 	}
 }
 
@@ -544,7 +547,7 @@ func GetSessionMessagesHandler(sessionRepo sessions.Repository) gin.HandlerFunc 
 // @Produce json
 // @Param id path string true "Session ID (UUID)"
 // @Param participant_id path string true "Participant ID (UUID)"
-// @Success 200 {object} map[string]string
+// @Success 200 {object} MessageResponse
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Failure 403 {object} map[string]string
@@ -597,7 +600,7 @@ func RemoveParticipantHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"message": "participant removed successfully"})
+		c.JSON(http.StatusOK, MessageResponse{Message: "participant removed successfully"})
 	}
 }
 
@@ -655,7 +658,10 @@ func UpdateParticipantRoleHandler(sessionRepo sessions.Repository) gin.HandlerFu
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"message": "role updated successfully", "role": req.Role})
+		c.JSON(http.StatusOK, UpdateRoleResponse{
+			Message: "role updated successfully",
+			Role:    req.Role,
+		})
 	}
 }
 
@@ -665,7 +671,7 @@ func UpdateParticipantRoleHandler(sessionRepo sessions.Repository) gin.HandlerFu
 // @Tags sessions
 // @Produce json
 // @Param id path string true "Session ID (UUID)"
-// @Success 200 {object} map[string][]InviteTokenResponse
+// @Success 200 {object} InviteTokensListResponse
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Failure 403 {object} map[string]string
@@ -717,7 +723,7 @@ func ListInviteTokensHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 			})
 		}
 
-		c.JSON(http.StatusOK, gin.H{"tokens": responses})
+		c.JSON(http.StatusOK, InviteTokensListResponse{Tokens: responses})
 	}
 }
 
@@ -728,7 +734,7 @@ func ListInviteTokensHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 // @Produce json
 // @Param id path string true "Session ID (UUID)"
 // @Param token_id path string true "Token ID (UUID)"
-// @Success 200 {object} map[string]string
+// @Success 200 {object} MessageResponse
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Failure 403 {object} map[string]string
@@ -770,6 +776,6 @@ func RevokeInviteTokenHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"message": "invite token revoked successfully"})
+		c.JSON(http.StatusOK, MessageResponse{Message: "invite token revoked successfully"})
 	}
 }

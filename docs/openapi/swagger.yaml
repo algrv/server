@@ -1,5 +1,33 @@
 basePath: /
 definitions:
+  api_rest_auth.AuthResponse:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/github_com_algorave_server_algorave_users.User'
+    type: object
+  api_rest_auth.MessageResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  api_rest_auth.UpdateProfileRequest:
+    properties:
+      avatar_url:
+        maxLength: 500
+        type: string
+      name:
+        maxLength: 100
+        type: string
+    required:
+    - name
+    type: object
+  api_rest_auth.UserResponse:
+    properties:
+      user:
+        $ref: '#/definitions/github_com_algorave_server_algorave_users.User'
+    type: object
   api_rest_collaboration.CreateInviteTokenRequest:
     properties:
       expires_at:
@@ -62,6 +90,13 @@ definitions:
       uses_count:
         type: integer
     type: object
+  api_rest_collaboration.InviteTokensListResponse:
+    properties:
+      tokens:
+        items:
+          $ref: '#/definitions/api_rest_collaboration.InviteTokenResponse'
+        type: array
+    type: object
   api_rest_collaboration.JoinSessionRequest:
     properties:
       display_name:
@@ -81,6 +116,18 @@ definitions:
       session_id:
         type: string
     type: object
+  api_rest_collaboration.MessageResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  api_rest_collaboration.MessagesResponse:
+    properties:
+      messages:
+        items:
+          $ref: '#/definitions/github_com_algorave_server_algorave_sessions.Message'
+        type: array
+    type: object
   api_rest_collaboration.ParticipantResponse:
     properties:
       display_name:
@@ -97,6 +144,13 @@ definitions:
         type: string
       user_id:
         type: string
+    type: object
+  api_rest_collaboration.ParticipantsListResponse:
+    properties:
+      participants:
+        items:
+          $ref: '#/definitions/api_rest_collaboration.ParticipantResponse'
+        type: array
     type: object
   api_rest_collaboration.SessionResponse:
     properties:
@@ -121,6 +175,13 @@ definitions:
       title:
         type: string
     type: object
+  api_rest_collaboration.SessionsListResponse:
+    properties:
+      sessions:
+        items:
+          $ref: '#/definitions/api_rest_collaboration.SessionResponse'
+        type: array
+    type: object
   api_rest_collaboration.UpdateSessionCodeRequest:
     properties:
       code:
@@ -129,6 +190,13 @@ definitions:
         type: string
     required:
     - code
+    type: object
+  api_rest_collaboration.UpdateSessionCodeResponse:
+    properties:
+      code:
+        type: string
+      message:
+        type: string
     type: object
   api_rest_generate.Request:
     properties:
@@ -189,6 +257,46 @@ definitions:
     required:
     - session_id
     - title
+    type: object
+  api_rest_sessions.TransferSessionResponse:
+    properties:
+      message:
+        type: string
+      strudel:
+        $ref: '#/definitions/github_com_algorave_server_algorave_strudels.Strudel'
+      strudel_id:
+        type: string
+    type: object
+  api_rest_strudels.MessageResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  api_rest_strudels.StrudelsListResponse:
+    properties:
+      strudels:
+        items:
+          $ref: '#/definitions/github_com_algorave_server_algorave_strudels.Strudel'
+        type: array
+    type: object
+  github_com_algorave_server_algorave_sessions.Message:
+    properties:
+      content:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: string
+      messageType:
+        description: MessageTypeUserPrompt, MessageTypeAIResponse, MessageTypeChat
+        type: string
+      role:
+        description: user, assistant
+        type: string
+      sessionID:
+        type: string
+      userID:
+        type: string
     type: object
   github_com_algorave_server_algorave_strudels.CreateStrudelRequest:
     properties:
@@ -287,6 +395,23 @@ definitions:
         maxLength: 200
         type: string
     type: object
+  github_com_algorave_server_algorave_users.User:
+    properties:
+      avatar_url:
+        type: string
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      provider:
+        type: string
+      updated_at:
+        type: string
+    type: object
   github_com_algorave_server_internal_agent.Message:
     properties:
       content:
@@ -361,10 +486,9 @@ paths:
       - application/json
       responses:
         "200":
-          description: user and token
+          description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/api_rest_auth.AuthResponse'
         "400":
           description: Bad Request
           schema:
@@ -389,9 +513,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/api_rest_auth.MessageResponse'
       summary: Logout
       tags:
       - auth
@@ -402,10 +524,9 @@ paths:
       - application/json
       responses:
         "200":
-          description: user object
+          description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/api_rest_auth.UserResponse'
         "401":
           description: Unauthorized
           schema:
@@ -433,20 +554,14 @@ paths:
         name: request
         required: true
         schema:
-          properties:
-            avatar_url:
-              type: string
-            name:
-              type: string
-          type: object
+          $ref: '#/definitions/api_rest_auth.UpdateProfileRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: updated user
+          description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/api_rest_auth.UserResponse'
         "400":
           description: Bad Request
           schema:
@@ -539,11 +654,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              items:
-                $ref: '#/definitions/github_com_algorave_server_algorave_strudels.Strudel'
-              type: array
-            type: object
+            $ref: '#/definitions/api_rest_strudels.StrudelsListResponse'
         "500":
           description: Internal Server Error
           schema:
@@ -568,11 +679,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              items:
-                $ref: '#/definitions/api_rest_collaboration.SessionResponse'
-              type: array
-            type: object
+            $ref: '#/definitions/api_rest_collaboration.SessionsListResponse'
         "401":
           description: Unauthorized
           schema:
@@ -647,9 +754,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/api_rest_collaboration.MessageResponse'
         "400":
           description: Bad Request
           schema:
@@ -737,8 +842,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/api_rest_collaboration.UpdateSessionCodeResponse'
         "400":
           description: Bad Request
           schema:
@@ -789,11 +893,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              items:
-                $ref: '#/definitions/api_rest_collaboration.InviteTokenResponse'
-              type: array
-            type: object
+            $ref: '#/definitions/api_rest_collaboration.InviteTokensListResponse'
         "400":
           description: Bad Request
           schema:
@@ -907,9 +1007,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/api_rest_collaboration.MessageResponse'
         "400":
           description: Bad Request
           schema:
@@ -960,9 +1058,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/api_rest_collaboration.MessageResponse'
         "400":
           description: Bad Request
           schema:
@@ -1012,8 +1108,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/api_rest_collaboration.MessagesResponse'
         "400":
           description: Bad Request
           schema:
@@ -1044,11 +1139,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              items:
-                $ref: '#/definitions/api_rest_collaboration.ParticipantResponse'
-              type: array
-            type: object
+            $ref: '#/definitions/api_rest_collaboration.ParticipantsListResponse'
         "400":
           description: Bad Request
           schema:
@@ -1084,9 +1175,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/api_rest_collaboration.MessageResponse'
         "400":
           description: Bad Request
           schema:
@@ -1182,10 +1271,9 @@ paths:
       - application/json
       responses:
         "201":
-          description: message, strudel, strudel_id
+          description: Created
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/api_rest_sessions.TransferSessionResponse'
         "400":
           description: Bad Request
           schema:
@@ -1224,11 +1312,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              items:
-                $ref: '#/definitions/github_com_algorave_server_algorave_strudels.Strudel'
-              type: array
-            type: object
+            $ref: '#/definitions/api_rest_strudels.StrudelsListResponse'
         "401":
           description: Unauthorized
           schema:
@@ -1302,9 +1386,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/api_rest_strudels.MessageResponse'
         "400":
           description: Bad Request
           schema:

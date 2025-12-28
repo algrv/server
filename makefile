@@ -1,70 +1,70 @@
 .PHONY: help ingest build cli test clean setup
 
 help: 
-	@echo 'Usage: make [target]'
+	@echo 'usage: make [target]'
 	@echo ''
-	@echo 'Available targets:'
+	@echo 'available targets:'
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'
 
 setup: ## initial project setup (run once)
-	@echo "Setting up algorave..."
+	@echo "setting up algorave..."
 	@cp .env.example .env
-	@echo "✓ Created .env file - please edit with your API keys"
+	@echo "✓ created .env file - please edit with your API keys"
 	@go mod download
-	@echo "✓ Downloaded dependencies"
+	@echo "✓ downloaded dependencies"
 	@mkdir -p bin docs/strudel
-	@echo "✓ Created directories"
+	@echo "✓ created directories"
 	@echo ""
-	@echo "Next steps:"
-	@echo "  1. Edit .env with your API keys"
-	@echo "  2. Run schema.sql in Supabase SQL Editor"
-	@echo "  3. Add markdown docs to docs/strudel/"
-	@echo "  4. Run 'make ingest' to index documentation"
+	@echo "next steps:"
+	@echo "  1. edit .env with your API keys"
+	@echo "  2. run schema.sql in supabase SQL Editor"
+	@echo "  3. add markdown docs to docs/strudel/"
+	@echo "  4. run 'make ingest' to index documentation"
 
 ingest: ## run document ingestion
-	@echo "Ingesting documentation..."
+	@echo "ingesting documentation..."
 	go run ./cmd/ingester all --clear
 
 ingest-no-clear: ## run ingestion without clearing existing data
-	@echo "Ingesting documentation (no clear)..."
+	@echo "ingesting documentation (no clear)..."
 	go run ./cmd/ingester all
 
 server: ## run API server
-	@echo "Starting API server..."
+	@echo "starting API server..."
 	go run ./cmd/server
 
 build: ## build binaries
-	@echo "Building binaries..."
+	@echo "building binaries..."
 	@mkdir -p bin
 	go build -o bin/ingester ./cmd/ingester
 	go build -o bin/server ./cmd/server
 	go build -o bin/algorave ./cmd/tui
-	@echo "✓ Built all binaries in bin/"
+	@echo "✓ built all binaries in bin/"
 
 cli: ## build local CLI
-	@echo "Building local CLI..."
+	@echo "building local CLI..."
 	@mkdir -p bin
 	go build -o bin/algorave ./cmd/tui
-	@echo "✓ Built bin/algorave"
+	@echo "✓ built bin/algorave"
 
 test: ## run all tests
-	@echo "Running tests..."
+	@echo "running tests..."
 	@go test -v ./...
 
 test-coverage: ## run tests and generate coverage report
-	@echo "Running tests with coverage..."
+	@echo "running tests with coverage..."
 	@go test -v -coverprofile=coverage.out ./...
 	@go tool cover -html=coverage.out -o coverage.html
-	@echo "Coverage report: coverage.html"
+	@echo "coverage report: coverage.html"
 
 clean: ## clean build artifacts
 	rm -rf bin/
 	rm -f coverage.out coverage.html
-	@echo "✓ Cleaned build artifacts"
+	@echo "✓ cleaned build artifacts"
 
 fmt: ## format code
 	go fmt ./...
-	@echo "✓ Formatted code"
+	@echo "✓ formatted code"
 
 lint: ## run linter (requires golangci-lint)
 	golangci-lint run
@@ -72,28 +72,28 @@ lint: ## run linter (requires golangci-lint)
 deps: ## Download dependencies
 	go mod download
 	go mod tidy
-	@echo "✓ Dependencies updated"
+	@echo "✓ dependencies updated"
 
 ci: ## run CI checks locally (lint + unit tests)
-	@echo "Running CI checks..."
-	@echo "\n→ Checking formatting..."
+	@echo "running CI checks..."
+	@echo "\n→ checking formatting..."
 	@if [ -n "$$(gofmt -s -l .)" ]; then \
 		echo "❌ Code is not formatted. Run 'make fmt' to fix."; \
 		gofmt -s -l .; \
 		exit 1; \
 	fi
 	@echo "✓ Code is formatted"
-	@echo "\n→ Running linter..."
+	@echo "\n→ running linter..."
 	@golangci-lint run || (echo "❌ Linting failed" && exit 1)
 	@echo "✓ Linting passed"
-	@echo "\n→ Running tests..."
+	@echo "\n→ running tests..."
 	@go test -v -race -coverprofile=coverage.out ./...
 	@echo "✓ All CI checks passed!"
 
 .DEFAULT_GOAL := help
 
 db-migrate: ## apply pending migrations
-	@echo "Applying migrations to Supabase..."
+	@echo "applying migrations to supabase..."
 	supabase db push
 	@echo "✓ Migrations applied"
 

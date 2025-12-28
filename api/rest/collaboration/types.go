@@ -1,6 +1,10 @@
 package collaboration
 
-import "time"
+import (
+	"time"
+
+	"github.com/algorave/server/algorave/sessions"
+)
 
 type CreateSessionRequest struct {
 	Title string `json:"title" binding:"required,max=200"`
@@ -69,4 +73,41 @@ type JoinSessionResponse struct {
 	SessionID   string `json:"session_id"`
 	Role        string `json:"role"`
 	DisplayName string `json:"display_name"`
+}
+
+// SessionsListResponse wraps a list of sessions
+type SessionsListResponse struct {
+	Sessions []SessionResponse `json:"sessions"`
+}
+
+// ParticipantsListResponse wraps a list of participants
+type ParticipantsListResponse struct {
+	Participants []ParticipantResponse `json:"participants"`
+}
+
+// InviteTokensListResponse wraps a list of invite tokens
+type InviteTokensListResponse struct {
+	Tokens []InviteTokenResponse `json:"tokens"`
+}
+
+// MessageResponse for simple success messages
+type MessageResponse struct {
+	Message string `json:"message"`
+}
+
+// UpdateSessionCodeResponse returned after updating session code
+type UpdateSessionCodeResponse struct {
+	Message string `json:"message"`
+	Code    string `json:"code"`
+}
+
+// UpdateRoleResponse returned after updating participant role
+type UpdateRoleResponse struct {
+	Message string `json:"message"`
+	Role    string `json:"role"`
+}
+
+// MessagesResponse wraps chat messages
+type MessagesResponse struct {
+	Messages []*sessions.Message `json:"messages"`
 }

@@ -52,7 +52,7 @@ func CreateStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 // @Description Get all strudels owned by the authenticated user
 // @Tags strudels
 // @Produce json
-// @Success 200 {object} map[string][]strudels.Strudel
+// @Success 200 {object} StrudelsListResponse
 // @Failure 401 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /api/v1/strudels [get]
@@ -71,7 +71,7 @@ func ListStrudelsHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"strudels": strudelsList})
+		c.JSON(http.StatusOK, StrudelsListResponse{Strudels: strudelsList})
 	}
 }
 
@@ -160,7 +160,7 @@ func UpdateStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 // @Tags strudels
 // @Produce json
 // @Param id path string true "Strudel ID (UUID)"
-// @Success 200 {object} map[string]string
+// @Success 200 {object} MessageResponse
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Failure 404 {object} map[string]string
@@ -185,7 +185,7 @@ func DeleteStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"message": "strudel deleted"})
+		c.JSON(http.StatusOK, MessageResponse{Message: "strudel deleted"})
 	}
 }
 
@@ -195,7 +195,7 @@ func DeleteStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 // @Tags strudels
 // @Produce json
 // @Param limit query int false "Limit results (max 100)" default(50)
-// @Success 200 {object} map[string][]strudels.Strudel
+// @Success 200 {object} StrudelsListResponse
 // @Failure 500 {object} map[string]string
 // @Router /api/v1/public/strudels [get]
 func ListPublicStrudelsHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
@@ -214,7 +214,7 @@ func ListPublicStrudelsHandler(strudelRepo *strudels.Repository) gin.HandlerFunc
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"strudels": strudelsList})
+		c.JSON(http.StatusOK, StrudelsListResponse{Strudels: strudelsList})
 	}
 }
 

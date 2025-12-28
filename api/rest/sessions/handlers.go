@@ -17,7 +17,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param request body TransferSessionRequest true "Transfer request"
-// @Success 201 {object} map[string]interface{} "message, strudel, strudel_id"
+// @Success 201 {object} TransferSessionResponse
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Failure 404 {object} map[string]string
@@ -62,10 +62,10 @@ func TransferSessionHandler(sessionMgr *anonsessions.Manager, strudelRepo *strud
 		// delete the session after successful transfer
 		sessionMgr.DeleteSession(req.SessionID)
 
-		c.JSON(http.StatusCreated, gin.H{
-			"message":    "session transferred successfully",
-			"strudel":    strudel,
-			"strudel_id": strudel.ID,
+		c.JSON(http.StatusCreated, TransferSessionResponse{
+			Message:   "session transferred successfully",
+			Strudel:   strudel,
+			StrudelID: strudel.ID,
 		})
 	}
 }

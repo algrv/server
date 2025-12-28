@@ -61,7 +61,7 @@ func BeginAuthHandler(userRepo *users.Repository) gin.HandlerFunc {
 // @Tags auth
 // @Produce json
 // @Param provider path string true "OAuth provider" Enums(google, github, apple)
-// @Success 200 {object} map[string]interface{} "user and token"
+// @Success 200 {object} AuthResponse
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /api/v1/auth/{provider}/callback [get]
@@ -111,7 +111,7 @@ func CallbackHandler(userRepo *users.Repository) gin.HandlerFunc {
 // @Description Get authenticated user's profile
 // @Tags auth
 // @Produce json
-// @Success 200 {object} map[string]interface{} "user object"
+// @Success 200 {object} UserResponse
 // @Failure 401 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Router /api/v1/auth/me [get]
@@ -141,8 +141,8 @@ func GetCurrentUserHandler(userRepo *users.Repository) gin.HandlerFunc {
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Param request body object{name=string,avatar_url=string} true "Profile update"
-// @Success 200 {object} map[string]interface{} "updated user"
+// @Param request body UpdateProfileRequest true "Profile update"
+// @Success 200 {object} UserResponse
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -156,10 +156,7 @@ func UpdateProfileHandler(userRepo *users.Repository) gin.HandlerFunc {
 			return
 		}
 
-		var req struct {
-			Name      string `json:"name" binding:"required,max=100"`
-			AvatarURL string `json:"avatar_url" binding:"max=500"`
-		}
+		var req UpdateProfileRequest
 
 		if err := c.ShouldBindJSON(&req); err != nil {
 			errors.ValidationError(c, err)
@@ -181,7 +178,7 @@ func UpdateProfileHandler(userRepo *users.Repository) gin.HandlerFunc {
 // @Description Clear authentication session
 // @Tags auth
 // @Produce json
-// @Success 200 {object} map[string]string
+// @Success 200 {object} MessageResponse
 // @Router /api/v1/auth/logout [post]
 func LogoutHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
