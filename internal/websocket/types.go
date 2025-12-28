@@ -122,7 +122,9 @@ type AgentRequestPayload struct {
 		Role    string `json:"role"`
 		Content string `json:"content"`
 	} `json:"conversation_history,omitempty"` // Private, not broadcasted
-	DisplayName string `json:"display_name,omitempty"` // Added by server for broadcasting
+	ProviderAPIKey string `json:"provider_api_key,omitempty"` // Private, not broadcasted
+	Provider       string `json:"provider,omitempty"`         // Private, not broadcasted
+	DisplayName    string `json:"display_name,omitempty"`     // Added by server for broadcasting
 }
 
 // AgentResponsePayload contains the agent's code generation response

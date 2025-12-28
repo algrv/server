@@ -8,6 +8,7 @@ import (
 	"github.com/algorave/server/algorave/strudels"
 	"github.com/algorave/server/internal/agent"
 	"github.com/algorave/server/internal/errors"
+	"github.com/algorave/server/internal/llm"
 	"github.com/algorave/server/internal/logger"
 	"github.com/gin-gonic/gin"
 )
@@ -35,6 +36,23 @@ func Handler(agentClient *agent.Agent, strudelRepo StrudelGetter, sessionMgr *an
 		if err := c.ShouldBindJSON(&req); err != nil {
 			errors.ValidationError(c, err)
 			return
+		}
+
+		var customGenerator llm.TextGenerator
+
+		if req.ProviderAPIKey != "" {
+			if req.Provider == "" {
+				errors.BadRequest(c, "provider is required when using generator_api_key", nil)
+				return
+			}
+
+			var err error
+
+			customGenerator, err = createBYOKGenerator(req.Provider, req.ProviderAPIKey)
+			if err != nil {
+				errors.BadRequest(c, err.Error(), err)
+				return
+			}
 		}
 
 		userID, isAuthenticated := c.Get("user_id")
@@ -97,6 +115,7 @@ func Handler(agentClient *agent.Agent, strudelRepo StrudelGetter, sessionMgr *an
 			UserQuery:           req.UserQuery,
 			EditorState:         editorState,
 			ConversationHistory: conversationHistory,
+			CustomGenerator:     customGenerator,
 		})
 
 		if err != nil {
@@ -128,5 +147,24 @@ func Handler(agentClient *agent.Agent, strudelRepo StrudelGetter, sessionMgr *an
 			ClarifyingQuestions: resp.ClarifyingQuestions,
 			SessionID:           sessionID,
 		})
+	}
+}
+
+func createBYOKGenerator(provider, apiKey string) (llm.TextGenerator, error) {
+	switch provider {
+	case "openai":
+		return llm.NewOpenAIGenerator(llm.OpenAIConfig{
+			APIKey: apiKey,
+			Model:  "gpt-4o",
+		}), nil
+	case "claude":
+		return llm.NewAnthropicTransformer(llm.AnthropicConfig{
+			APIKey:      apiKey,
+			Model:       "claude-sonnet-4-20250514",
+			MaxTokens:   4096,
+			Temperature: 0.7,
+		}), nil
+	default:
+		return nil, errors.ErrUnsupportedProvider(provider)
 	}
 }

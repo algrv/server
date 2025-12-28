@@ -1,6 +1,7 @@
 package errors
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -8,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// RECIPE FOR ERROR HANDLING:
+// @AGENTS & @CONTRIBUTORS: RECIPE FOR ERROR HANDLING:
 //
 // for HTTP REST handlers:
 //   - use errors.InternalError(), errors.BadRequest(), etc. for critical errors
@@ -232,4 +233,9 @@ func ValidatePathUUID(c *gin.Context, paramName string) (string, bool) {
 	}
 
 	return id, true
+}
+
+// returns an error for unsupported provider
+func ErrUnsupportedProvider(provider string) error {
+	return fmt.Errorf("unsupported provider: %s (supported: openai, claude)", provider)
 }

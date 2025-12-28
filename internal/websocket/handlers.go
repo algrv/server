@@ -6,6 +6,8 @@ import (
 
 	"github.com/algorave/server/algorave/sessions"
 	"github.com/algorave/server/internal/agent"
+	"github.com/algorave/server/internal/errors"
+	"github.com/algorave/server/internal/llm"
 	"github.com/algorave/server/internal/logger"
 )
 
@@ -116,16 +118,34 @@ func GenerateHandler(agentClient *agent.Agent, sessionRepo sessions.Repository) 
 			})
 		}
 
+		// create custom generator if BYOK
+		var customGenerator llm.TextGenerator
+		if payload.ProviderAPIKey != "" {
+			if payload.Provider == "" {
+				client.SendError("bad_request", "provider is required when using provider_api_key", "")
+				return ErrInvalidMessage
+			}
+
+			var err error
+			customGenerator, err = createBYOKGenerator(payload.Provider, payload.ProviderAPIKey)
+			if err != nil {
+				client.SendError("bad_request", err.Error(), "")
+				return err
+			}
+		}
+
 		// create agent request
 		agentReq := agent.GenerateRequest{
 			UserQuery:           payload.UserQuery,
 			EditorState:         payload.EditorState,
 			ConversationHistory: conversationHistory,
+			CustomGenerator:     customGenerator,
 		}
 
 		// generate code using agent
 		ctx := context.Background()
 		response, err := agentClient.Generate(ctx, agentReq)
+
 		if err != nil {
 			logger.ErrorErr(err, "failed to generate code",
 				"client_id", client.ID,
@@ -289,5 +309,24 @@ func ChatHandler(sessionRepo sessions.Repository) MessageHandler {
 		)
 
 		return nil
+	}
+}
+
+func createBYOKGenerator(provider, apiKey string) (llm.TextGenerator, error) {
+	switch provider {
+	case "openai":
+		return llm.NewOpenAIGenerator(llm.OpenAIConfig{
+			APIKey: apiKey,
+			Model:  "gpt-4o",
+		}), nil
+	case "claude":
+		return llm.NewAnthropicTransformer(llm.AnthropicConfig{
+			APIKey:      apiKey,
+			Model:       "claude-sonnet-4-20250514",
+			MaxTokens:   4096,
+			Temperature: 0.7,
+		}), nil
+	default:
+		return nil, errors.ErrUnsupportedProvider(provider)
 	}
 }

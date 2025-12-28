@@ -15,7 +15,13 @@ func New(ret Retriever, llmClient llm.LLM) *Agent {
 }
 
 func (a *Agent) Generate(ctx context.Context, req GenerateRequest) (*GenerateResponse, error) {
-	// analyze query for actionability
+	textGenerator := llm.TextGenerator(a.generator)
+
+	if req.CustomGenerator != nil {
+		textGenerator = req.CustomGenerator
+	}
+
+	// analyze query for actionability (always use platform's transformer)
 	analysis, err := a.generator.AnalyzeQuery(ctx, req.UserQuery)
 	if err != nil {
 		return nil, fmt.Errorf("failed to analyze query: %w", err)
@@ -28,7 +34,7 @@ func (a *Agent) Generate(ctx context.Context, req GenerateRequest) (*GenerateRes
 			ClarifyingQuestions: analysis.ClarifyingQuestions,
 			DocsRetrieved:       0,
 			ExamplesRetrieved:   0,
-			Model:               a.generator.Model(),
+			Model:               textGenerator.Model(),
 		}, nil
 	}
 
@@ -51,8 +57,8 @@ func (a *Agent) Generate(ctx context.Context, req GenerateRequest) (*GenerateRes
 		Conversations: req.ConversationHistory,
 	})
 
-	// call LLM for code generation
-	response, err := a.callGenerator(ctx, systemPrompt, req.UserQuery, req.ConversationHistory)
+	// call LLM for code generation (uses custom generator if BYOK)
+	response, err := a.callGeneratorWithClient(ctx, textGenerator, systemPrompt, req.UserQuery, req.ConversationHistory)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate code: %w", err)
 	}
@@ -61,12 +67,12 @@ func (a *Agent) Generate(ctx context.Context, req GenerateRequest) (*GenerateRes
 		Code:              response,
 		DocsRetrieved:     len(docs),
 		ExamplesRetrieved: len(examples),
-		Model:             a.generator.Model(),
+		Model:             textGenerator.Model(),
 		IsActionable:      true,
 	}, nil
 }
 
-func (a *Agent) callGenerator(ctx context.Context, systemPrompt, userQuery string, history []Message) (string, error) {
+func (a *Agent) callGeneratorWithClient(ctx context.Context, generator llm.TextGenerator, systemPrompt, userQuery string, history []Message) (string, error) {
 	llmMessages := make([]llm.Message, 0, len(history)+1)
 
 	for _, msg := range history {
@@ -81,7 +87,7 @@ func (a *Agent) callGenerator(ctx context.Context, systemPrompt, userQuery strin
 		Content: userQuery,
 	})
 
-	response, err := a.generator.GenerateText(ctx, llm.TextGenerationRequest{
+	response, err := generator.GenerateText(ctx, llm.TextGenerationRequest{
 		SystemPrompt: systemPrompt,
 		Messages:     llmMessages,
 		MaxTokens:    4096,

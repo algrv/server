@@ -24,6 +24,7 @@ type GenerateRequest struct {
 	UserQuery           string
 	EditorState         string
 	ConversationHistory []Message
+	CustomGenerator     llm.TextGenerator // optional BYOK generator
 }
 
 // contains the generated code and metadata

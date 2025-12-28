@@ -1114,7 +1114,7 @@ func TestAnnotateCode_ModifyRequest(t *testing.T) {
 func TestGenerateWithAnnotation(t *testing.T) {
     agent := NewAgent(config)
 
-    // Test MODIFY request
+    // test MODIFY request
     resp, err := agent.Generate(ctx, GenerateRequest{
         UserQuery:   "make the kick quieter",
         EditorState: "$: sound(\"bd*4\")\n$: sound(\"hh*8\")",

@@ -4,10 +4,12 @@ import "github.com/algorave/server/internal/agent"
 
 type Request struct {
 	UserQuery           string          `json:"user_query" binding:"required,max=5000"`
-	EditorState         string          `json:"editor_state" binding:"max=1048576"` // 1MB limit
+	EditorState         string          `json:"editor_state" binding:"max=1048576"`          // 1MB limit
 	ConversationHistory []agent.Message `json:"conversation_history" binding:"max=100,dive"` // max 100 messages
 	StrudelID           string          `json:"strudel_id,omitempty"`
 	SessionID           string          `json:"session_id,omitempty"`
+	ProviderAPIKey      string          `json:"provider_api_key,omitempty"`
+	Provider            string          `json:"provider,omitempty"` // "openai" or "claude"
 }
 
 type Response struct {
