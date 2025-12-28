@@ -51,6 +51,12 @@ func WebSocketHandler(hub *ws.Hub, sessionRepo sessions.Repository) gin.HandlerF
 			return
 		}
 
+		// validate session_id is a valid UUID
+		if !errors.IsValidUUID(params.SessionID) {
+			errors.BadRequest(c, "invalid session_id format", nil)
+			return
+		}
+
 		// verify session exists and is active
 		ctx := c.Request.Context()
 		session, err := sessionRepo.GetSession(ctx, params.SessionID)

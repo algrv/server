@@ -10,6 +10,23 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Error Handling Guidelines:
+//
+// For HTTP REST handlers:
+//   - Use errors.InternalError(), errors.BadRequest(), etc. for critical errors
+//     These functions handle both logging and HTTP response automatically
+//   - Use logger.ErrorErr() only for non-critical errors where processing continues
+//   - Never call both logger.ErrorErr() and errors.InternalError() for the same error
+//
+// For WebSocket handlers:
+//   - Use logger.ErrorErr() + client.SendError() + return err
+//   - This provides both server-side logging and client-side error notification
+//
+// For services/repositories/internal packages:
+//   - Return wrapped errors with context using fmt.Errorf("context: %w", err)
+//   - Let the caller (handler) decide how to log and respond
+//   - Do not log errors in non-handler code (avoid double logging)
+
 // UUID format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx (36 characters)
 var uuidRegex = regexp.MustCompile(`^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`)
 
