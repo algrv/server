@@ -35,41 +35,47 @@ This file contains detailed implementation decisions and technical context for t
 ## Project Structure
 ```
 algorave/
-├── cmd/
-│   ├── ingester/
-│   │   ├── main.go          # Ingestion CLI entry point
-│   │   ├── docs.go          # Ingest technical docs
-│   │   ├── concepts.go      # Ingest concept docs (MDX) ← NEW!
-│   │   └── examples.go      # Ingest example Strudels
-│   └── server/              # (Build later)
-│       └── main.go          # API server entry point
-├── internal/
-│   ├── chunker/
-│   │   └── chunker.go       # Markdown chunking logic
-│   ├── embedder/
-│   │   └── openai.go        # OpenAI embedding client
-│   ├── storage/
-│   │   └── supabase.go      # Supabase pgvector operations
-│   ├── strudel/             # ← NEW! Shared Strudel code analysis
-│   │   ├── parser.go        # Core parsing utilities (extract sounds, notes, functions)
-│   │   ├── keywords.go      # Keyword extraction (for retriever)
-│   │   └── analyzer.go      # Semantic analysis (for examples tagging)
-│   ├── cheatsheet/          # (Phase 1.5)
-│   │   └── cheatsheet.go    # Quick reference constants
-│   ├── retriever/           # (For server phase)
-│   │   └── retriever.go     # Vector search + query transformation
-│   └── agent/               # (For server phase)
-│       └── agent.go         # Code generation orchestration
+├── algorave/                # Domain models & business logic
+│   ├── anonsessions/        # Anonymous session management
+│   ├── sessions/            # Collaborative sessions (with repository pattern)
+│   ├── strudels/            # User-saved Strudels
+│   └── users/               # User models
+├── api/                     # HTTP/WebSocket layer
+│   ├── rest/                # REST API handlers
+│   │   ├── auth/            # Authentication endpoints
+│   │   ├── collaboration/   # Session collaboration endpoints
+│   │   ├── generate/        # Code generation endpoints
+│   │   ├── health/          # Health check
+│   │   ├── sessions/        # Session management
+│   │   └── strudels/        # Strudel CRUD
+│   └── websocket/           # WebSocket handlers for real-time collaboration
+├── cmd/                     # Executable entry points
+│   ├── ingester/            # Documentation ingestion CLI
+│   ├── server/              # API server (Gin router + middleware)
+│   └── tui/                 # Terminal UI for local development
 ├── docs/
-│   ├── project-docs/        # Technical documentation (30 pages)
-│   └── concepts/            # Teaching concepts (MDX files) ← NEW!
-│       ├── music-theory.mdx
-│       ├── common-patterns.mdx
-│       ├── genres.mdx
-│       ├── sound-selection.mdx
-│       ├── composition-techniques.mdx
-│       └── mixing-basics.mdx
-├── agent.md                 # This file
+│   ├── concepts/            # Teaching concepts (MDX files)
+│   ├── openapi/             # Generated OpenAPI documentation
+│   ├── strudel/             # Strudel documentation (for RAG ingestion)
+│   └── system-specs/        # Architecture & design docs
+├── internal/                # Internal packages
+│   ├── agent/               # Code generation orchestration
+│   ├── auth/                # JWT authentication & middleware
+│   ├── chunker/             # Markdown chunking for RAG
+│   ├── config/              # Environment configuration
+│   ├── errors/              # Standardized error handling
+│   ├── examples/            # Example Strudel storage & retrieval
+│   ├── llm/                 # LLM client abstraction (Anthropic, OpenAI)
+│   ├── logger/              # Structured logging
+│   ├── retriever/           # Vector search & query transformation
+│   ├── storage/             # Supabase pgvector operations
+│   ├── strudel/             # Strudel code analysis (parser, keywords, analyzer)
+│   ├── tui/                 # TUI components
+│   └── websocket/           # WebSocket hub & client management
+├── resources/               # Static resources (cheatsheet, etc.)
+├── supabase/
+│   └── migrations/          # Database schema migrations
+├── AGENTS.md                # This file
 ├── .env                     # Environment variables (gitignored)
 ├── .env.example             # Template
 └── go.mod

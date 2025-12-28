@@ -119,7 +119,7 @@ You can also trigger it manually via GitHub UI → Actions → "Sync & Ingest St
 
 ### Development
 
-See `agent.md` for full architectural details.
+See `AGENTS.md` for full architectural details.
 
 For detailed coding standards, see `.clinerules`.
 
@@ -131,4 +131,4 @@ User Query → Query Transformation → Vector Search → Retrieved Docs
                                     Code Generation ← Docs + History
 ```
 
-See `agent.md` for complete architecture documentation.
+See `AGENTS.md` for complete architecture documentation.
