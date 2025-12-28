@@ -35,7 +35,7 @@ func init() {
 // @Tags auth
 // @Param provider path string true "OAuth provider" Enums(google, github, apple)
 // @Success 302 {string} string "Redirect to OAuth provider"
-// @Failure 400 {object} map[string]string
+// @Failure 400 {object} errors.ErrorResponse
 // @Router /api/v1/auth/{provider} [get]
 func BeginAuthHandler(userRepo *users.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -62,8 +62,8 @@ func BeginAuthHandler(userRepo *users.Repository) gin.HandlerFunc {
 // @Produce json
 // @Param provider path string true "OAuth provider" Enums(google, github, apple)
 // @Success 200 {object} AuthResponse
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
 // @Router /api/v1/auth/{provider}/callback [get]
 func CallbackHandler(userRepo *users.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -112,8 +112,8 @@ func CallbackHandler(userRepo *users.Repository) gin.HandlerFunc {
 // @Tags auth
 // @Produce json
 // @Success 200 {object} UserResponse
-// @Failure 401 {object} map[string]string
-// @Failure 404 {object} map[string]string
+// @Failure 401 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
 // @Router /api/v1/auth/me [get]
 // @Security BearerAuth
 func GetCurrentUserHandler(userRepo *users.Repository) gin.HandlerFunc {
@@ -143,9 +143,9 @@ func GetCurrentUserHandler(userRepo *users.Repository) gin.HandlerFunc {
 // @Produce json
 // @Param request body UpdateProfileRequest true "Profile update"
 // @Success 200 {object} UserResponse
-// @Failure 400 {object} map[string]string
-// @Failure 401 {object} map[string]string
-// @Failure 500 {object} map[string]string
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 401 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
 // @Router /api/v1/auth/me [put]
 // @Security BearerAuth
 func UpdateProfileHandler(userRepo *users.Repository) gin.HandlerFunc {

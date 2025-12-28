@@ -18,9 +18,9 @@ import (
 // @Produce json
 // @Param request body strudels.CreateStrudelRequest true "Strudel data"
 // @Success 201 {object} strudels.Strudel
-// @Failure 400 {object} map[string]string
-// @Failure 401 {object} map[string]string
-// @Failure 500 {object} map[string]string
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 401 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
 // @Router /api/v1/strudels [post]
 // @Security BearerAuth
 func CreateStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
@@ -53,8 +53,8 @@ func CreateStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 // @Tags strudels
 // @Produce json
 // @Success 200 {object} StrudelsListResponse
-// @Failure 401 {object} map[string]string
-// @Failure 500 {object} map[string]string
+// @Failure 401 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
 // @Router /api/v1/strudels [get]
 // @Security BearerAuth
 func ListStrudelsHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
@@ -82,9 +82,9 @@ func ListStrudelsHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 // @Produce json
 // @Param id path string true "Strudel ID (UUID)"
 // @Success 200 {object} strudels.Strudel
-// @Failure 400 {object} map[string]string
-// @Failure 401 {object} map[string]string
-// @Failure 404 {object} map[string]string
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 401 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
 // @Router /api/v1/strudels/{id} [get]
 // @Security BearerAuth
 func GetStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
@@ -119,9 +119,9 @@ func GetStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 // @Param id path string true "Strudel ID (UUID)"
 // @Param request body strudels.UpdateStrudelRequest true "Update data"
 // @Success 200 {object} strudels.Strudel
-// @Failure 400 {object} map[string]string
-// @Failure 401 {object} map[string]string
-// @Failure 404 {object} map[string]string
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 401 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
 // @Router /api/v1/strudels/{id} [put]
 // @Security BearerAuth
 func UpdateStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
@@ -161,9 +161,9 @@ func UpdateStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 // @Produce json
 // @Param id path string true "Strudel ID (UUID)"
 // @Success 200 {object} MessageResponse
-// @Failure 400 {object} map[string]string
-// @Failure 401 {object} map[string]string
-// @Failure 404 {object} map[string]string
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 401 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
 // @Router /api/v1/strudels/{id} [delete]
 // @Security BearerAuth
 func DeleteStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
@@ -196,7 +196,7 @@ func DeleteStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 // @Produce json
 // @Param limit query int false "Limit results (max 100)" default(50)
 // @Success 200 {object} StrudelsListResponse
-// @Failure 500 {object} map[string]string
+// @Failure 500 {object} errors.ErrorResponse
 // @Router /api/v1/public/strudels [get]
 func ListPublicStrudelsHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {

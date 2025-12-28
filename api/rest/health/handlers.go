@@ -26,10 +26,10 @@ func Handler(c *gin.Context) {
 // @Description Simple ping endpoint
 // @Tags health
 // @Produce json
-// @Success 200 {object} map[string]string
+// @Success 200 {object} PingResponse
 // @Router /api/v1/ping [get]
 func PingHandler(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "pong",
+	c.JSON(http.StatusOK, PingResponse{
+		Message: "pong",
 	})
 }

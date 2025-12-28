@@ -20,9 +20,9 @@ import (
 // @Produce json
 // @Param request body CreateSessionRequest true "Session data"
 // @Success 201 {object} CreateSessionResponse
-// @Failure 400 {object} map[string]string
-// @Failure 401 {object} map[string]string
-// @Failure 500 {object} map[string]string
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 401 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
 // @Router /api/v1/sessions [post]
 // @Security BearerAuth
 func CreateSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
@@ -70,8 +70,8 @@ func CreateSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 // @Produce json
 // @Param id path string true "Session ID (UUID)"
 // @Success 200 {object} SessionResponse
-// @Failure 400 {object} map[string]string
-// @Failure 404 {object} map[string]string
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
 // @Router /api/v1/sessions/{id} [get]
 func GetSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -130,8 +130,8 @@ func GetSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 // @Produce json
 // @Param active_only query boolean false "Only return active sessions" default(false)
 // @Success 200 {object} SessionsListResponse
-// @Failure 401 {object} map[string]string
-// @Failure 500 {object} map[string]string
+// @Failure 401 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
 // @Router /api/v1/sessions [get]
 // @Security BearerAuth
 func ListUserSessionsHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
@@ -180,11 +180,11 @@ func ListUserSessionsHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 // @Param id path string true "Session ID (UUID)"
 // @Param request body UpdateSessionCodeRequest true "Code update"
 // @Success 200 {object} UpdateSessionCodeResponse
-// @Failure 400 {object} map[string]string
-// @Failure 401 {object} map[string]string
-// @Failure 403 {object} map[string]string
-// @Failure 404 {object} map[string]string
-// @Failure 500 {object} map[string]string
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 401 {object} errors.ErrorResponse
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
 // @Router /api/v1/sessions/{id} [put]
 // @Security BearerAuth
 func UpdateSessionCodeHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
@@ -240,11 +240,11 @@ func UpdateSessionCodeHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 // @Produce json
 // @Param id path string true "Session ID (UUID)"
 // @Success 200 {object} MessageResponse
-// @Failure 400 {object} map[string]string
-// @Failure 401 {object} map[string]string
-// @Failure 403 {object} map[string]string
-// @Failure 404 {object} map[string]string
-// @Failure 500 {object} map[string]string
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 401 {object} errors.ErrorResponse
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
 // @Router /api/v1/sessions/{id} [delete]
 // @Security BearerAuth
 func EndSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
@@ -290,11 +290,11 @@ func EndSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 // @Param id path string true "Session ID (UUID)"
 // @Param request body CreateInviteTokenRequest true "Token settings"
 // @Success 201 {object} InviteTokenResponse
-// @Failure 400 {object} map[string]string
-// @Failure 401 {object} map[string]string
-// @Failure 403 {object} map[string]string
-// @Failure 404 {object} map[string]string
-// @Failure 500 {object} map[string]string
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 401 {object} errors.ErrorResponse
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
 // @Router /api/v1/sessions/{id}/invite [post]
 // @Security BearerAuth
 func CreateInviteTokenHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
@@ -358,8 +358,8 @@ func CreateInviteTokenHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 // @Produce json
 // @Param id path string true "Session ID (UUID)"
 // @Success 200 {object} ParticipantsListResponse
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
 // @Router /api/v1/sessions/{id}/participants [get]
 func ListParticipantsHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -401,9 +401,9 @@ func ListParticipantsHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 // @Produce json
 // @Param request body JoinSessionRequest true "Join request with invite token"
 // @Success 200 {object} JoinSessionResponse
-// @Failure 400 {object} map[string]string
-// @Failure 403 {object} map[string]string "Invalid or expired invite"
-// @Failure 500 {object} map[string]string
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 403 {object} errors.ErrorResponse "Invalid or expired invite"
+// @Failure 500 {object} errors.ErrorResponse
 // @Router /api/v1/sessions/join [post]
 // @Security BearerAuth
 func JoinSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
@@ -467,10 +467,10 @@ func JoinSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 // @Produce json
 // @Param id path string true "Session ID (UUID)"
 // @Success 200 {object} MessageResponse
-// @Failure 400 {object} map[string]string
-// @Failure 401 {object} map[string]string
-// @Failure 404 {object} map[string]string
-// @Failure 500 {object} map[string]string
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 401 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
 // @Router /api/v1/sessions/{id}/leave [post]
 // @Security BearerAuth
 func LeaveSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
@@ -509,8 +509,8 @@ func LeaveSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 // @Param id path string true "Session ID (UUID)"
 // @Param limit query int false "Max messages to return (max 1000)" default(100)
 // @Success 200 {object} MessagesResponse
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
 // @Router /api/v1/sessions/{id}/messages [get]
 func GetSessionMessagesHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -548,11 +548,11 @@ func GetSessionMessagesHandler(sessionRepo sessions.Repository) gin.HandlerFunc 
 // @Param id path string true "Session ID (UUID)"
 // @Param participant_id path string true "Participant ID (UUID)"
 // @Success 200 {object} MessageResponse
-// @Failure 400 {object} map[string]string
-// @Failure 401 {object} map[string]string
-// @Failure 403 {object} map[string]string
-// @Failure 404 {object} map[string]string
-// @Failure 500 {object} map[string]string
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 401 {object} errors.ErrorResponse
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
 // @Router /api/v1/sessions/{id}/participants/{participant_id} [delete]
 // @Security BearerAuth
 func RemoveParticipantHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
@@ -672,11 +672,11 @@ func UpdateParticipantRoleHandler(sessionRepo sessions.Repository) gin.HandlerFu
 // @Produce json
 // @Param id path string true "Session ID (UUID)"
 // @Success 200 {object} InviteTokensListResponse
-// @Failure 400 {object} map[string]string
-// @Failure 401 {object} map[string]string
-// @Failure 403 {object} map[string]string
-// @Failure 404 {object} map[string]string
-// @Failure 500 {object} map[string]string
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 401 {object} errors.ErrorResponse
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
 // @Router /api/v1/sessions/{id}/invite [get]
 // @Security BearerAuth
 func ListInviteTokensHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
@@ -735,11 +735,11 @@ func ListInviteTokensHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 // @Param id path string true "Session ID (UUID)"
 // @Param token_id path string true "Token ID (UUID)"
 // @Success 200 {object} MessageResponse
-// @Failure 400 {object} map[string]string
-// @Failure 401 {object} map[string]string
-// @Failure 403 {object} map[string]string
-// @Failure 404 {object} map[string]string
-// @Failure 500 {object} map[string]string
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 401 {object} errors.ErrorResponse
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
 // @Router /api/v1/sessions/{id}/invite/{token_id} [delete]
 // @Security BearerAuth
 func RevokeInviteTokenHandler(sessionRepo sessions.Repository) gin.HandlerFunc {

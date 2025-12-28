@@ -24,8 +24,8 @@ type StrudelGetter interface {
 // @Produce json
 // @Param request body Request true "Generation request"
 // @Success 200 {object} Response
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
 // @Router /api/v1/generate [post]
 // @Security BearerAuth
 func Handler(agentClient *agent.Agent, strudelRepo StrudelGetter, sessionMgr *anonsessions.Manager) gin.HandlerFunc {

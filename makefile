@@ -78,24 +78,24 @@ ci: ## run CI checks locally (lint + unit tests)
 	@echo "running CI checks..."
 	@echo "\n→ checking formatting..."
 	@if [ -n "$$(gofmt -s -l .)" ]; then \
-		echo "❌ Code is not formatted. Run 'make fmt' to fix."; \
+		echo "x: code is not formatted. run 'make fmt' to fix."; \
 		gofmt -s -l .; \
 		exit 1; \
 	fi
-	@echo "✓ Code is formatted"
+	@echo "✓ code is formatted"
 	@echo "\n→ running linter..."
-	@golangci-lint run || (echo "❌ Linting failed" && exit 1)
-	@echo "✓ Linting passed"
+	@golangci-lint run || (echo "x: linting failed" && exit 1)
+	@echo "✓ linting passed"
 	@echo "\n→ running tests..."
 	@go test -v -race -coverprofile=coverage.out ./...
-	@echo "✓ All CI checks passed!"
+	@echo "✓ all CI checks passed!"
 
 .DEFAULT_GOAL := help
 
 db-migrate: ## apply pending migrations
 	@echo "applying migrations to supabase..."
 	supabase db push
-	@echo "✓ Migrations applied"
+	@echo "✓ migrations applied"
 
 docs: ## generate API documentation
 	swag init -g cmd/server/main.go --output ./docs --parseDependency --parseInternal	

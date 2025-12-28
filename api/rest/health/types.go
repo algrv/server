@@ -5,3 +5,7 @@ type Response struct {
 	Service string `json:"service"`
 	Version string `json:"version,omitempty"`
 }
+
+type PingResponse struct {
+	Message string `json:"message"`
+}

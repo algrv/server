@@ -239,6 +239,11 @@ definitions:
       session_id:
         type: string
     type: object
+  api_rest_health.PingResponse:
+    properties:
+      message:
+        type: string
+    type: object
   api_rest_health.Response:
     properties:
       service:
@@ -421,6 +426,18 @@ definitions:
         description: '"user" or "assistant"'
         type: string
     type: object
+  github_com_algorave_server_internal_errors.ErrorResponse:
+    properties:
+      details:
+        description: optional details (sanitized in production)
+        type: string
+      error:
+        description: error code (e.g., "unauthorized", "not_found")
+        type: string
+      message:
+        description: user-friendly message
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -463,9 +480,7 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
       summary: Start OAuth authentication
       tags:
       - auth
@@ -492,15 +507,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
       summary: OAuth callback
       tags:
       - auth
@@ -530,15 +541,11 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get current user
@@ -565,21 +572,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Update user profile
@@ -610,15 +611,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Generate Strudel code
@@ -633,9 +630,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/api_rest_health.PingResponse'
       summary: Ping
       tags:
       - health
@@ -658,9 +653,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
       summary: List public strudels
       tags:
       - strudels
@@ -683,15 +676,11 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: List user's sessions
@@ -719,21 +708,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Create collaboration session
@@ -758,33 +741,23 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: End session
@@ -808,15 +781,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
       summary: Get session details
       tags:
       - sessions
@@ -846,33 +815,23 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Update session code
@@ -897,33 +856,23 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: List invite tokens
@@ -955,33 +904,23 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Create invite token
@@ -1011,33 +950,23 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Revoke invite token
@@ -1062,27 +991,19 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Leave session
@@ -1112,15 +1033,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
       summary: Get session chat messages
       tags:
       - sessions
@@ -1143,15 +1060,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
       summary: List session participants
       tags:
       - sessions
@@ -1179,33 +1092,23 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Remove participant
@@ -1234,21 +1137,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "403":
           description: Invalid or expired invite
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Join session with invite
@@ -1277,27 +1174,19 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Transfer anonymous session
@@ -1316,15 +1205,11 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: List user's strudels
@@ -1351,21 +1236,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Create strudel
@@ -1390,21 +1269,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Delete strudel
@@ -1428,21 +1301,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get strudel by ID
@@ -1474,21 +1341,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Update strudel
@@ -1535,33 +1396,23 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
         "429":
           description: Too Many Requests
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/github_com_algorave_server_internal_errors.ErrorResponse'
       summary: WebSocket connection
       tags:
       - websocket

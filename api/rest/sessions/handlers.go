@@ -18,10 +18,10 @@ import (
 // @Produce json
 // @Param request body TransferSessionRequest true "Transfer request"
 // @Success 201 {object} TransferSessionResponse
-// @Failure 400 {object} map[string]string
-// @Failure 401 {object} map[string]string
-// @Failure 404 {object} map[string]string
-// @Failure 500 {object} map[string]string
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 401 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
 // @Router /api/v1/sessions/transfer [post]
 // @Security BearerAuth
 func TransferSessionHandler(sessionMgr *anonsessions.Manager, strudelRepo *strudels.Repository) gin.HandlerFunc {

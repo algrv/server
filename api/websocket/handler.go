@@ -9,6 +9,7 @@ import (
 
 	"github.com/algorave/server/algorave/sessions"
 	"github.com/algorave/server/internal/auth"
+	_ "github.com/algorave/server/internal/errors" // imported for godoc
 	"github.com/algorave/server/internal/logger"
 	ws "github.com/algorave/server/internal/websocket"
 )
@@ -37,11 +38,11 @@ var upgrader = websocket.Upgrader{
 // @Param invite_token query string false "Session invite token"
 // @Param display_name query string false "Display name for anonymous users"
 // @Success 101 {string} string "Switching Protocols"
-// @Failure 400 {object} map[string]string
-// @Failure 401 {object} map[string]string
-// @Failure 403 {object} map[string]string
-// @Failure 404 {object} map[string]string
-// @Failure 429 {object} map[string]string
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 401 {object} errors.ErrorResponse
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 429 {object} errors.ErrorResponse
 // @Router /api/v1/ws [get]
 func WebSocketHandler(hub *ws.Hub, sessionRepo sessions.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
