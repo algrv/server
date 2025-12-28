@@ -10,6 +10,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// CreateStrudelHandler godoc
+// @Summary Create strudel
+// @Description Save a new Strudel pattern with code, title, and metadata
+// @Tags strudels
+// @Accept json
+// @Produce json
+// @Param request body strudels.CreateStrudelRequest true "Strudel data"
+// @Success 201 {object} strudels.Strudel
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/strudels [post]
+// @Security BearerAuth
 func CreateStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID, exists := auth.GetUserID(c)
@@ -34,6 +47,16 @@ func CreateStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 	}
 }
 
+// ListStrudelsHandler godoc
+// @Summary List user's strudels
+// @Description Get all strudels owned by the authenticated user
+// @Tags strudels
+// @Produce json
+// @Success 200 {object} map[string][]strudels.Strudel
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/strudels [get]
+// @Security BearerAuth
 func ListStrudelsHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID, exists := auth.GetUserID(c)
@@ -52,6 +75,18 @@ func ListStrudelsHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 	}
 }
 
+// GetStrudelHandler godoc
+// @Summary Get strudel by ID
+// @Description Get a specific strudel by ID (must be owner)
+// @Tags strudels
+// @Produce json
+// @Param id path string true "Strudel ID (UUID)"
+// @Success 200 {object} strudels.Strudel
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /api/v1/strudels/{id} [get]
+// @Security BearerAuth
 func GetStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID, exists := auth.GetUserID(c)
@@ -75,6 +110,20 @@ func GetStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 	}
 }
 
+// UpdateStrudelHandler godoc
+// @Summary Update strudel
+// @Description Update a strudel's properties (must be owner)
+// @Tags strudels
+// @Accept json
+// @Produce json
+// @Param id path string true "Strudel ID (UUID)"
+// @Param request body strudels.UpdateStrudelRequest true "Update data"
+// @Success 200 {object} strudels.Strudel
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /api/v1/strudels/{id} [put]
+// @Security BearerAuth
 func UpdateStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID, exists := auth.GetUserID(c)
@@ -105,6 +154,18 @@ func UpdateStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 	}
 }
 
+// DeleteStrudelHandler godoc
+// @Summary Delete strudel
+// @Description Delete a strudel (must be owner)
+// @Tags strudels
+// @Produce json
+// @Param id path string true "Strudel ID (UUID)"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /api/v1/strudels/{id} [delete]
+// @Security BearerAuth
 func DeleteStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID, exists := auth.GetUserID(c)
@@ -128,6 +189,15 @@ func DeleteStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 	}
 }
 
+// ListPublicStrudelsHandler godoc
+// @Summary List public strudels
+// @Description Get publicly shared strudels from all users
+// @Tags strudels
+// @Produce json
+// @Param limit query int false "Limit results (max 100)" default(50)
+// @Success 200 {object} map[string][]strudels.Strudel
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/public/strudels [get]
 func ListPublicStrudelsHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		limit := 50

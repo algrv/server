@@ -6,6 +6,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Handler godoc
+// @Summary Health check
+// @Description Get service health status
+// @Tags health
+// @Produce json
+// @Success 200 {object} Response
+// @Router /health [get]
 func Handler(c *gin.Context) {
 	c.JSON(http.StatusOK, Response{
 		Status:  "healthy",
@@ -14,6 +21,13 @@ func Handler(c *gin.Context) {
 	})
 }
 
+// PingHandler godoc
+// @Summary Ping
+// @Description Simple ping endpoint
+// @Tags health
+// @Produce json
+// @Success 200 {object} map[string]string
+// @Router /api/v1/ping [get]
 func PingHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "pong",

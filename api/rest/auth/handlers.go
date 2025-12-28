@@ -29,6 +29,14 @@ func init() {
 	}
 }
 
+// BeginAuthHandler godoc
+// @Summary Start OAuth authentication
+// @Description Begin OAuth authentication flow with specified provider (google, github, apple)
+// @Tags auth
+// @Param provider path string true "OAuth provider" Enums(google, github, apple)
+// @Success 302 {string} string "Redirect to OAuth provider"
+// @Failure 400 {object} map[string]string
+// @Router /api/v1/auth/{provider} [get]
 func BeginAuthHandler(userRepo *users.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		provider := c.Param("provider")
@@ -47,6 +55,16 @@ func BeginAuthHandler(userRepo *users.Repository) gin.HandlerFunc {
 	}
 }
 
+// CallbackHandler godoc
+// @Summary OAuth callback
+// @Description OAuth provider callback. Returns user data and JWT token
+// @Tags auth
+// @Produce json
+// @Param provider path string true "OAuth provider" Enums(google, github, apple)
+// @Success 200 {object} map[string]interface{} "user and token"
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/auth/{provider}/callback [get]
 func CallbackHandler(userRepo *users.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		provider := c.Param("provider")
@@ -88,6 +106,16 @@ func CallbackHandler(userRepo *users.Repository) gin.HandlerFunc {
 	}
 }
 
+// GetCurrentUserHandler godoc
+// @Summary Get current user
+// @Description Get authenticated user's profile
+// @Tags auth
+// @Produce json
+// @Success 200 {object} map[string]interface{} "user object"
+// @Failure 401 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /api/v1/auth/me [get]
+// @Security BearerAuth
 func GetCurrentUserHandler(userRepo *users.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID, exists := auth.GetUserID(c)
@@ -107,6 +135,19 @@ func GetCurrentUserHandler(userRepo *users.Repository) gin.HandlerFunc {
 	}
 }
 
+// UpdateProfileHandler godoc
+// @Summary Update user profile
+// @Description Update authenticated user's name and avatar
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body object{name=string,avatar_url=string} true "Profile update"
+// @Success 200 {object} map[string]interface{} "updated user"
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/auth/me [put]
+// @Security BearerAuth
 func UpdateProfileHandler(userRepo *users.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID, exists := auth.GetUserID(c)
@@ -135,6 +176,13 @@ func UpdateProfileHandler(userRepo *users.Repository) gin.HandlerFunc {
 	}
 }
 
+// LogoutHandler godoc
+// @Summary Logout
+// @Description Clear authentication session
+// @Tags auth
+// @Produce json
+// @Success 200 {object} map[string]string
+// @Router /api/v1/auth/logout [post]
 func LogoutHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		gothic.Logout(c.Writer, c.Request)

@@ -10,7 +10,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// transfers an anonymous session to an authenticated user's account
+// TransferSessionHandler godoc
+// @Summary Transfer anonymous session
+// @Description Convert an anonymous session to a saved strudel in authenticated user's account
+// @Tags sessions
+// @Accept json
+// @Produce json
+// @Param request body TransferSessionRequest true "Transfer request"
+// @Success 201 {object} map[string]interface{} "message, strudel, strudel_id"
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/sessions/transfer [post]
+// @Security BearerAuth
 func TransferSessionHandler(sessionMgr *anonsessions.Manager, strudelRepo *strudels.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID, exists := auth.GetUserID(c)

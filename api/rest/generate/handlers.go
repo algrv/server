@@ -16,6 +16,18 @@ type StrudelGetter interface {
 	Get(ctx context.Context, strudelID, userID string) (*strudels.Strudel, error)
 }
 
+// Handler godoc
+// @Summary Generate Strudel code
+// @Description Generate Strudel code from natural language using AI. Supports both authenticated and anonymous users. For authenticated users, can load context from saved strudels. For anonymous users, manages conversation state via sessions.
+// @Tags generation
+// @Accept json
+// @Produce json
+// @Param request body Request true "Generation request"
+// @Success 200 {object} Response
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/generate [post]
+// @Security BearerAuth
 func Handler(agentClient *agent.Agent, strudelRepo StrudelGetter, sessionMgr *anonsessions.Manager) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req Request

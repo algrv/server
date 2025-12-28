@@ -12,6 +12,19 @@ import (
 	"github.com/algorave/server/internal/logger"
 )
 
+// CreateSessionHandler godoc
+// @Summary Create collaboration session
+// @Description Create a new collaborative coding session (authenticated users only)
+// @Tags sessions
+// @Accept json
+// @Produce json
+// @Param request body CreateSessionRequest true "Session data"
+// @Success 201 {object} CreateSessionResponse
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/sessions [post]
+// @Security BearerAuth
 func CreateSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID, exists := auth.GetUserID(c)
@@ -50,7 +63,16 @@ func CreateSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 	}
 }
 
-// retrieves a session by ID
+// GetSessionHandler godoc
+// @Summary Get session details
+// @Description Get session information including participants
+// @Tags sessions
+// @Produce json
+// @Param id path string true "Session ID (UUID)"
+// @Success 200 {object} SessionResponse
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /api/v1/sessions/{id} [get]
 func GetSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		sessionID, ok := errors.ValidatePathUUID(c, "id")
@@ -101,7 +123,17 @@ func GetSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 	}
 }
 
-// lists all sessions for the currently authenticated user
+// ListUserSessionsHandler godoc
+// @Summary List user's sessions
+// @Description Get all sessions where user is host or participant
+// @Tags sessions
+// @Produce json
+// @Param active_only query boolean false "Only return active sessions" default(false)
+// @Success 200 {object} map[string][]SessionResponse
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/sessions [get]
+// @Security BearerAuth
 func ListUserSessionsHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID, exists := auth.GetUserID(c)
@@ -139,7 +171,22 @@ func ListUserSessionsHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 	}
 }
 
-// updates the strudel code in a session
+// UpdateSessionCodeHandler godoc
+// @Summary Update session code
+// @Description Update the code in a session (host or co-authors only)
+// @Tags sessions
+// @Accept json
+// @Produce json
+// @Param id path string true "Session ID (UUID)"
+// @Param request body UpdateSessionCodeRequest true "Code update"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/sessions/{id} [put]
+// @Security BearerAuth
 func UpdateSessionCodeHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		sessionID, ok := errors.ValidatePathUUID(c, "id")
@@ -183,6 +230,20 @@ func UpdateSessionCodeHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 	}
 }
 
+// EndSessionHandler godoc
+// @Summary End session
+// @Description End a collaborative session (host only)
+// @Tags sessions
+// @Produce json
+// @Param id path string true "Session ID (UUID)"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/sessions/{id} [delete]
+// @Security BearerAuth
 func EndSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		sessionID, ok := errors.ValidatePathUUID(c, "id")
@@ -217,7 +278,22 @@ func EndSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 	}
 }
 
-// creates an invite token for a session
+// CreateInviteTokenHandler godoc
+// @Summary Create invite token
+// @Description Generate an invite link for joining the session (host only)
+// @Tags sessions
+// @Accept json
+// @Produce json
+// @Param id path string true "Session ID (UUID)"
+// @Param request body CreateInviteTokenRequest true "Token settings"
+// @Success 201 {object} InviteTokenResponse
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/sessions/{id}/invite [post]
+// @Security BearerAuth
 func CreateInviteTokenHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		sessionID, ok := errors.ValidatePathUUID(c, "id")
@@ -272,6 +348,16 @@ func CreateInviteTokenHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 	}
 }
 
+// ListParticipantsHandler godoc
+// @Summary List session participants
+// @Description Get all participants in a session (authenticated and anonymous)
+// @Tags sessions
+// @Produce json
+// @Param id path string true "Session ID (UUID)"
+// @Success 200 {object} map[string][]ParticipantResponse
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/sessions/{id}/participants [get]
 func ListParticipantsHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		sessionID, ok := errors.ValidatePathUUID(c, "id")
@@ -304,6 +390,19 @@ func ListParticipantsHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 	}
 }
 
+// JoinSessionHandler godoc
+// @Summary Join session with invite
+// @Description Join a collaborative session using an invite token (authenticated or anonymous)
+// @Tags sessions
+// @Accept json
+// @Produce json
+// @Param request body JoinSessionRequest true "Join request with invite token"
+// @Success 200 {object} JoinSessionResponse
+// @Failure 400 {object} map[string]string
+// @Failure 403 {object} map[string]string "Invalid or expired invite"
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/sessions/join [post]
+// @Security BearerAuth
 func JoinSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req JoinSessionRequest
@@ -358,6 +457,19 @@ func JoinSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 	}
 }
 
+// LeaveSessionHandler godoc
+// @Summary Leave session
+// @Description Leave a collaborative session
+// @Tags sessions
+// @Produce json
+// @Param id path string true "Session ID (UUID)"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/sessions/{id}/leave [post]
+// @Security BearerAuth
 func LeaveSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		sessionID, ok := errors.ValidatePathUUID(c, "id")
@@ -386,6 +498,17 @@ func LeaveSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 	}
 }
 
+// GetSessionMessagesHandler godoc
+// @Summary Get session chat messages
+// @Description Retrieve chat messages from a session
+// @Tags sessions
+// @Produce json
+// @Param id path string true "Session ID (UUID)"
+// @Param limit query int false "Max messages to return (max 1000)" default(100)
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/sessions/{id}/messages [get]
 func GetSessionMessagesHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		sessionID, ok := errors.ValidatePathUUID(c, "id")
@@ -414,6 +537,21 @@ func GetSessionMessagesHandler(sessionRepo sessions.Repository) gin.HandlerFunc 
 	}
 }
 
+// RemoveParticipantHandler godoc
+// @Summary Remove participant
+// @Description Remove a participant from the session (host only)
+// @Tags sessions
+// @Produce json
+// @Param id path string true "Session ID (UUID)"
+// @Param participant_id path string true "Participant ID (UUID)"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/sessions/{id}/participants/{participant_id} [delete]
+// @Security BearerAuth
 func RemoveParticipantHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		sessionID, ok := errors.ValidatePathUUID(c, "id")
@@ -521,6 +659,20 @@ func UpdateParticipantRoleHandler(sessionRepo sessions.Repository) gin.HandlerFu
 	}
 }
 
+// ListInviteTokensHandler godoc
+// @Summary List invite tokens
+// @Description Get all invite tokens for a session (host only)
+// @Tags sessions
+// @Produce json
+// @Param id path string true "Session ID (UUID)"
+// @Success 200 {object} map[string][]InviteTokenResponse
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/sessions/{id}/invite [get]
+// @Security BearerAuth
 func ListInviteTokensHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		sessionID, ok := errors.ValidatePathUUID(c, "id")
@@ -569,6 +721,21 @@ func ListInviteTokensHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 	}
 }
 
+// RevokeInviteTokenHandler godoc
+// @Summary Revoke invite token
+// @Description Revoke an invite token to prevent further use (host only)
+// @Tags sessions
+// @Produce json
+// @Param id path string true "Session ID (UUID)"
+// @Param token_id path string true "Token ID (UUID)"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/v1/sessions/{id}/invite/{token_id} [delete]
+// @Security BearerAuth
 func RevokeInviteTokenHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		sessionID, ok := errors.ValidatePathUUID(c, "id")

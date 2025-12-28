@@ -1,0 +1,1505 @@
+basePath: /
+definitions:
+  api_rest_collaboration.CreateInviteTokenRequest:
+    properties:
+      expires_at:
+        type: string
+      max_uses:
+        type: integer
+      role:
+        enum:
+        - co-author
+        - viewer
+        type: string
+    required:
+    - role
+    type: object
+  api_rest_collaboration.CreateSessionRequest:
+    properties:
+      code:
+        description: 1MB limit
+        maxLength: 1048576
+        type: string
+      title:
+        maxLength: 200
+        type: string
+    required:
+    - title
+    type: object
+  api_rest_collaboration.CreateSessionResponse:
+    properties:
+      code:
+        type: string
+      created_at:
+        type: string
+      host_user_id:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      last_activity:
+        type: string
+      title:
+        type: string
+    type: object
+  api_rest_collaboration.InviteTokenResponse:
+    properties:
+      created_at:
+        type: string
+      expires_at:
+        type: string
+      id:
+        type: string
+      max_uses:
+        type: integer
+      role:
+        type: string
+      session_id:
+        type: string
+      token:
+        type: string
+      uses_count:
+        type: integer
+    type: object
+  api_rest_collaboration.JoinSessionRequest:
+    properties:
+      display_name:
+        maxLength: 100
+        type: string
+      invite_token:
+        type: string
+    required:
+    - invite_token
+    type: object
+  api_rest_collaboration.JoinSessionResponse:
+    properties:
+      display_name:
+        type: string
+      role:
+        type: string
+      session_id:
+        type: string
+    type: object
+  api_rest_collaboration.ParticipantResponse:
+    properties:
+      display_name:
+        type: string
+      id:
+        type: string
+      joined_at:
+        type: string
+      left_at:
+        type: string
+      role:
+        type: string
+      status:
+        type: string
+      user_id:
+        type: string
+    type: object
+  api_rest_collaboration.SessionResponse:
+    properties:
+      code:
+        type: string
+      created_at:
+        type: string
+      ended_at:
+        type: string
+      host_user_id:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      last_activity:
+        type: string
+      participants:
+        items:
+          $ref: '#/definitions/api_rest_collaboration.ParticipantResponse'
+        type: array
+      title:
+        type: string
+    type: object
+  api_rest_collaboration.UpdateSessionCodeRequest:
+    properties:
+      code:
+        description: 1MB limit
+        maxLength: 1048576
+        type: string
+    required:
+    - code
+    type: object
+  api_rest_generate.Request:
+    properties:
+      conversation_history:
+        description: max 100 messages
+        items:
+          $ref: '#/definitions/github_com_algorave_server_internal_agent.Message'
+        maxItems: 100
+        type: array
+      editor_state:
+        description: 1MB limit
+        maxLength: 1048576
+        type: string
+      session_id:
+        type: string
+      strudel_id:
+        type: string
+      user_query:
+        maxLength: 5000
+        type: string
+    required:
+    - user_query
+    type: object
+  api_rest_generate.Response:
+    properties:
+      clarifying_questions:
+        items:
+          type: string
+        type: array
+      code:
+        type: string
+      docs_retrieved:
+        type: integer
+      examples_retrieved:
+        type: integer
+      is_actionable:
+        type: boolean
+      model:
+        type: string
+      session_id:
+        type: string
+    type: object
+  api_rest_health.Response:
+    properties:
+      service:
+        type: string
+      status:
+        type: string
+      version:
+        type: string
+    type: object
+  api_rest_sessions.TransferSessionRequest:
+    properties:
+      session_id:
+        type: string
+      title:
+        type: string
+    required:
+    - session_id
+    - title
+    type: object
+  github_com_algorave_server_algorave_strudels.CreateStrudelRequest:
+    properties:
+      categories:
+        description: max 10 categories, each max 50 chars
+        items:
+          type: string
+        maxItems: 10
+        type: array
+      code:
+        description: 1MB limit
+        maxLength: 1048576
+        type: string
+      conversation_history:
+        description: max 100 messages
+        items:
+          $ref: '#/definitions/github_com_algorave_server_internal_agent.Message'
+        maxItems: 100
+        type: array
+      description:
+        maxLength: 2000
+        type: string
+      is_public:
+        type: boolean
+      tags:
+        description: max 20 tags, each max 50 chars
+        items:
+          type: string
+        maxItems: 20
+        type: array
+      title:
+        maxLength: 200
+        type: string
+    required:
+    - code
+    - title
+    type: object
+  github_com_algorave_server_algorave_strudels.Strudel:
+    properties:
+      categories:
+        items:
+          type: string
+        type: array
+      code:
+        type: string
+      conversation_history:
+        items:
+          $ref: '#/definitions/github_com_algorave_server_internal_agent.Message'
+        type: array
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      is_public:
+        type: boolean
+      tags:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  github_com_algorave_server_algorave_strudels.UpdateStrudelRequest:
+    properties:
+      categories:
+        items:
+          type: string
+        maxItems: 10
+        type: array
+      code:
+        description: 1MB limit
+        maxLength: 1048576
+        type: string
+      conversation_history:
+        items:
+          $ref: '#/definitions/github_com_algorave_server_internal_agent.Message'
+        maxItems: 100
+        type: array
+      description:
+        maxLength: 2000
+        type: string
+      is_public:
+        type: boolean
+      tags:
+        items:
+          type: string
+        maxItems: 20
+        type: array
+      title:
+        maxLength: 200
+        type: string
+    type: object
+  github_com_algorave_server_internal_agent.Message:
+    properties:
+      content:
+        description: message content
+        type: string
+      role:
+        description: '"user" or "assistant"'
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    name: API Support
+    url: https://github.com/algorave/server
+  description: |-
+    AI-powered Strudel code generation and collaborative live coding platform
+
+    Features:
+    - AI-powered Strudel code generation from natural language
+    - Real-time collaborative editing via WebSockets
+    - OAuth authentication (Google, GitHub)
+    - Anonymous session support
+    - Save and share Strudel patterns
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  title: Algorave API
+  version: "1.0"
+paths:
+  /api/v1/auth/{provider}:
+    get:
+      description: Begin OAuth authentication flow with specified provider (google,
+        github, apple)
+      parameters:
+      - description: OAuth provider
+        enum:
+        - google
+        - github
+        - apple
+        in: path
+        name: provider
+        required: true
+        type: string
+      responses:
+        "302":
+          description: Redirect to OAuth provider
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Start OAuth authentication
+      tags:
+      - auth
+  /api/v1/auth/{provider}/callback:
+    get:
+      description: OAuth provider callback. Returns user data and JWT token
+      parameters:
+      - description: OAuth provider
+        enum:
+        - google
+        - github
+        - apple
+        in: path
+        name: provider
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: user and token
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: OAuth callback
+      tags:
+      - auth
+  /api/v1/auth/logout:
+    post:
+      description: Clear authentication session
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Logout
+      tags:
+      - auth
+  /api/v1/auth/me:
+    get:
+      description: Get authenticated user's profile
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: user object
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get current user
+      tags:
+      - auth
+    put:
+      consumes:
+      - application/json
+      description: Update authenticated user's name and avatar
+      parameters:
+      - description: Profile update
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            avatar_url:
+              type: string
+            name:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: updated user
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update user profile
+      tags:
+      - auth
+  /api/v1/generate:
+    post:
+      consumes:
+      - application/json
+      description: Generate Strudel code from natural language using AI. Supports
+        both authenticated and anonymous users. For authenticated users, can load
+        context from saved strudels. For anonymous users, manages conversation state
+        via sessions.
+      parameters:
+      - description: Generation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api_rest_generate.Request'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api_rest_generate.Response'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Generate Strudel code
+      tags:
+      - generation
+  /api/v1/ping:
+    get:
+      description: Simple ping endpoint
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Ping
+      tags:
+      - health
+  /api/v1/public/strudels:
+    get:
+      description: Get publicly shared strudels from all users
+      parameters:
+      - default: 50
+        description: Limit results (max 100)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                $ref: '#/definitions/github_com_algorave_server_algorave_strudels.Strudel'
+              type: array
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List public strudels
+      tags:
+      - strudels
+  /api/v1/sessions:
+    get:
+      description: Get all sessions where user is host or participant
+      parameters:
+      - default: false
+        description: Only return active sessions
+        in: query
+        name: active_only
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                $ref: '#/definitions/api_rest_collaboration.SessionResponse'
+              type: array
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List user's sessions
+      tags:
+      - sessions
+    post:
+      consumes:
+      - application/json
+      description: Create a new collaborative coding session (authenticated users
+        only)
+      parameters:
+      - description: Session data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api_rest_collaboration.CreateSessionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/api_rest_collaboration.CreateSessionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create collaboration session
+      tags:
+      - sessions
+  /api/v1/sessions/{id}:
+    delete:
+      description: End a collaborative session (host only)
+      parameters:
+      - description: Session ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: End session
+      tags:
+      - sessions
+    get:
+      description: Get session information including participants
+      parameters:
+      - description: Session ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api_rest_collaboration.SessionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get session details
+      tags:
+      - sessions
+    put:
+      consumes:
+      - application/json
+      description: Update the code in a session (host or co-authors only)
+      parameters:
+      - description: Session ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Code update
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api_rest_collaboration.UpdateSessionCodeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update session code
+      tags:
+      - sessions
+  /api/v1/sessions/{id}/invite:
+    get:
+      description: Get all invite tokens for a session (host only)
+      parameters:
+      - description: Session ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                $ref: '#/definitions/api_rest_collaboration.InviteTokenResponse'
+              type: array
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List invite tokens
+      tags:
+      - sessions
+    post:
+      consumes:
+      - application/json
+      description: Generate an invite link for joining the session (host only)
+      parameters:
+      - description: Session ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Token settings
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api_rest_collaboration.CreateInviteTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/api_rest_collaboration.InviteTokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create invite token
+      tags:
+      - sessions
+  /api/v1/sessions/{id}/invite/{token_id}:
+    delete:
+      description: Revoke an invite token to prevent further use (host only)
+      parameters:
+      - description: Session ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Token ID (UUID)
+        in: path
+        name: token_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Revoke invite token
+      tags:
+      - sessions
+  /api/v1/sessions/{id}/leave:
+    post:
+      description: Leave a collaborative session
+      parameters:
+      - description: Session ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Leave session
+      tags:
+      - sessions
+  /api/v1/sessions/{id}/messages:
+    get:
+      description: Retrieve chat messages from a session
+      parameters:
+      - description: Session ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - default: 100
+        description: Max messages to return (max 1000)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get session chat messages
+      tags:
+      - sessions
+  /api/v1/sessions/{id}/participants:
+    get:
+      description: Get all participants in a session (authenticated and anonymous)
+      parameters:
+      - description: Session ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                $ref: '#/definitions/api_rest_collaboration.ParticipantResponse'
+              type: array
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List session participants
+      tags:
+      - sessions
+  /api/v1/sessions/{id}/participants/{participant_id}:
+    delete:
+      description: Remove a participant from the session (host only)
+      parameters:
+      - description: Session ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Participant ID (UUID)
+        in: path
+        name: participant_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Remove participant
+      tags:
+      - sessions
+  /api/v1/sessions/join:
+    post:
+      consumes:
+      - application/json
+      description: Join a collaborative session using an invite token (authenticated
+        or anonymous)
+      parameters:
+      - description: Join request with invite token
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api_rest_collaboration.JoinSessionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api_rest_collaboration.JoinSessionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Invalid or expired invite
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Join session with invite
+      tags:
+      - sessions
+  /api/v1/sessions/transfer:
+    post:
+      consumes:
+      - application/json
+      description: Convert an anonymous session to a saved strudel in authenticated
+        user's account
+      parameters:
+      - description: Transfer request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api_rest_sessions.TransferSessionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: message, strudel, strudel_id
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Transfer anonymous session
+      tags:
+      - sessions
+  /api/v1/strudels:
+    get:
+      description: Get all strudels owned by the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                $ref: '#/definitions/github_com_algorave_server_algorave_strudels.Strudel'
+              type: array
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List user's strudels
+      tags:
+      - strudels
+    post:
+      consumes:
+      - application/json
+      description: Save a new Strudel pattern with code, title, and metadata
+      parameters:
+      - description: Strudel data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_algorave_server_algorave_strudels.CreateStrudelRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_algorave_server_algorave_strudels.Strudel'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create strudel
+      tags:
+      - strudels
+  /api/v1/strudels/{id}:
+    delete:
+      description: Delete a strudel (must be owner)
+      parameters:
+      - description: Strudel ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete strudel
+      tags:
+      - strudels
+    get:
+      description: Get a specific strudel by ID (must be owner)
+      parameters:
+      - description: Strudel ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_algorave_server_algorave_strudels.Strudel'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get strudel by ID
+      tags:
+      - strudels
+    put:
+      consumes:
+      - application/json
+      description: Update a strudel's properties (must be owner)
+      parameters:
+      - description: Strudel ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_algorave_server_algorave_strudels.UpdateStrudelRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_algorave_server_algorave_strudels.Strudel'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update strudel
+      tags:
+      - strudels
+  /api/v1/ws:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Establish WebSocket connection for real-time collaboration. Supports authentication via JWT token or invite token.
+
+        Message Types:
+        - code_update: Real-time code changes
+        - agent_request: AI code generation requests
+        - chat_message: Chat messages
+        - user_joined: User join notifications
+        - user_left: User leave notifications
+      parameters:
+      - description: Session ID (UUID)
+        in: query
+        name: session_id
+        required: true
+        type: string
+      - description: JWT authentication token
+        in: query
+        name: token
+        type: string
+      - description: Session invite token
+        in: query
+        name: invite_token
+        type: string
+      - description: Display name for anonymous users
+        in: query
+        name: display_name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "101":
+          description: Switching Protocols
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "429":
+          description: Too Many Requests
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: WebSocket connection
+      tags:
+      - websocket
+  /health:
+    get:
+      description: Get service health status
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api_rest_health.Response'
+      summary: Health check
+      tags:
+      - health
+securityDefinitions:
+  BearerAuth:
+    description: 'JWT token for authenticated requests. Format: Bearer {token}'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

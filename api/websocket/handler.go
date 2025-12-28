@@ -19,6 +19,30 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin:     ws.CheckOrigin,
 }
 
+// WebSocketHandler godoc
+// @Summary WebSocket connection
+// @Description Establish WebSocket connection for real-time collaboration. Supports authentication via JWT token or invite token.
+// @Description
+// @Description Message Types:
+// @Description - code_update: Real-time code changes
+// @Description - agent_request: AI code generation requests
+// @Description - chat_message: Chat messages
+// @Description - user_joined: User join notifications
+// @Description - user_left: User leave notifications
+// @Tags websocket
+// @Accept json
+// @Produce json
+// @Param session_id query string true "Session ID (UUID)"
+// @Param token query string false "JWT authentication token"
+// @Param invite_token query string false "Session invite token"
+// @Param display_name query string false "Display name for anonymous users"
+// @Success 101 {string} string "Switching Protocols"
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 429 {object} map[string]string
+// @Router /api/v1/ws [get]
 func WebSocketHandler(hub *ws.Hub, sessionRepo sessions.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var params ConnectParams
