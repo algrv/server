@@ -2,56 +2,33 @@ package errors
 
 import (
 	"net/http"
-	"os"
-	"regexp"
 	"strings"
 
 	"github.com/algorave/server/internal/logger"
 	"github.com/gin-gonic/gin"
 )
 
-// Error Handling Guidelines:
+// RECIPE FOR ERROR HANDLING:
 //
-// For HTTP REST handlers:
-//   - Use errors.InternalError(), errors.BadRequest(), etc. for critical errors
-//     These functions handle both logging and HTTP response automatically
-//   - Use logger.ErrorErr() only for non-critical errors where processing continues
-//   - Never call both logger.ErrorErr() and errors.InternalError() for the same error
+// for HTTP REST handlers:
+//   - use errors.InternalError(), errors.BadRequest(), etc. for critical errors
+//     these functions handle both logging and HTTP response automatically
+//   - use logger.ErrorErr() only for non-critical errors where processing continues
+//   - never call both logger.ErrorErr() and errors.InternalError() for the same error
 //
-// For WebSocket handlers:
-//   - Use logger.ErrorErr() + client.SendError() + return err
-//   - This provides both server-side logging and client-side error notification
+// for WebSocket handlers:
+//   - use logger.ErrorErr() + client.SendError() + return err
+//   - this provides both server-side logging and client-side error notification
 //
-// For services/repositories/internal packages:
-//   - Return wrapped errors with context using fmt.Errorf("context: %w", err)
-//   - Let the caller (handler) decide how to log and respond
-//   - Do not log errors in non-handler code (avoid double logging)
-
-// UUID format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx (36 characters)
-var uuidRegex = regexp.MustCompile(`^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`)
-
-// represents a standardized error response
-type ErrorResponse struct {
-	Error   string `json:"error"`             // error code (e.g., "unauthorized", "not_found")
-	Message string `json:"message"`           // user-friendly message
-	Details string `json:"details,omitempty"` // optional details (sanitized in production)
-}
-
-// standard error codes
-const (
-	CodeUnauthorized        = "unauthorized"
-	CodeForbidden           = "forbidden"
-	CodeNotFound            = "not_found"
-	CodeValidationError     = "validation_error"
-	CodeServerError         = "server_error"
-	CodeBadRequest          = "bad_request"
-	CodeConflict            = "conflict"
-	CodeTooManyRequests     = "too_many_requests"
-	CodeInvalidOperation    = "invalid_operation"
-	CodeSessionNotFound     = "session_not_found"
-	CodeInvalidInvite       = "invalid_invite"
-	CodeParticipantNotFound = "participant_not_found"
-)
+// for services/repositories/internal packages:
+//   - return wrapped errors with context using fmt.Errorf("context: %w", err)
+//   - let the caller (handler) decide how to log and respond
+//   - do not log errors in non-handler code (avoid double logging)
+//
+// error classification:
+//   - errors are automatically classified for logging (adds "error_category" field)
+//   - classification happens in InternalError() for better log filtering
+//   - categories: database, network, validation, auth, not_found, timeout, unknown
 
 // returns a 401 unauthorized error
 func Unauthorized(c *gin.Context, message string) {
@@ -104,7 +81,8 @@ func BadRequest(c *gin.Context, message string, err error) {
 
 	// add details if error provided
 	if err != nil {
-		response.Details = sanitizeError(err)
+		info := classifyError(err)
+		response.Details = info.sanitized
 	}
 
 	c.JSON(http.StatusBadRequest, response)
@@ -116,7 +94,8 @@ func ValidationError(c *gin.Context, err error) {
 	details := ""
 
 	if err != nil {
-		details = sanitizeError(err)
+		info := classifyError(err)
+		details = info.sanitized
 		// extract a more specific message from validation errors if available
 		if strings.Contains(err.Error(), "binding") || strings.Contains(err.Error(), "validation") {
 			message = "request validation failed"
@@ -136,18 +115,22 @@ func InternalError(c *gin.Context, message string, err error) {
 		message = "an error occurred"
 	}
 
-	// log full error server-side with context
+	// classify error once (single pass for both logging and response)
+	info := classifyError(err)
+
+	// log with category
 	logger.ErrorErr(err, message,
 		"path", c.Request.URL.Path,
 		"method", c.Request.Method,
 		"user_id", c.GetString("user_id"),
+		"error_category", info.category,
 	)
 
 	// return sanitized error to client
 	c.JSON(http.StatusInternalServerError, ErrorResponse{
 		Error:   CodeServerError,
 		Message: message,
-		Details: sanitizeError(err),
+		Details: info.sanitized,
 	})
 }
 
@@ -213,42 +196,6 @@ func ParticipantNotFound(c *gin.Context) {
 		Error:   CodeParticipantNotFound,
 		Message: "participant not found in this session",
 	})
-}
-
-// sanitizes error messages for production
-func sanitizeError(err error) string {
-	if err == nil {
-		return ""
-	}
-
-	errMsg := err.Error()
-	env := os.Getenv("ENVIRONMENT")
-
-	if env != "production" {
-		return errMsg
-	}
-
-	if strings.Contains(errMsg, "database") || strings.Contains(errMsg, "sql") {
-		return "database operation failed"
-	}
-
-	if strings.Contains(errMsg, "connection") || strings.Contains(errMsg, "network") {
-		return "connection error occurred"
-	}
-
-	if strings.Contains(errMsg, "timeout") {
-		return "request timed out"
-	}
-
-	if strings.Contains(errMsg, "permission") || strings.Contains(errMsg, "unauthorized") {
-		return "permission denied"
-	}
-
-	if strings.Contains(errMsg, "not found") {
-		return "resource not found"
-	}
-
-	return "an error occurred"
 }
 
 // validates a UUID string format
