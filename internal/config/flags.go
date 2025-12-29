@@ -11,10 +11,10 @@ func ParseDocsFlags() Flags {
 
 	fs := flag.NewFlagSet("docs", flag.ExitOnError)
 	path := fs.String("path", "./docs/strudel", "path to documentation directory")
-	clear := fs.Bool("clear", false, "clear existing chunks before ingesting")
-	fs.Parse(args)
+	clearFlag := fs.Bool("clear", false, "clear existing chunks before ingesting")
+	fs.Parse(args) //nolint:errcheck,gosec // G104: ExitOnError flag set handles errors
 
-	return Flags{Path: *path, Clear: *clear}
+	return Flags{Path: *path, Clear: *clearFlag}
 }
 
 // parses CLI flags for the concepts subcommand
@@ -23,10 +23,10 @@ func ParseConceptsFlags() Flags {
 
 	fs := flag.NewFlagSet("concepts", flag.ExitOnError)
 	path := fs.String("path", "./docs/concepts", "path to concepts directory")
-	clear := fs.Bool("clear", false, "clear existing concepts before ingesting")
-	fs.Parse(args)
+	clearFlag := fs.Bool("clear", false, "clear existing concepts before ingesting")
+	fs.Parse(args) //nolint:errcheck,gosec // G104: ExitOnError flag set handles errors
 
-	return Flags{Path: *path, Clear: *clear}
+	return Flags{Path: *path, Clear: *clearFlag}
 }
 
 // parses CLI flags for the examples subcommand
@@ -35,10 +35,10 @@ func ParseExamplesFlags() Flags {
 
 	fs := flag.NewFlagSet("examples", flag.ExitOnError)
 	path := fs.String("path", "./resources/strudel_examples.json", "path to examples JSON file")
-	clear := fs.Bool("clear", false, "clear existing examples before ingesting")
-	fs.Parse(args)
+	clearFlag := fs.Bool("clear", false, "clear existing examples before ingesting")
+	fs.Parse(args) //nolint:errcheck,gosec // G104: ExitOnError flag set handles errors
 
-	return Flags{Path: *path, Clear: *clear}
+	return Flags{Path: *path, Clear: *clearFlag}
 }
 
 // returns default flags for docs ingestion

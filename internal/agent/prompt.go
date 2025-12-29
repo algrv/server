@@ -60,11 +60,12 @@ func buildSystemPrompt(ctx SystemPromptContext) string {
 			builder.WriteString("─────────────────────────────────────────\n")
 
 			for _, doc := range pageMap[pageName] {
-				if doc.SectionTitle == "PAGE_SUMMARY" {
+				switch doc.SectionTitle {
+				case "PAGE_SUMMARY":
 					builder.WriteString("\nSUMMARY:\n")
-				} else if doc.SectionTitle == "PAGE_EXAMPLES" {
+				case "PAGE_EXAMPLES":
 					builder.WriteString("\nEXAMPLES:\n")
-				} else {
+				default:
 					builder.WriteString(fmt.Sprintf("\nSECTION: %s\n", doc.SectionTitle))
 				}
 

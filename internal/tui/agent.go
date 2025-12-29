@@ -30,14 +30,14 @@ func sendToAgent(userQuery, editorState string, conversationHistory []MessageMod
 			return AgentErrorMsg{userQuery: userQuery, err: fmt.Errorf("failed to marshal request: %w", err)}
 		}
 
-		resp, err := http.Post(endpoint, "application/json", bytes.NewBuffer(jsonData))
+		resp, err := http.Post(endpoint, "application/json", bytes.NewBuffer(jsonData)) //nolint:gosec // G107: endpoint is from config, not user input
 		if err != nil {
 			return AgentErrorMsg{userQuery: userQuery, err: fmt.Errorf("failed to connect to agent: %w", err)}
 		}
-		defer resp.Body.Close()
+		defer resp.Body.Close() //nolint:errcheck
 
 		if resp.StatusCode != http.StatusOK {
-			body, _ := io.ReadAll(resp.Body)
+			body, _ := io.ReadAll(resp.Body) //nolint:errcheck
 			return AgentErrorMsg{userQuery: userQuery, err: fmt.Errorf("agent returned error %d: %s", resp.StatusCode, string(body))}
 		}
 

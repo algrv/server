@@ -44,7 +44,7 @@ func NewEditor() *EditorModel {
 	)
 	if err != nil {
 		// fallback to auto style
-		renderer, _ = glamour.NewTermRenderer(
+		renderer, _ = glamour.NewTermRenderer( //nolint:errcheck
 			glamour.WithAutoStyle(),
 			glamour.WithWordWrap(physicalWidth-8),
 		)
@@ -198,7 +198,7 @@ func (m *EditorModel) Update(msg tea.Msg) (*EditorModel, tea.Cmd) {
 		)
 
 		if err != nil {
-			renderer, _ = glamour.NewTermRenderer(
+			renderer, _ = glamour.NewTermRenderer( //nolint:errcheck
 				glamour.WithAutoStyle(),
 				glamour.WithWordWrap(msg.Width-8),
 			)
@@ -300,7 +300,8 @@ func (m *EditorModel) renderChatHistory() string {
 			b.WriteString("\n")
 		}
 
-		if msg.Role == "user" {
+		switch msg.Role {
+		case "user":
 			// user indicator
 			userIndicator := lipgloss.NewStyle().
 				Foreground(colorGreen).
@@ -322,7 +323,7 @@ func (m *EditorModel) renderChatHistory() string {
 			b.WriteString(userContent)
 			b.WriteString("\n\n")
 
-		} else if msg.Role == "assistant" {
+		case "assistant":
 			// agent indicator
 			agentIndicator := lipgloss.NewStyle().
 				Foreground(colorPurple).

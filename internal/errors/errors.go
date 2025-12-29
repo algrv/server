@@ -31,7 +31,7 @@ import (
 //   - classification happens in InternalError() for better log filtering
 //   - categories: database, network, validation, auth, not_found, timeout, unknown
 
-// returns a 401 unauthorized error
+// Unauthorized returns a 401 unauthorized error
 func Unauthorized(c *gin.Context, message string) {
 	if message == "" {
 		message = "authentication required"
@@ -43,7 +43,7 @@ func Unauthorized(c *gin.Context, message string) {
 	})
 }
 
-// returns a 403 forbidden error
+// Forbidden returns a 403 forbidden error
 func Forbidden(c *gin.Context, message string) {
 	if message == "" {
 		message = "permission denied"
@@ -55,7 +55,7 @@ func Forbidden(c *gin.Context, message string) {
 	})
 }
 
-// returns a 404 not found error
+// NotFound returns a 404 not found error
 func NotFound(c *gin.Context, resource string) {
 	message := "resource not found"
 
@@ -69,7 +69,7 @@ func NotFound(c *gin.Context, resource string) {
 	})
 }
 
-// returns a 400 bad request error
+// BadRequest returns a 400 bad request error
 func BadRequest(c *gin.Context, message string, err error) {
 	if message == "" {
 		message = "invalid request"
@@ -89,7 +89,7 @@ func BadRequest(c *gin.Context, message string, err error) {
 	c.JSON(http.StatusBadRequest, response)
 }
 
-// returns a 400 bad request error for validation failures
+// ValidationError returns a 400 bad request error for validation failures
 func ValidationError(c *gin.Context, err error) {
 	message := "validation failed"
 	details := ""
@@ -110,7 +110,7 @@ func ValidationError(c *gin.Context, err error) {
 	})
 }
 
-// returns a 500 internal server error
+// InternalError returns a 500 internal server error
 func InternalError(c *gin.Context, message string, err error) {
 	if message == "" {
 		message = "an error occurred"
@@ -135,7 +135,7 @@ func InternalError(c *gin.Context, message string, err error) {
 	})
 }
 
-// returns a 409 conflict error
+// Conflict returns a 409 conflict error
 func Conflict(c *gin.Context, message string) {
 	if message == "" {
 		message = "resource conflict"
@@ -147,7 +147,7 @@ func Conflict(c *gin.Context, message string) {
 	})
 }
 
-// returns a 429 too many requests error
+// TooManyRequests returns a 429 too many requests error
 func TooManyRequests(c *gin.Context, message string) {
 	if message == "" {
 		message = "too many requests"
@@ -159,7 +159,7 @@ func TooManyRequests(c *gin.Context, message string) {
 	})
 }
 
-// returns a 400 bad request error for invalid operations
+// InvalidOperation returns a 400 bad request error for invalid operations
 func InvalidOperation(c *gin.Context, message string) {
 	if message == "" {
 		message = "invalid operation"
@@ -171,7 +171,7 @@ func InvalidOperation(c *gin.Context, message string) {
 	})
 }
 
-// returns a 404 error for session not found
+// SessionNotFound returns a 404 error for session not found
 func SessionNotFound(c *gin.Context) {
 	c.JSON(http.StatusNotFound, ErrorResponse{
 		Error:   CodeSessionNotFound,
@@ -179,7 +179,7 @@ func SessionNotFound(c *gin.Context) {
 	})
 }
 
-// returns a 401 error for invalid invite tokens
+// InvalidInvite returns a 401 error for invalid invite tokens
 func InvalidInvite(c *gin.Context, message string) {
 	if message == "" {
 		message = "invalid or expired invite token"
@@ -191,7 +191,7 @@ func InvalidInvite(c *gin.Context, message string) {
 	})
 }
 
-// returns a 404 error for participant not found
+// ParticipantNotFound returns a 404 error for participant not found
 func ParticipantNotFound(c *gin.Context) {
 	c.JSON(http.StatusNotFound, ErrorResponse{
 		Error:   CodeParticipantNotFound,
@@ -199,7 +199,7 @@ func ParticipantNotFound(c *gin.Context) {
 	})
 }
 
-// validates a UUID string format
+// IsValidUUID validates a UUID string format
 func IsValidUUID(id string) bool {
 	if id == "" {
 		return false
@@ -208,7 +208,7 @@ func IsValidUUID(id string) bool {
 	return uuidRegex.MatchString(strings.ToLower(id))
 }
 
-// validates a UUID string and returns 404 if invalid
+// ValidateUUID validates a UUID string and returns 404 if invalid
 func ValidateUUID(c *gin.Context, id string, resourceName string) bool {
 	if id != "" && !IsValidUUID(id) {
 		NotFound(c, resourceName)
@@ -218,7 +218,7 @@ func ValidateUUID(c *gin.Context, id string, resourceName string) bool {
 	return true
 }
 
-// validates a UUID parameter from the request path
+// ValidatePathUUID validates a UUID parameter from the request path
 func ValidatePathUUID(c *gin.Context, paramName string) (string, bool) {
 	id := c.Param(paramName)
 
@@ -235,7 +235,7 @@ func ValidatePathUUID(c *gin.Context, paramName string) (string, bool) {
 	return id, true
 }
 
-// returns an error for unsupported provider
+// ErrUnsupportedProvider returns an error for unsupported provider
 func ErrUnsupportedProvider(provider string) error {
 	return fmt.Errorf("unsupported provider: %s (supported: openai, claude)", provider)
 }

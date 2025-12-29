@@ -179,7 +179,7 @@ func (c *Client) BM25SearchExamples(ctx context.Context, queryText string, topK 
 	return results, nil
 }
 
-func (c *Client) HybridSearchDocs(ctx context.Context, userQuery, editorState string, topK int) ([]SearchResult, error) {
+func (c *Client) HybridSearchDocs(ctx context.Context, userQuery, _ string, topK int) ([]SearchResult, error) {
 	searchQuery, err := c.llm.TransformQuery(ctx, userQuery)
 	if err != nil {
 		logger.Warn("query transformation failed, using original query", "error", err)
@@ -226,7 +226,7 @@ func (c *Client) HybridSearchDocs(ctx context.Context, userQuery, editorState st
 }
 
 // hybrid search (vector + BM25) for strudel examples
-func (c *Client) HybridSearchExamples(ctx context.Context, userQuery, editorState string, topK int) ([]ExampleResult, error) {
+func (c *Client) HybridSearchExamples(ctx context.Context, userQuery, _ string, topK int) ([]ExampleResult, error) {
 	searchQuery, err := c.llm.TransformQuery(ctx, userQuery)
 	if err != nil {
 		logger.Warn("query transformation failed, using original query", "error", err)

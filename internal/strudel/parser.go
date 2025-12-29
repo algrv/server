@@ -103,7 +103,7 @@ func parsePatternString(pattern string) []string {
 
 // isNumeric checks if a string is purely numeric
 func isNumeric(s string) bool {
-	matched, _ := regexp.MatchString(`^\d+\.?\d*$`, s)
+	matched, _ := regexp.MatchString(`^\d+\.?\d*$`, s) //nolint:errcheck
 	return matched
 }
 

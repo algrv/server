@@ -309,7 +309,7 @@ func calculateComplexity(code string, parsed ParsedCode) int {
 	} else if len(code) > 200 {
 		score += 2
 	} else {
-		score += 1
+		score++
 	}
 
 	// layering complexity
@@ -325,7 +325,7 @@ func calculateComplexity(code string, parsed ParsedCode) int {
 	if varCount > 5 {
 		score += 2
 	} else if varCount > 0 {
-		score += 1
+		score++
 	}
 
 	// advanced patterns
@@ -335,7 +335,7 @@ func calculateComplexity(code string, parsed ParsedCode) int {
 
 	// interactive elements
 	if parsed.Patterns["slider"] > 0 {
-		score += 1
+		score++
 	}
 
 	// cap at 10

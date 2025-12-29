@@ -71,7 +71,13 @@ func Handler(agentClient *agent.Agent, strudelRepo StrudelGetter, sessionMgr *an
 
 		// priority 1: if strudel_id is provided and user is authenticated, load history from strudel
 		if req.StrudelID != "" && isAuthenticated {
-			strudel, err := strudelRepo.Get(c.Request.Context(), req.StrudelID, userID.(string))
+			uid, ok := userID.(string)
+			if !ok {
+				errors.InternalError(c, "invalid user ID type", nil)
+				return
+			}
+
+			strudel, err := strudelRepo.Get(c.Request.Context(), req.StrudelID, uid)
 			if err != nil {
 				logger.Warn("failed to load strudel",
 					"strudel_id", req.StrudelID,

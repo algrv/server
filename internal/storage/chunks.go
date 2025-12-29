@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/algorave/server/internal/chunker"
@@ -52,7 +53,7 @@ func (c *Client) InsertChunksBatch(ctx context.Context, chunks []chunker.Chunk, 
 
 	// defer rollback - will be no-op if commit succeeds
 	defer func() {
-		if err := tx.Rollback(ctx); err != nil && err != pgx.ErrTxClosed {
+		if err := tx.Rollback(ctx); err != nil && !errors.Is(err, pgx.ErrTxClosed) {
 			logger.Warn("failed to rollback transaction", "error", err)
 		}
 	}()
@@ -75,7 +76,7 @@ func (c *Client) InsertChunksBatch(ctx context.Context, chunks []chunker.Chunk, 
 	for i := range len(chunks) {
 		_, err := br.Exec()
 		if err != nil {
-			br.Close()
+			br.Close() //nolint:errcheck,gosec // G104: error path cleanup
 			return fmt.Errorf("failed to insert chunk %d: %w", i, err)
 		}
 	}

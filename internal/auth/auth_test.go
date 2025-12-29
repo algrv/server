@@ -12,8 +12,10 @@ import (
 )
 
 func TestGenerateJWT_Success(t *testing.T) {
-	os.Setenv("JWT_SECRET", "test-secret-key-for-testing")
-	defer os.Unsetenv("JWT_SECRET")
+	os.Setenv( //nolint:errcheck // test fixture
+	"JWT_SECRET", "test-secret-key-for-testing")
+	defer os.Unsetenv( //nolint:errcheck // test cleanup
+	"JWT_SECRET")
 
 	token, err := GenerateJWT("user-123", "test@example.com")
 
@@ -24,7 +26,8 @@ func TestGenerateJWT_Success(t *testing.T) {
 }
 
 func TestGenerateJWT_MissingSecret(t *testing.T) {
-	os.Unsetenv("JWT_SECRET")
+	os.Unsetenv( //nolint:errcheck // test cleanup
+	"JWT_SECRET")
 
 	_, err := GenerateJWT("user-123", "test@example.com")
 
@@ -33,8 +36,10 @@ func TestGenerateJWT_MissingSecret(t *testing.T) {
 }
 
 func TestValidateJWT_ValidToken(t *testing.T) {
-	os.Setenv("JWT_SECRET", "test-secret-key-for-testing")
-	defer os.Unsetenv("JWT_SECRET")
+	os.Setenv( //nolint:errcheck // test fixture
+	"JWT_SECRET", "test-secret-key-for-testing")
+	defer os.Unsetenv( //nolint:errcheck // test cleanup
+	"JWT_SECRET")
 
 	token, err := GenerateJWT("user-123", "test@example.com")
 	require.NoError(t, err)
@@ -47,8 +52,10 @@ func TestValidateJWT_ValidToken(t *testing.T) {
 }
 
 func TestValidateJWT_ExpiredToken(t *testing.T) {
-	os.Setenv("JWT_SECRET", "test-secret-key-for-testing")
-	defer os.Unsetenv("JWT_SECRET")
+	os.Setenv( //nolint:errcheck // test fixture
+	"JWT_SECRET", "test-secret-key-for-testing")
+	defer os.Unsetenv( //nolint:errcheck // test cleanup
+	"JWT_SECRET")
 
 	// create an expired token
 	claims := Claims{
@@ -70,8 +77,10 @@ func TestValidateJWT_ExpiredToken(t *testing.T) {
 }
 
 func TestValidateJWT_TamperedToken(t *testing.T) {
-	os.Setenv("JWT_SECRET", "test-secret-key-for-testing")
-	defer os.Unsetenv("JWT_SECRET")
+	os.Setenv( //nolint:errcheck // test fixture
+	"JWT_SECRET", "test-secret-key-for-testing")
+	defer os.Unsetenv( //nolint:errcheck // test cleanup
+	"JWT_SECRET")
 
 	token, err := GenerateJWT("user-123", "test@example.com")
 	require.NoError(t, err)
@@ -84,13 +93,16 @@ func TestValidateJWT_TamperedToken(t *testing.T) {
 }
 
 func TestValidateJWT_WrongSecret(t *testing.T) {
-	os.Setenv("JWT_SECRET", "test-secret-key-for-testing")
+	os.Setenv( //nolint:errcheck // test fixture
+	"JWT_SECRET", "test-secret-key-for-testing")
 	token, err := GenerateJWT("user-123", "test@example.com")
 	require.NoError(t, err)
 
 	// change the secret
-	os.Setenv("JWT_SECRET", "different-secret-key")
-	defer os.Unsetenv("JWT_SECRET")
+	os.Setenv( //nolint:errcheck // test fixture
+	"JWT_SECRET", "different-secret-key")
+	defer os.Unsetenv( //nolint:errcheck // test cleanup
+	"JWT_SECRET")
 
 	_, err = ValidateJWT(token)
 
@@ -98,8 +110,10 @@ func TestValidateJWT_WrongSecret(t *testing.T) {
 }
 
 func TestValidateJWT_AlgorithmConfusionAttack(t *testing.T) {
-	os.Setenv("JWT_SECRET", "test-secret-key-for-testing")
-	defer os.Unsetenv("JWT_SECRET")
+	os.Setenv( //nolint:errcheck // test fixture
+	"JWT_SECRET", "test-secret-key-for-testing")
+	defer os.Unsetenv( //nolint:errcheck // test cleanup
+	"JWT_SECRET")
 
 	claims := Claims{
 		UserID: "attacker",
@@ -112,15 +126,17 @@ func TestValidateJWT_AlgorithmConfusionAttack(t *testing.T) {
 
 	// attempt to use different signing method
 	token := jwt.NewWithClaims(jwt.SigningMethodNone, claims)
-	tokenString, _ := token.SignedString(jwt.UnsafeAllowNoneSignatureType)
+	tokenString, _ := token.SignedString(jwt.UnsafeAllowNoneSignatureType) //nolint:errcheck // test code
 
 	_, err := ValidateJWT(tokenString)
 	assert.Error(t, err, "token with 'none' algorithm should be rejected")
 }
 
 func TestValidateJWT_MalformedToken(t *testing.T) {
-	os.Setenv("JWT_SECRET", "test-secret-key-for-testing")
-	defer os.Unsetenv("JWT_SECRET")
+	os.Setenv( //nolint:errcheck // test fixture
+	"JWT_SECRET", "test-secret-key-for-testing")
+	defer os.Unsetenv( //nolint:errcheck // test cleanup
+	"JWT_SECRET")
 
 	malformedTokens := []string{
 		"",
@@ -137,8 +153,10 @@ func TestValidateJWT_MalformedToken(t *testing.T) {
 }
 
 func TestJWT_TokenExpiration(t *testing.T) {
-	os.Setenv("JWT_SECRET", "test-secret-key-for-testing")
-	defer os.Unsetenv("JWT_SECRET")
+	os.Setenv( //nolint:errcheck // test fixture
+	"JWT_SECRET", "test-secret-key-for-testing")
+	defer os.Unsetenv( //nolint:errcheck // test cleanup
+	"JWT_SECRET")
 
 	token, err := GenerateJWT("user-123", "test@example.com")
 	require.NoError(t, err)
@@ -155,8 +173,10 @@ func TestJWT_TokenExpiration(t *testing.T) {
 }
 
 func TestJWT_ClaimsIntegrity(t *testing.T) {
-	os.Setenv("JWT_SECRET", "test-secret-key-for-testing")
-	defer os.Unsetenv("JWT_SECRET")
+	os.Setenv( //nolint:errcheck // test fixture
+	"JWT_SECRET", "test-secret-key-for-testing")
+	defer os.Unsetenv( //nolint:errcheck // test cleanup
+	"JWT_SECRET")
 
 	testCases := []struct {
 		userID string

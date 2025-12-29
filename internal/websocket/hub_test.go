@@ -214,7 +214,7 @@ func TestHubMessageHandler(t *testing.T) {
 	handlerCalled := false
 	var handlerMu sync.Mutex
 
-	testHandler := func(hub *Hub, client *Client, msg *Message) error {
+	testHandler := func(_ *Hub, _ *Client, _ *Message) error {
 		handlerMu.Lock()
 		handlerCalled = true
 		handlerMu.Unlock()
@@ -404,9 +404,9 @@ func TestHubConcurrentBroadcasts(t *testing.T) {
 	var wg sync.WaitGroup
 	for i := range numMessages {
 		wg.Add(1)
-		go func(msgNum int) {
+		go func(_ int) {
 			defer wg.Done()
-			msg, _ := NewMessage(TypeCodeUpdate, sessionID, "a", CodeUpdatePayload{
+			msg, _ := NewMessage(TypeCodeUpdate, sessionID, "a", CodeUpdatePayload{ //nolint:errcheck // test code
 				Code:        "sound(\"bd\")",
 				DisplayName: "A",
 			})

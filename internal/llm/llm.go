@@ -17,7 +17,7 @@ func NewLLM(ctx context.Context) (LLM, error) {
 }
 
 // creates a new LLM with explicit configuration
-func NewLLMWithConfig(ctx context.Context, config *Config) (LLM, error) {
+func NewLLMWithConfig(_ context.Context, config *Config) (LLM, error) {
 	if config == nil {
 		return nil, fmt.Errorf("config cannot be nil")
 	}

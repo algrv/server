@@ -9,6 +9,7 @@ import (
 	"github.com/algorave/server/algorave/users"
 	"github.com/algorave/server/internal/auth"
 	"github.com/algorave/server/internal/errors"
+	"github.com/algorave/server/internal/logger"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/sessions"
 	"github.com/markbates/goth/gothic"
@@ -37,7 +38,7 @@ func init() {
 // @Success 302 {string} string "Redirect to OAuth provider"
 // @Failure 400 {object} errors.ErrorResponse
 // @Router /api/v1/auth/{provider} [get]
-func BeginAuthHandler(userRepo *users.Repository) gin.HandlerFunc {
+func BeginAuthHandler(_ *users.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		provider := c.Param("provider")
 
@@ -182,7 +183,9 @@ func UpdateProfileHandler(userRepo *users.Repository) gin.HandlerFunc {
 // @Router /api/v1/auth/logout [post]
 func LogoutHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		gothic.Logout(c.Writer, c.Request)
+		if err := gothic.Logout(c.Writer, c.Request); err != nil {
+			logger.ErrorErr(err, "failed to logout user from gothic session")
+		}
 		c.JSON(http.StatusOK, MessageResponse{Message: "logged out successfully"})
 	}
 }

@@ -30,11 +30,11 @@ func (m *mockLLM) Model() string {
 	return "mock-model"
 }
 
-func (m *mockLLM) GenerateEmbedding(ctx context.Context, text string) ([]float32, error) {
+func (m *mockLLM) GenerateEmbedding(_ context.Context, _ string) ([]float32, error) {
 	return make([]float32, 1536), nil
 }
 
-func (m *mockLLM) GenerateEmbeddings(ctx context.Context, texts []string) ([][]float32, error) {
+func (m *mockLLM) GenerateEmbeddings(_ context.Context, texts []string) ([][]float32, error) {
 	embeddings := make([][]float32, len(texts))
 	for i := range texts {
 		embeddings[i] = make([]float32, 1536)
@@ -42,11 +42,11 @@ func (m *mockLLM) GenerateEmbeddings(ctx context.Context, texts []string) ([][]f
 	return embeddings, nil
 }
 
-func (m *mockLLM) TransformQuery(ctx context.Context, query string) (string, error) {
+func (m *mockLLM) TransformQuery(_ context.Context, query string) (string, error) {
 	return query + " expanded", nil
 }
 
-func (m *mockLLM) AnalyzeQuery(ctx context.Context, query string) (*llm.QueryAnalysis, error) {
+func (m *mockLLM) AnalyzeQuery(_ context.Context, query string) (*llm.QueryAnalysis, error) {
 	return &llm.QueryAnalysis{
 		TransformedQuery:    query + " expanded",
 		IsActionable:        true,
@@ -116,7 +116,7 @@ func TestGenerateCode(t *testing.T) {
 
 	mockRet := &mockRetriever{}
 	mockGen := &mockLLM{
-		generateTextFunc: func(ctx context.Context, req llm.TextGenerationRequest) (string, error) {
+		generateTextFunc: func(_ context.Context, req llm.TextGenerationRequest) (string, error) {
 			// verify system prompt includes cheatsheet
 			if req.SystemPrompt == "" {
 				t.Error("expected system prompt to be set")
@@ -166,7 +166,7 @@ func TestGenerateCodeWithConversationHistory(t *testing.T) {
 
 	mockRet := &mockRetriever{}
 	mockGen := &mockLLM{
-		generateTextFunc: func(ctx context.Context, req llm.TextGenerationRequest) (string, error) {
+		generateTextFunc: func(_ context.Context, req llm.TextGenerationRequest) (string, error) {
 			// verify conversation history is included
 			if len(req.Messages) != 3 { // 2 history + 1 current
 				t.Errorf("expected 3 messages, got %d", len(req.Messages))

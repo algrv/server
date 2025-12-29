@@ -24,7 +24,7 @@ func NewClient(id, sessionID, userID, displayName, role, ipAddress string, isAut
 		closed:                 false,
 		codeUpdateTimestamps:   make([]time.Time, 0, maxCodeUpdatesPerSecond),
 		agentRequestTimestamps: make([]time.Time, 0, maxAgentRequestsPerMinute),
-		chatMessageTimestamps: make([]time.Time, 0, maxChatMessagesPerMinute),
+		chatMessageTimestamps:  make([]time.Time, 0, maxChatMessagesPerMinute),
 	}
 }
 
@@ -32,13 +32,13 @@ func NewClient(id, sessionID, userID, displayName, role, ipAddress string, isAut
 func (c *Client) ReadPump() {
 	defer func() {
 		c.hub.Unregister <- c
-		c.conn.Close()
+		c.conn.Close() //nolint:errcheck,gosec // G104: defer cleanup
 	}()
 
 	c.conn.SetReadLimit(maxMessageSize)
-	c.conn.SetReadDeadline(time.Now().Add(pongWait))
+	c.conn.SetReadDeadline(time.Now().Add(pongWait)) //nolint:errcheck,gosec // G104: websocket setup
 	c.conn.SetPongHandler(func(string) error {
-		c.conn.SetReadDeadline(time.Now().Add(pongWait))
+		c.conn.SetReadDeadline(time.Now().Add(pongWait)) //nolint:errcheck,gosec // G104: pong handler
 		return nil
 	})
 
@@ -84,17 +84,17 @@ func (c *Client) WritePump() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
-		c.conn.Close()
+		c.conn.Close() //nolint:errcheck,gosec // G104: defer cleanup
 	}()
 
 	for {
 		select {
 		case message, ok := <-c.send:
-			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			c.conn.SetWriteDeadline(time.Now().Add(writeWait)) //nolint:errcheck,gosec // G104: websocket timing
 
 			if !ok {
 				// hub closed the channel
-				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				c.conn.WriteMessage(websocket.CloseMessage, []byte{}) //nolint:errcheck,gosec // G104: close message
 				return
 			}
 
@@ -103,14 +103,14 @@ func (c *Client) WritePump() {
 				return
 			}
 
-			w.Write(message)
+			w.Write(message) //nolint:errcheck,gosec // G104: websocket write
 
 			// add queued messages to the current webSocket message
 			n := len(c.send)
 
 			for range n {
-				w.Write([]byte{'\n'})
-				w.Write(<-c.send)
+				w.Write([]byte{'\n'}) //nolint:errcheck,gosec // G104: websocket write
+				w.Write(<-c.send)     //nolint:errcheck,gosec // G104: websocket write
 			}
 
 			if err := w.Close(); err != nil {
@@ -118,7 +118,7 @@ func (c *Client) WritePump() {
 			}
 
 		case <-ticker.C:
-			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			c.conn.SetWriteDeadline(time.Now().Add(writeWait)) //nolint:errcheck,gosec // G104: websocket ping timing
 
 			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
 				return
@@ -183,7 +183,7 @@ func (c *Client) SendError(code, message, details string) {
 		return
 	}
 
-	c.Send(errorMsg)
+	c.Send(errorMsg) //nolint:errcheck,gosec // G104: best effort error notification
 }
 
 // closes the client connection

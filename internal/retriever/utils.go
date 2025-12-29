@@ -74,11 +74,12 @@ func (c *Client) organizeByPage(ctx context.Context, chunks []SearchResult) ([]S
 		}
 
 		// categorize chunks
-		if chunk.SectionTitle == "PAGE_SUMMARY" {
+		switch chunk.SectionTitle {
+		case "PAGE_SUMMARY":
 			pageSummaries[chunk.PageName] = chunk
-		} else if chunk.SectionTitle == "PAGE_EXAMPLES" {
+		case "PAGE_EXAMPLES":
 			pageExamples[chunk.PageName] = chunk
-		} else {
+		default:
 			pageSections[chunk.PageName] = append(pageSections[chunk.PageName], chunk)
 		}
 	}
@@ -86,11 +87,12 @@ func (c *Client) organizeByPage(ctx context.Context, chunks []SearchResult) ([]S
 	// add special chunks from database fetch
 	for pageName, chunks := range specialChunks {
 		for _, chunk := range chunks {
-			if chunk.SectionTitle == "PAGE_SUMMARY" {
+			switch chunk.SectionTitle {
+			case "PAGE_SUMMARY":
 				if _, exists := pageSummaries[pageName]; !exists {
 					pageSummaries[pageName] = chunk
 				}
-			} else if chunk.SectionTitle == "PAGE_EXAMPLES" {
+			case "PAGE_EXAMPLES":
 				if _, exists := pageExamples[pageName]; !exists {
 					pageExamples[pageName] = chunk
 				}

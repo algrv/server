@@ -45,7 +45,7 @@ func ProcessRawExamples(rawExamples []RawExample) ([]Example, error) {
 		example, err := ProcessRawExample(raw)
 
 		if err != nil {
-			return nil, fmt.Errorf("failed to process example: %v", err)
+			return nil, fmt.Errorf("failed to process example: %w", err)
 		}
 
 		examples = append(examples, example)

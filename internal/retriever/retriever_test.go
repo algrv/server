@@ -1,55 +1,19 @@
 package retriever
 
 import (
-	"context"
 	"log"
 	"slices"
 	"strings"
 	"testing"
 
-	"github.com/algorave/server/internal/llm"
 	"github.com/algorave/server/internal/strudel"
 	"github.com/joho/godotenv"
 )
-
-type mockLLM struct {
-	model                  string
-	generateTextFunc       func(ctx context.Context, req llm.TextGenerationRequest) (string, error)
-	generateEmbeddingFunc  func(ctx context.Context, text string) ([]float32, error)
-	generateEmbeddingsFunc func(ctx context.Context, texts []string) ([][]float32, error)
-	transformQueryFunc     func(ctx context.Context, query string) (string, error)
-}
 
 func init() {
 	if err := godotenv.Load("../../.env"); err != nil {
 		log.Printf("Warning: Could not load .env file: %v", err)
 	}
-}
-
-func (l *mockLLM) GenerateText(ctx context.Context, req llm.TextGenerationRequest) (string, error) {
-	return "sound(\"bd\").fast(4)", nil
-}
-
-func (l *mockLLM) Model() string {
-	return "mock-model"
-}
-
-func (l *mockLLM) GenerateEmbedding(ctx context.Context, text string) ([]float32, error) {
-	return make([]float32, 1536), nil
-}
-
-func (l *mockLLM) GenerateEmbeddings(ctx context.Context, texts []string) ([][]float32, error) {
-	embeddings := make([][]float32, len(texts))
-
-	for i := range texts {
-		embeddings[i] = make([]float32, 1536)
-	}
-
-	return embeddings, nil
-}
-
-func (l *mockLLM) TransformQuery(ctx context.Context, query string) (string, error) {
-	return query + " expanded keywords", nil
 }
 
 // verifies the merge logic works correctly

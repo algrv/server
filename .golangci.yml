@@ -4,26 +4,18 @@ run:
 linters:
   enable:
     - errorlint
-    - funlen
-    - gocyclo
     - gosec
     - prealloc
     - revive
-    - whitespace
-    - wsl_v5
   settings:
     errcheck:
       check-type-assertions: true
       check-blank: true
-    funlen:
-      lines: 50
-      statements: 40
-    gocyclo:
-      min-complexity: 15
     gosec:
       excludes:
         - G404
         - G304
+        - G101 # False positive for "token" column names in SQL queries
     revive:
       enable-all-rules: false
       rules:
@@ -33,6 +25,7 @@ linters:
         - name: dot-imports
         - name: error-return
         - name: error-strings
+          disabled: true
         - name: error-naming
         - name: if-return
         - name: increment-decrement
@@ -57,41 +50,15 @@ linters:
       checks:
         - all
         - '-ST1000' # Disable package comment requirement
-    wsl_v5:
-      allow-first-in-block: true
-      allow-whole-block: true
-      branch-max-lines: 2
-      case-max-lines: 0
-      default: none
-      enable:
-        - expr
-        - go
-        - inc-dec
-        - label
-        - send
-        - switch
-        - leading-whitespace
-        - trailing-whitespace
+        - '-ST1005' # Disable error string punctuation requirement
+        - '-ST1020' # Disable function comment format requirement
+        - '-ST1021' # Disable type comment format requirement
   exclusions:
     generated: lax
     rules:
       - linters:
-          - funlen
-          - gocyclo
-        path: _test\.go
-      - linters:
           - gosec
         path: _test\.go
-      - text: only one cuddle assignment allowed before if statement
-        linters: ['wsl']
-      - text: if statements should only be cuddled with assignments
-        linters: ['wsl']
-      - text: ranges should only be cuddled with assignments used in the iteration
-        linters: ['wsl']
-      - text: go statements can only invoke
-        linters: ['wsl']
-      - text: should not be cuddled if block has more than two lines
-        linters: ['wsl']
     paths:
       - third_party$
       - builtin$

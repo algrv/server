@@ -47,7 +47,12 @@ func GetUserID(c *gin.Context) (string, bool) {
 		return "", false
 	}
 
-	return userID.(string), true
+	uid, ok := userID.(string) //nolint:errcheck
+	if !ok {
+		return "", false
+	}
+
+	return uid, true
 }
 
 // validates JWT if present but doesn't require it
