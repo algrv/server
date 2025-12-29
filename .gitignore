@@ -48,3 +48,6 @@ docs/strudel
 
 # Logs
 *.log
+
+# development plans
+.brainstorm/

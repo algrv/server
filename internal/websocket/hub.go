@@ -79,6 +79,15 @@ func (h *Hub) registerClient(client *Client) {
 		Role:        client.Role,
 	})
 	if err == nil {
+		// send welcome message to the connecting client first
+		if sendErr := client.Send(userJoinedMsg); sendErr != nil {
+			logger.ErrorErr(sendErr, "failed to send welcome message",
+				"client_id", client.ID,
+				"session_id", client.SessionID,
+			)
+		}
+
+		// then broadcast to other clients in the session
 		h.broadcastToSession(client.SessionID, userJoinedMsg, client.ID)
 	}
 }
@@ -161,15 +170,18 @@ func (h *Hub) handleMessage(msg *Message) {
 	h.mu.RUnlock()
 
 	if exists {
-		if err := handler(h, sender, msg); err != nil {
-			logger.ErrorErr(err, "handler error",
-				"message_type", msg.Type,
-				"client_id", sender.ID,
-				"session_id", msg.SessionID,
-			)
+		// run handler asynchronously to avoid blocking the hub
+		go func() {
+			if err := handler(h, sender, msg); err != nil {
+				logger.ErrorErr(err, "handler error",
+					"message_type", msg.Type,
+					"client_id", sender.ID,
+					"session_id", msg.SessionID,
+				)
 
-			sender.SendError("server_error", "failed to process message", err.Error())
-		}
+				sender.SendError("server_error", "failed to process message", err.Error())
+			}
+		}()
 	} else {
 		// reject unhandled message types
 		logger.Warn("unhandled message type received",
