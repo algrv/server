@@ -12,14 +12,6 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// holds all external service clients (LLM, storage, retriever, agent)
-type Services struct {
-	Agent     *agent.Agent
-	LLM       llm.LLM
-	Retriever *retriever.Client
-	Storage   *storage.Client
-}
-
 // creates and configures all service clients
 func InitializeServices(cfg *config.Config, db *pgxpool.Pool) (*Services, error) {
 	llmClient, err := llm.NewLLM(context.Background())

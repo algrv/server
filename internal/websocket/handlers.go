@@ -6,7 +6,6 @@ import (
 
 	"github.com/algorave/server/algorave/sessions"
 	"github.com/algorave/server/internal/agent"
-	"github.com/algorave/server/internal/errors"
 	"github.com/algorave/server/internal/llm"
 	"github.com/algorave/server/internal/logger"
 )
@@ -230,7 +229,7 @@ func GenerateHandler(agentClient *agent.Agent, sessionRepo sessions.Repository) 
 	}
 }
 
-// handles chat message messages
+// handles session chat message messages
 func ChatHandler(sessionRepo sessions.Repository) MessageHandler {
 	return func(hub *Hub, client *Client, msg *Message) error {
 		// check rate limit
@@ -309,24 +308,5 @@ func ChatHandler(sessionRepo sessions.Repository) MessageHandler {
 		)
 
 		return nil
-	}
-}
-
-func createBYOKGenerator(provider, apiKey string) (llm.TextGenerator, error) {
-	switch provider {
-	case "openai":
-		return llm.NewOpenAIGenerator(llm.OpenAIConfig{
-			APIKey: apiKey,
-			Model:  "gpt-4o",
-		}), nil
-	case "claude":
-		return llm.NewAnthropicTransformer(llm.AnthropicConfig{
-			APIKey:      apiKey,
-			Model:       "claude-sonnet-4-20250514",
-			MaxTokens:   4096,
-			Temperature: 0.7,
-		}), nil
-	default:
-		return nil, errors.ErrUnsupportedProvider(provider)
 	}
 }

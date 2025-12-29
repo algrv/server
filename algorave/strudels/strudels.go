@@ -7,11 +7,6 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// handles strudel database operations
-type Repository struct {
-	db *pgxpool.Pool
-}
-
 var (
 	ErrStrudelNotFound = errors.New("strudel not found")
 )

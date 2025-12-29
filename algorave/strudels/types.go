@@ -6,7 +6,13 @@ import (
 	"time"
 
 	"github.com/algorave/server/internal/agent"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
+
+// handles strudel database operations
+type Repository struct {
+	db *pgxpool.Pool
+}
 
 // represents a saved strudel pattern with code and metadata
 type Strudel struct {

@@ -9,48 +9,10 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// handles session database operations
-type Repository interface {
-	// session operations
-	CreateSession(ctx context.Context, req *CreateSessionRequest) (*Session, error)
-	GetSession(ctx context.Context, sessionID string) (*Session, error)
-	GetUserSessions(ctx context.Context, userID string, activeOnly bool) ([]*Session, error)
-	UpdateSessionCode(ctx context.Context, sessionID, code string) error
-	EndSession(ctx context.Context, sessionID string) error
-
-	// authenticated participant operations
-	AddAuthenticatedParticipant(ctx context.Context, sessionID, userID, displayName, role string) (*Participant, error)
-	GetAuthenticatedParticipant(ctx context.Context, sessionID, userID string) (*Participant, error)
-	MarkAuthenticatedParticipantLeft(ctx context.Context, participantID string) error
-	GetParticipantByID(ctx context.Context, participantID string) (*CombinedParticipant, error)
-	UpdateParticipantRole(ctx context.Context, participantID, role string) error
-
-	// anonymous participant operations
-	AddAnonymousParticipant(ctx context.Context, sessionID, displayName, role string) (*AnonymousParticipant, error)
-
-	// combined participant operations
-	ListAllParticipants(ctx context.Context, sessionID string) ([]*CombinedParticipant, error)
-	RemoveParticipant(ctx context.Context, participantID string) error
-
-	// invite token operations
-	CreateInviteToken(ctx context.Context, req *CreateInviteTokenRequest) (*InviteToken, error)
-	ListInviteTokens(ctx context.Context, sessionID string) ([]*InviteToken, error)
-	ValidateInviteToken(ctx context.Context, token string) (*InviteToken, error)
-	IncrementTokenUses(ctx context.Context, tokenID string) error
-	RevokeInviteToken(ctx context.Context, tokenID string) error
-
-	// message operations
-	GetMessages(ctx context.Context, sessionID string, limit int) ([]*Message, error)
-	CreateMessage(ctx context.Context, sessionID string, userID *string, role, content string) (*Message, error)
-	AddMessage(ctx context.Context, sessionID, userID, role, messageType, content string) (*Message, error)
-	UpdateLastActivity(ctx context.Context, sessionID string) error
-}
-
 type repository struct {
 	db *pgxpool.Pool
 }
 
-// creates a new session repository
 func NewRepository(db *pgxpool.Pool) Repository {
 	return &repository{db: db}
 }
@@ -108,6 +70,7 @@ func (r *repository) GetSession(ctx context.Context, sessionID string) (*Session
 // retrieves all sessions for a user (as host or participant)
 func (r *repository) GetUserSessions(ctx context.Context, userID string, activeOnly bool) ([]*Session, error) {
 	query := queryGetUserSessions
+
 	if activeOnly {
 		query = queryGetUserSessionsActiveOnly
 	}
@@ -116,8 +79,8 @@ func (r *repository) GetUserSessions(ctx context.Context, userID string, activeO
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 
+	defer rows.Close()
 	var sessions []*Session
 
 	for rows.Next() {
@@ -145,19 +108,16 @@ func (r *repository) GetUserSessions(ctx context.Context, userID string, activeO
 	return sessions, nil
 }
 
-// updates the code in a session
 func (r *repository) UpdateSessionCode(ctx context.Context, sessionID, code string) error {
 	_, err := r.db.Exec(ctx, queryUpdateSessionCode, code, sessionID)
 	return err
 }
 
-// marks a session as ended
 func (r *repository) EndSession(ctx context.Context, sessionID string) error {
 	_, err := r.db.Exec(ctx, queryEndSession, sessionID)
 	return err
 }
 
-// adds an authenticated user to a session
 func (r *repository) AddAuthenticatedParticipant(
 	ctx context.Context,
 	sessionID, userID, displayName, role string,
@@ -189,7 +149,6 @@ func (r *repository) AddAuthenticatedParticipant(
 	return &participant, nil
 }
 
-// retrieves an authenticated participant
 func (r *repository) GetAuthenticatedParticipant(ctx context.Context, sessionID, userID string) (*Participant, error) {
 	var participant Participant
 
@@ -211,7 +170,6 @@ func (r *repository) GetAuthenticatedParticipant(ctx context.Context, sessionID,
 	return &participant, nil
 }
 
-// marks a participant as having left
 func (r *repository) MarkAuthenticatedParticipantLeft(ctx context.Context, participantID string) error {
 	_, err := r.db.Exec(ctx, queryMarkAuthenticatedParticipantLeft, participantID)
 	return err
@@ -274,13 +232,11 @@ func (r *repository) GetParticipantByID(ctx context.Context, participantID strin
 	}, nil
 }
 
-// updates a participant's role
 func (r *repository) UpdateParticipantRole(ctx context.Context, participantID, role string) error {
 	_, err := r.db.Exec(ctx, queryUpdateParticipantRole, role, participantID)
 	return err
 }
 
-// adds an anonymous user to a session
 func (r *repository) AddAnonymousParticipant(
 	ctx context.Context,
 	sessionID, displayName, role string,
@@ -538,6 +494,7 @@ func (r *repository) GetMessages(ctx context.Context, sessionID string, limit in
 			&m.SessionID,
 			&m.UserID,
 			&m.Role,
+			&m.MessageType,
 			&m.Content,
 			&m.CreatedAt,
 		)
@@ -559,7 +516,7 @@ func (r *repository) CreateMessage(
 	ctx context.Context,
 	sessionID string,
 	userID *string,
-	role, content string,
+	role, messageType, content string,
 ) (*Message, error) {
 	var message Message
 
@@ -569,12 +526,14 @@ func (r *repository) CreateMessage(
 		sessionID,
 		userID,
 		role,
+		messageType,
 		content,
 	).Scan(
 		&message.ID,
 		&message.SessionID,
 		&message.UserID,
 		&message.Role,
+		&message.MessageType,
 		&message.Content,
 		&message.CreatedAt,
 	)
@@ -597,7 +556,6 @@ func (r *repository) AddMessage(
 		userIDPtr = &userID
 	}
 
-	// use role (messageType is redundant but kept for compatibility)
 	var message Message
 	err := r.db.QueryRow(
 		ctx,
@@ -605,12 +563,14 @@ func (r *repository) AddMessage(
 		sessionID,
 		userIDPtr,
 		role,
+		messageType,
 		content,
 	).Scan(
 		&message.ID,
 		&message.SessionID,
 		&message.UserID,
 		&message.Role,
+		&message.MessageType,
 		&message.Content,
 		&message.CreatedAt,
 	)
@@ -631,6 +591,7 @@ func (r *repository) UpdateLastActivity(ctx context.Context, sessionID string) e
 // generates a cryptographically secure random token
 func generateToken() (string, error) {
 	bytes := make([]byte, 32)
+
 	if _, err := rand.Read(bytes); err != nil {
 		return "", fmt.Errorf("failed to generate token: %w", err)
 	}

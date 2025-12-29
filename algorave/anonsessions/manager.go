@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/algorave/server/algorave/strudels"
@@ -14,13 +13,6 @@ const (
 	SessionExpiryDuration = 24 * time.Hour
 	CleanupInterval       = 1 * time.Hour
 )
-
-// manages in-memory anonymous sessions
-type Manager struct {
-	sessions map[string]*AnonymousSession
-	mu       sync.RWMutex
-	stopChan chan struct{}
-}
 
 // creates a new anonymous session manager
 func NewManager() *Manager {
@@ -175,6 +167,7 @@ func (m *Manager) Stop() {
 // generates a cryptographically secure random session ID
 func generateSessionID() (string, error) {
 	bytes := make([]byte, 16)
+
 	if _, err := rand.Read(bytes); err != nil {
 		return "", fmt.Errorf("failed to generate session ID: %w", err)
 	}

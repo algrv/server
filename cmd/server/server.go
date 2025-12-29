@@ -14,19 +14,6 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// holds all dependencies and state for the API server
-type Server struct {
-	db          *pgxpool.Pool
-	config      *config.Config
-	userRepo    *users.Repository
-	strudelRepo *strudels.Repository
-	sessionRepo sessions.Repository
-	sessionMgr  *anonsessions.Manager
-	services    *Services
-	hub         *ws.Hub
-	router      *gin.Engine
-}
-
 // creates and configures a new server instance with all dependencies
 func NewServer(cfg *config.Config) (*Server, error) {
 	ctx := context.Background()

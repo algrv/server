@@ -1,6 +1,7 @@
 package sessions
 
 import (
+	"context"
 	"time"
 )
 
@@ -8,8 +9,45 @@ import (
 const (
 	MessageTypeUserPrompt = "user"
 	MessageTypeAIResponse = "assistant"
-	MessageTypeChat       = "user"
+	MessageTypeChat       = "chat"
 )
+
+// handles session database operations
+type Repository interface {
+	// session operations
+	CreateSession(ctx context.Context, req *CreateSessionRequest) (*Session, error)
+	GetSession(ctx context.Context, sessionID string) (*Session, error)
+	GetUserSessions(ctx context.Context, userID string, activeOnly bool) ([]*Session, error)
+	UpdateSessionCode(ctx context.Context, sessionID, code string) error
+	EndSession(ctx context.Context, sessionID string) error
+
+	// authenticated participant operations
+	AddAuthenticatedParticipant(ctx context.Context, sessionID, userID, displayName, role string) (*Participant, error)
+	GetAuthenticatedParticipant(ctx context.Context, sessionID, userID string) (*Participant, error)
+	MarkAuthenticatedParticipantLeft(ctx context.Context, participantID string) error
+	GetParticipantByID(ctx context.Context, participantID string) (*CombinedParticipant, error)
+	UpdateParticipantRole(ctx context.Context, participantID, role string) error
+
+	// anonymous participant operations
+	AddAnonymousParticipant(ctx context.Context, sessionID, displayName, role string) (*AnonymousParticipant, error)
+
+	// combined participant operations
+	ListAllParticipants(ctx context.Context, sessionID string) ([]*CombinedParticipant, error)
+	RemoveParticipant(ctx context.Context, participantID string) error
+
+	// invite token operations
+	CreateInviteToken(ctx context.Context, req *CreateInviteTokenRequest) (*InviteToken, error)
+	ListInviteTokens(ctx context.Context, sessionID string) ([]*InviteToken, error)
+	ValidateInviteToken(ctx context.Context, token string) (*InviteToken, error)
+	IncrementTokenUses(ctx context.Context, tokenID string) error
+	RevokeInviteToken(ctx context.Context, tokenID string) error
+
+	// message operations
+	GetMessages(ctx context.Context, sessionID string, limit int) ([]*Message, error)
+	CreateMessage(ctx context.Context, sessionID string, userID *string, role, messageType, content string) (*Message, error)
+	AddMessage(ctx context.Context, sessionID, userID, role, messageType, content string) (*Message, error)
+	UpdateLastActivity(ctx context.Context, sessionID string) error
+}
 
 // represents a collaborative coding session
 type Session struct {
@@ -76,7 +114,7 @@ type Message struct {
 	ID          string    `json:"id"`
 	SessionID   string    `json:"sessionID"`
 	UserID      *string   `json:"userID,omitempty"`
-	Role        string    `json:"role"` // user, assistant
+	Role        string    `json:"role"`        // user, assistant
 	MessageType string    `json:"messageType"` // MessageTypeUserPrompt, MessageTypeAIResponse, MessageTypeChat
 	Content     string    `json:"content"`
 	CreatedAt   time.Time `json:"createdAt"`

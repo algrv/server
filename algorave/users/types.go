@@ -1,6 +1,15 @@
 package users
 
-import "time"
+import (
+	"time"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+)
+
+// handles user database operations
+type Repository struct {
+	db *pgxpool.Pool
+}
 
 // represents an authenticated user in the system
 type User struct {

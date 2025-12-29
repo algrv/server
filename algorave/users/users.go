@@ -6,11 +6,6 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// handles user database operations
-type Repository struct {
-	db *pgxpool.Pool
-}
-
 // creates a new user repository
 func NewRepository(db *pgxpool.Pool) *Repository {
 	return &Repository{db: db}
