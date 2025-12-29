@@ -37,6 +37,9 @@ const (
 
 	// is sent by server in response to ping
 	TypePong = "pong"
+
+	// is sent by server before shutdown
+	TypeServerShutdown = "server_shutdown"
 )
 
 // Client connection constants
@@ -90,6 +93,7 @@ type Message struct {
 	ClientID  string          `json:"-"` // Internal only, not sent to clients
 	UserID    string          `json:"user_id,omitempty"`
 	Timestamp time.Time       `json:"timestamp"`
+	Sequence  uint64          `json:"seq,omitempty"`
 	Payload   json.RawMessage `json:"payload"`
 }
 
@@ -129,18 +133,31 @@ type AgentRequestPayload struct {
 
 // AgentResponsePayload contains the agent's code generation response
 type AgentResponsePayload struct {
-	Code                string   `json:"code,omitempty"`
-	DocsRetrieved       int      `json:"docs_retrieved"`
-	ExamplesRetrieved   int      `json:"examples_retrieved"`
-	Model               string   `json:"model"`
-	IsActionable        bool     `json:"is_actionable"`
-	ClarifyingQuestions []string `json:"clarifying_questions,omitempty"`
+	Code                string     `json:"code,omitempty"`
+	DocsRetrieved       int        `json:"docs_retrieved"`
+	ExamplesRetrieved   int        `json:"examples_retrieved"`
+	Model               string     `json:"model"`
+	IsActionable        bool       `json:"is_actionable"`
+	ClarifyingQuestions []string   `json:"clarifying_questions,omitempty"`
+	RateLimit           *RateLimit `json:"rate_limit,omitempty"`
+}
+
+// RateLimit contains rate limit status for the client
+type RateLimit struct {
+	RequestsRemaining int `json:"requests_remaining"`
+	RequestsLimit     int `json:"requests_limit"`
+	ResetSeconds      int `json:"reset_seconds"`
 }
 
 // ChatMessagePayload contains a chat message from a user
 type ChatMessagePayload struct {
 	Message     string `json:"message"`
 	DisplayName string `json:"display_name,omitempty"`
+}
+
+// ServerShutdownPayload contains information about server shutdown
+type ServerShutdownPayload struct {
+	Reason string `json:"reason"`
 }
 
 
@@ -226,6 +243,9 @@ type Hub struct {
 
 	// connection tracking: IP address -> count of connections
 	ipConnections map[string]int
+
+	// sequence numbers per session for message ordering
+	sessionSequences map[string]uint64
 }
 
 // MessageHandler processes a specific message type

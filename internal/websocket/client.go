@@ -169,10 +169,32 @@ func (c *Client) Send(msg *Message) (err error) {
 	case c.send <- messageBytes:
 		return nil
 	default:
-		// channel is full, close the client
+		// channel is full, send error directly to websocket before closing
+		c.sendBufferOverflowError()
 		c.Close()
 		return ErrConnectionClosed
 	}
+}
+
+// sends buffer overflow error directly to websocket (bypassing the full channel)
+func (c *Client) sendBufferOverflowError() {
+	errorMsg, err := NewMessage(TypeError, c.SessionID, c.UserID, map[string]string{
+		"error":   "buffer_overflow",
+		"message": "message buffer full, connection will be closed",
+		"details": "too many messages queued, please reconnect",
+	})
+	if err != nil {
+		return
+	}
+
+	errorBytes, err := json.Marshal(errorMsg)
+	if err != nil {
+		return
+	}
+
+	// write directly to websocket with short deadline
+	c.conn.SetWriteDeadline(time.Now().Add(2 * time.Second))
+	c.conn.WriteMessage(websocket.TextMessage, errorBytes) //nolint:errcheck,gosec
 }
 
 // sends an error message to the client
@@ -309,4 +331,47 @@ func (c *Client) checkChatRateLimit() bool {
 	// add current timestamp
 	c.chatMessageTimestamps = append(c.chatMessageTimestamps, now)
 	return true
+}
+
+// returns current rate limit status for agent requests
+func (c *Client) GetAgentRateLimitStatus() *RateLimit {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	limit := c.getAgentRequestLimit()
+	now := time.Now()
+	oneMinuteAgo := now.Add(-1 * time.Minute)
+
+	// count valid timestamps
+	validCount := 0
+	var oldestTimestamp time.Time
+
+	for _, ts := range c.agentRequestTimestamps {
+		if ts.After(oneMinuteAgo) {
+			validCount++
+			if oldestTimestamp.IsZero() || ts.Before(oldestTimestamp) {
+				oldestTimestamp = ts
+			}
+		}
+	}
+
+	remaining := limit - validCount
+	if remaining < 0 {
+		remaining = 0
+	}
+
+	// calculate seconds until oldest request expires (resets quota)
+	resetSeconds := 60
+	if !oldestTimestamp.IsZero() {
+		resetSeconds = int(oldestTimestamp.Add(time.Minute).Sub(now).Seconds())
+		if resetSeconds < 0 {
+			resetSeconds = 0
+		}
+	}
+
+	return &RateLimit{
+		RequestsRemaining: remaining,
+		RequestsLimit:     limit,
+		ResetSeconds:      resetSeconds,
+	}
 }

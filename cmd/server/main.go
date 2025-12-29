@@ -91,6 +91,9 @@ func main() {
 
 	logger.Info("shutting down server")
 
+	// notify websocket clients and close connections first
+	srv.hub.Shutdown()
+
 	// graceful shutdown with 10 second timeout
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

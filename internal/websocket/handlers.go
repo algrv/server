@@ -243,7 +243,7 @@ func GenerateHandler(agentClient *agent.Agent, sessionRepo sessions.Repository, 
 			}
 		}
 
-		// create response payload
+		// create response payload with rate limit info
 		responsePayload := AgentResponsePayload{
 			Code:                response.Code,
 			DocsRetrieved:       response.DocsRetrieved,
@@ -251,6 +251,7 @@ func GenerateHandler(agentClient *agent.Agent, sessionRepo sessions.Repository, 
 			Model:               response.Model,
 			IsActionable:        response.IsActionable,
 			ClarifyingQuestions: response.ClarifyingQuestions,
+			RateLimit:           client.GetAgentRateLimitStatus(),
 		}
 
 		// create response message

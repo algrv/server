@@ -1,20 +1,23 @@
 package websocket
 
 import (
+	"time"
+
 	"github.com/algorave/server/internal/logger"
 )
 
 func NewHub() *Hub {
 	return &Hub{
-		sessions:        make(map[string]map[string]*Client),
-		Register:        make(chan *Client),
-		Unregister:      make(chan *Client),
-		Broadcast:       make(chan *Message, 256),
-		handlers:        make(map[string]MessageHandler),
-		running:         false,
-		shutdown:        make(chan struct{}),
-		userConnections: make(map[string]int),
-		ipConnections:   make(map[string]int),
+		sessions:         make(map[string]map[string]*Client),
+		Register:         make(chan *Client),
+		Unregister:       make(chan *Client),
+		Broadcast:        make(chan *Message, 256),
+		handlers:         make(map[string]MessageHandler),
+		running:          false,
+		shutdown:         make(chan struct{}),
+		userConnections:  make(map[string]int),
+		ipConnections:    make(map[string]int),
+		sessionSequences: make(map[string]uint64),
 	}
 }
 
@@ -124,6 +127,7 @@ func (h *Hub) unregisterClient(client *Client) {
 
 		if len(sessionClients) == 0 {
 			delete(h.sessions, client.SessionID)
+			delete(h.sessionSequences, client.SessionID)
 			logger.Info("session has no more clients, removed",
 				"session_id", client.SessionID,
 			)
@@ -208,6 +212,10 @@ func (h *Hub) broadcastToSession(sessionID string, msg *Message, excludeClientID
 		return
 	}
 
+	// assign sequence number to message
+	h.sessionSequences[sessionID]++
+	msg.Sequence = h.sessionSequences[sessionID]
+
 	for clientID, client := range sessionClients {
 		if clientID == excludeClientID {
 			continue
@@ -268,6 +276,35 @@ func (h *Hub) Shutdown() {
 
 func (h *Hub) closeAllConnections() {
 	h.mu.Lock()
+
+	logger.Info("notifying clients of server shutdown")
+
+	// send shutdown notification to all clients first
+	for sessionID, sessionClients := range h.sessions {
+		shutdownMsg, err := NewMessage(TypeServerShutdown, sessionID, "", ServerShutdownPayload{
+			Reason: "server is shutting down for maintenance",
+		})
+		if err != nil {
+			logger.ErrorErr(err, "failed to create shutdown message")
+			continue
+		}
+
+		for _, client := range sessionClients {
+			if err := client.Send(shutdownMsg); err != nil {
+				logger.ErrorErr(err, "failed to send shutdown notification",
+					"client_id", client.ID,
+					"session_id", sessionID,
+				)
+			}
+		}
+	}
+
+	h.mu.Unlock()
+
+	// give clients time to receive the shutdown message
+	time.Sleep(500 * time.Millisecond)
+
+	h.mu.Lock()
 	defer h.mu.Unlock()
 
 	logger.Info("closing all websocket connections")
@@ -286,6 +323,7 @@ func (h *Hub) closeAllConnections() {
 	h.sessions = make(map[string]map[string]*Client)
 	h.userConnections = make(map[string]int)
 	h.ipConnections = make(map[string]int)
+	h.sessionSequences = make(map[string]uint64)
 }
 
 // checks if a new connection should be allowed based on limits
