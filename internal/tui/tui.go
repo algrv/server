@@ -6,7 +6,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-// returns a new TUI application
 func NewApp(mode string) *Model {
 	return &Model{
 		state:   StateWelcome,
@@ -48,7 +47,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case EnterEditorMsg:
 		m.state = StateEditor
-		return m, nil
+		return m, m.editor.Init()
 	}
 
 	switch m.state {

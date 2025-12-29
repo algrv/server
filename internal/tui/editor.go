@@ -1,7 +1,9 @@
 package tui
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -64,7 +66,20 @@ func NewEditor() *EditorModel {
 		height:              physicalHeight,
 		ready:               true,
 		shouldScrollBottom:  false,
+		wsClient:            NewWSClient(),
+		wsConnected:         false,
+		wsError:             nil,
 	}
+}
+
+// returns the initial command to run when the editor starts
+func (m *EditorModel) Init() tea.Cmd {
+	// connect to WebSocket when editor initializes
+	log.Println("[editor] Init() called")
+	return tea.Batch(
+		m.spinner.Tick,
+		m.wsClient.ConnectCmd(),
+	)
 }
 
 func (m *EditorModel) Update(msg tea.Msg) (*EditorModel, tea.Cmd) {
@@ -74,10 +89,42 @@ func (m *EditorModel) Update(msg tea.Msg) (*EditorModel, tea.Cmd) {
 	)
 
 	switch msg := msg.(type) {
+	case WSConnectedMsg:
+		m.wsConnected = true
+		m.wsError = nil
+		return m, nil
+
+	case WSConnectErrorMsg:
+		m.wsConnected = false
+		m.wsError = msg.err
+		return m, nil
+
+	case WSDisconnectedMsg:
+		m.wsConnected = false
+		// try reconnecting automatically
+		return m, tea.Batch(
+			m.spinner.Tick,
+			m.wsClient.ConnectCmd(),
+		)
+
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+s", "enter":
 			if m.isFetching {
+				return m, nil
+			}
+
+			// retry connection if there's a connection error
+			if m.wsError != nil {
+				m.wsError = nil
+				return m, tea.Batch(
+					m.spinner.Tick,
+					m.wsClient.ConnectCmd(),
+				)
+			}
+
+			// wait for connection if not connected
+			if !m.wsConnected {
 				return m, nil
 			}
 
@@ -87,7 +134,7 @@ func (m *EditorModel) Update(msg tea.Msg) (*EditorModel, tea.Cmd) {
 				m.isFetching = true
 				m.input.SetValue("")
 
-				// get current code from last assistant message
+				// get current code from last agent message
 				currentCode := ""
 				for i := len(m.conversationHistory) - 1; i >= 0; i-- {
 					if m.conversationHistory[i].Role == "assistant" {
@@ -96,10 +143,10 @@ func (m *EditorModel) Update(msg tea.Msg) (*EditorModel, tea.Cmd) {
 					}
 				}
 
-				// send to agent (don't add user message yet - agent will add it)
+				// send to agent using persistent connection
 				return m, tea.Batch(
 					m.spinner.Tick,
-					sendToAgent(query, currentCode, m.conversationHistory),
+					m.sendToAgentCmd(query, currentCode, m.conversationHistory),
 				)
 			}
 
@@ -120,13 +167,16 @@ func (m *EditorModel) Update(msg tea.Msg) (*EditorModel, tea.Cmd) {
 		case "ctrl+up", "ctrl+down":
 			// ctrl+arrow keys for line-by-line viewport scrolling
 			var scrollMsg tea.Msg
+
 			if msg.String() == "ctrl+up" {
 				scrollMsg = tea.KeyMsg{Type: tea.KeyUp}
 			} else {
 				scrollMsg = tea.KeyMsg{Type: tea.KeyDown}
 			}
+
 			m.viewport, cmd = m.viewport.Update(scrollMsg)
 			cmds = append(cmds, cmd)
+
 			return m, tea.Batch(cmds...)
 
 		default:
@@ -209,7 +259,8 @@ func (m *EditorModel) Update(msg tea.Msg) (*EditorModel, tea.Cmd) {
 		return m, nil
 
 	case spinner.TickMsg:
-		if m.isFetching {
+		// keep spinner ticking during connection or fetching
+		if m.isFetching || (!m.wsConnected && m.wsError == nil) {
 			m.spinner, cmd = m.spinner.Update(msg)
 			return m, cmd
 		}
@@ -260,7 +311,21 @@ func (m *EditorModel) View() string {
 	b.WriteString("\n")
 
 	// input prompt
-	if m.isFetching {
+	if m.wsError != nil {
+		errorMsg := lipgloss.NewStyle().
+			Foreground(colorRed).
+			Italic(true).
+			Render(fmt.Sprintf("connection error: %v (press enter to retry)", m.wsError))
+		b.WriteString(errorMsg)
+		b.WriteString("\n\n")
+	} else if !m.wsConnected {
+		connectingMsg := lipgloss.NewStyle().
+			Foreground(colorYellow).
+			Italic(true).
+			Render(m.spinner.View() + " connecting...")
+		b.WriteString(connectingMsg)
+		b.WriteString("\n\n")
+	} else if m.isFetching {
 		fetchingMsg := lipgloss.NewStyle().
 			Foreground(colorGray).
 			Italic(true).
@@ -341,14 +406,12 @@ func (m *EditorModel) renderChatHistory() string {
 
 			// render code in a styled box
 			if len(msg.Content) > 0 {
-				// check if this is an error message
 				isError := strings.HasPrefix(msg.Content, "Error:")
-
-				// use lipgloss box with syntax highlighting from glamour
 				var codeContent string
+
 				if m.glamourRenderer != nil {
-					// render as markdown code block for syntax highlighting
 					markdown := fmt.Sprintf("```javascript\n%s\n```", msg.Content)
+
 					glamourOutput, err := m.glamourRenderer.Render(markdown)
 					if err == nil && glamourOutput != "" {
 						codeContent = strings.TrimSpace(glamourOutput)
@@ -434,4 +497,19 @@ func (m *EditorModel) GetCode() string {
 		}
 	}
 	return ""
+}
+
+// creates a command to send a request via the persistent webSocket connection
+func (m *EditorModel) sendToAgentCmd(userQuery, editorState string, conversationHistory []MessageModel) tea.Cmd {
+	return func() tea.Msg {
+		ctx, cancel := context.WithTimeout(context.Background(), agentRequestTimeout)
+		defer cancel()
+
+		resp, err := m.wsClient.SendAgentRequest(ctx, userQuery, editorState, conversationHistory)
+		if err != nil {
+			return AgentErrorMsg{userQuery: userQuery, err: err}
+		}
+
+		return *resp
+	}
 }
