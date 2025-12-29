@@ -11,12 +11,10 @@ var (
 	ErrStrudelNotFound = errors.New("strudel not found")
 )
 
-// creates a new strudel repository
 func NewRepository(db *pgxpool.Pool) *Repository {
 	return &Repository{db: db}
 }
 
-// creates a new strudel
 func (r *Repository) Create(
 	ctx context.Context,
 	userID string,
@@ -56,7 +54,6 @@ func (r *Repository) Create(
 	return &strudel, nil
 }
 
-// retrieves all strudels for a user
 func (r *Repository) List(ctx context.Context, userID string) ([]Strudel, error) {
 	rows, err := r.db.Query(ctx, queryList, userID)
 	if err != nil {
@@ -94,7 +91,6 @@ func (r *Repository) List(ctx context.Context, userID string) ([]Strudel, error)
 	return strudels, nil
 }
 
-// retrieves publicly shared strudels
 func (r *Repository) ListPublic(ctx context.Context, limit int) ([]Strudel, error) {
 	rows, err := r.db.Query(ctx, queryListPublic, limit)
 	if err != nil {
@@ -133,7 +129,6 @@ func (r *Repository) ListPublic(ctx context.Context, limit int) ([]Strudel, erro
 	return strudels, nil
 }
 
-// retrieves a specific strudel by ID for a user
 func (r *Repository) Get(ctx context.Context, strudelID, userID string) (*Strudel, error) {
 	var strudel Strudel
 
@@ -158,7 +153,6 @@ func (r *Repository) Get(ctx context.Context, strudelID, userID string) (*Strude
 	return &strudel, nil
 }
 
-// updates a strudel
 func (r *Repository) Update(
 	ctx context.Context,
 	strudelID, userID string,
@@ -199,7 +193,6 @@ func (r *Repository) Update(
 	return &strudel, nil
 }
 
-// deletes a strudel
 func (r *Repository) Delete(ctx context.Context, strudelID, userID string) error {
 	result, err := r.db.Exec(ctx, queryDelete, strudelID, userID)
 	if err != nil {

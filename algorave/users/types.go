@@ -6,7 +6,6 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// daily generation limits by tier/type
 const (
 	DailyLimitAnonymous = 50   // anonymous users: 50/day
 	DailyLimitFree      = 100  // free tier: 100/day
@@ -14,20 +13,16 @@ const (
 	DailyLimitBYOK      = -1   // BYOK: unlimited (using own keys)
 )
 
-// per-minute generation limits by tier (for future use)
-// currently all users share the same per-minute limit (10/min) defined in websocket/types.go
 const (
 	MinuteLimitDefault = 10 // default for all users
-	MinuteLimitPro     = 20 // pro tier: higher burst capacity
-	MinuteLimitBYOK    = 30 // BYOK: highest burst capacity
+	MinuteLimitPro     = 20 // pro tier
+	MinuteLimitBYOK    = 30 // BYOK
 )
 
-// handles user database operations
 type Repository struct {
 	db *pgxpool.Pool
 }
 
-// represents an authenticated user in the system
 type User struct {
 	ID         string    `json:"id"`
 	Email      string    `json:"email"`
@@ -40,13 +35,11 @@ type User struct {
 	UpdatedAt  time.Time `json:"updated_at"`
 }
 
-// contains data for updating a user's profile
 type UpdateProfileRequest struct {
 	Name      string `json:"name"`
 	AvatarURL string `json:"avatar_url"`
 }
 
-// contains data for logging a generation request
 type UsageLogRequest struct {
 	UserID       *string // nil for anonymous
 	SessionID    string  // for anonymous users
@@ -57,7 +50,6 @@ type UsageLogRequest struct {
 	IsBYOK       bool    // true if user provided own API key
 }
 
-// result of a rate limit check
 type RateLimitResult struct {
 	Allowed   bool
 	Current   int

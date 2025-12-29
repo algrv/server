@@ -65,7 +65,7 @@ type Session struct {
 	LastActivity time.Time  `json:"last_activity"`
 }
 
-// represents an authenticated user in a session
+// represents a user in a session
 type Participant struct {
 	ID          string     `json:"id"`
 	SessionID   string     `json:"session_id"`

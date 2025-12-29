@@ -487,13 +487,11 @@ func (r *repository) ValidateInviteToken(ctx context.Context, token string) (*In
 	return &inviteToken, nil
 }
 
-// increments the usage count of a token
 func (r *repository) IncrementTokenUses(ctx context.Context, tokenID string) error {
 	_, err := r.db.Exec(ctx, queryIncrementTokenUses, tokenID)
 	return err
 }
 
-// deletes an invite token
 func (r *repository) RevokeInviteToken(ctx context.Context, tokenID string) error {
 	_, err := r.db.Exec(ctx, queryRevokeInviteToken, tokenID)
 	return err
@@ -533,7 +531,6 @@ func (r *repository) GetMessages(ctx context.Context, sessionID string, limit in
 	return messages, nil
 }
 
-// creates a new chat message
 func (r *repository) CreateMessage(
 	ctx context.Context,
 	sessionID string,
@@ -574,6 +571,7 @@ func (r *repository) AddMessage(
 ) (*Message, error) {
 	// convert empty userID string to nil pointer
 	var userIDPtr *string
+
 	if userID != "" {
 		userIDPtr = &userID
 	}
