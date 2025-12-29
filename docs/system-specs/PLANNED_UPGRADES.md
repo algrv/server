@@ -30,19 +30,6 @@ User Query + Editor State → BM25 + Vector (intent + context) → Results
 
 ---
 
-## Token Usage Tracking
-
-**Status:** Deferred
-**Reason:** Rate limiting works without exact token counts. Usage logging has placeholder values.
-
-**Current:** `InputTokens: 0 // TODO` in usage logging
-
-**When to Revisit:**
-- When implementing usage-based billing
-- When optimizing prompt costs
-
----
-
 ## Proposed Architecture Summary
 
 User Request: "add delay"

@@ -64,15 +64,17 @@ func (a *Agent) Generate(ctx context.Context, req GenerateRequest) (*GenerateRes
 	}
 
 	return &GenerateResponse{
-		Code:              response,
+		Code:              response.Text,
 		DocsRetrieved:     len(docs),
 		ExamplesRetrieved: len(examples),
 		Model:             textGenerator.Model(),
 		IsActionable:      true,
+		InputTokens:       response.Usage.InputTokens,
+		OutputTokens:      response.Usage.OutputTokens,
 	}, nil
 }
 
-func (a *Agent) callGeneratorWithClient(ctx context.Context, generator llm.TextGenerator, systemPrompt, userQuery string, history []Message) (string, error) {
+func (a *Agent) callGeneratorWithClient(ctx context.Context, generator llm.TextGenerator, systemPrompt, userQuery string, history []Message) (*llm.TextGenerationResponse, error) {
 	llmMessages := make([]llm.Message, 0, len(history)+1)
 
 	for _, msg := range history {
@@ -94,7 +96,7 @@ func (a *Agent) callGeneratorWithClient(ctx context.Context, generator llm.TextG
 	})
 
 	if err != nil {
-		return "", fmt.Errorf("failed to generate text: %w", err)
+		return nil, fmt.Errorf("failed to generate text: %w", err)
 	}
 
 	return response, nil

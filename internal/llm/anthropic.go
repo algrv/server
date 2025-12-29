@@ -53,6 +53,10 @@ type transformResponse struct {
 	Role    string    `json:"role"`
 	Content []content `json:"content"`
 	Model   string    `json:"model"`
+	Usage   struct {
+		InputTokens  int `json:"input_tokens"`
+		OutputTokens int `json:"output_tokens"`
+	} `json:"usage"`
 }
 
 type content struct {
@@ -165,7 +169,7 @@ func (t *AnthropicTransformer) TransformQuery(ctx context.Context, userQuery str
 	return userQuery + " " + analysis.TransformedQuery, nil
 }
 
-func (t *AnthropicTransformer) GenerateText(ctx context.Context, req TextGenerationRequest) (string, error) {
+func (t *AnthropicTransformer) GenerateText(ctx context.Context, req TextGenerationRequest) (*TextGenerationResponse, error) {
 	// build messages array from conversation history
 	messages := make([]message, 0, len(req.Messages))
 
@@ -189,12 +193,12 @@ func (t *AnthropicTransformer) GenerateText(ctx context.Context, req TextGenerat
 
 	jsonData, err := json.Marshal(reqBody)
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal request: %w", err)
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", anthropicMessagesURL, bytes.NewBuffer(jsonData))
 	if err != nil {
-		return "", fmt.Errorf("failed to create request: %w", err)
+		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
 	httpReq.Header.Set("Content-Type", "application/json")
@@ -203,31 +207,37 @@ func (t *AnthropicTransformer) GenerateText(ctx context.Context, req TextGenerat
 
 	// rate limiting
 	if err := anthropicRateLimiter.Wait(ctx); err != nil {
-		return "", fmt.Errorf("rate limiter error: %w", err)
+		return nil, fmt.Errorf("rate limiter error: %w", err)
 	}
 
 	resp, err := t.httpClient.Do(httpReq)
 	if err != nil {
-		return "", fmt.Errorf("failed to send request: %w", err)
+		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
 
 	defer resp.Body.Close() //nolint:errcheck
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body) //nolint:errcheck
-		return "", fmt.Errorf("API request failed with status %d: %s", resp.StatusCode, string(body))
+		return nil, fmt.Errorf("API request failed with status %d: %s", resp.StatusCode, string(body))
 	}
 
 	var apiResp transformResponse
 	if err := json.NewDecoder(resp.Body).Decode(&apiResp); err != nil {
-		return "", fmt.Errorf("failed to decode response: %w", err)
+		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
 	if len(apiResp.Content) == 0 {
-		return "", fmt.Errorf("no content in response")
+		return nil, fmt.Errorf("no content in response")
 	}
 
-	return strings.TrimSpace(apiResp.Content[0].Text), nil
+	return &TextGenerationResponse{
+		Text: strings.TrimSpace(apiResp.Content[0].Text),
+		Usage: Usage{
+			InputTokens:  apiResp.Usage.InputTokens,
+			OutputTokens: apiResp.Usage.OutputTokens,
+		},
+	}, nil
 }
 
 // returns system prompt for query transformation

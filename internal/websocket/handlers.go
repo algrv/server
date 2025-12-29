@@ -199,8 +199,8 @@ func GenerateHandler(agentClient *agent.Agent, sessionRepo sessions.Repository, 
 			SessionID:    client.SessionID,
 			Provider:     "anthropic",
 			Model:        response.Model,
-			InputTokens:  0, // TODO: track actual tokens
-			OutputTokens: 0,
+			InputTokens:  response.InputTokens,
+			OutputTokens: response.OutputTokens,
 			IsBYOK:       isBYOK,
 		}
 

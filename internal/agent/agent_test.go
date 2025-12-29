@@ -10,16 +10,22 @@ import (
 
 // implements llm.LLM for testing
 type mockLLM struct {
-	generateTextFunc func(ctx context.Context, req llm.TextGenerationRequest) (string, error)
+	generateTextFunc func(ctx context.Context, req llm.TextGenerationRequest) (*llm.TextGenerationResponse, error)
 	model            string
 }
 
-func (m *mockLLM) GenerateText(ctx context.Context, req llm.TextGenerationRequest) (string, error) {
+func (m *mockLLM) GenerateText(ctx context.Context, req llm.TextGenerationRequest) (*llm.TextGenerationResponse, error) {
 	if m.generateTextFunc != nil {
 		return m.generateTextFunc(ctx, req)
 	}
 
-	return "sound(\"bd\").fast(4)", nil
+	return &llm.TextGenerationResponse{
+		Text: "sound(\"bd\").fast(4)",
+		Usage: llm.Usage{
+			InputTokens:  100,
+			OutputTokens: 20,
+		},
+	}, nil
 }
 
 func (m *mockLLM) Model() string {
@@ -116,7 +122,7 @@ func TestGenerateCode(t *testing.T) {
 
 	mockRet := &mockRetriever{}
 	mockGen := &mockLLM{
-		generateTextFunc: func(_ context.Context, req llm.TextGenerationRequest) (string, error) {
+		generateTextFunc: func(_ context.Context, req llm.TextGenerationRequest) (*llm.TextGenerationResponse, error) {
 			// verify system prompt includes cheatsheet
 			if req.SystemPrompt == "" {
 				t.Error("expected system prompt to be set")
@@ -127,7 +133,13 @@ func TestGenerateCode(t *testing.T) {
 				t.Error("expected at least one message")
 			}
 
-			return "sound(\"bd hh sd hh\").gain(0.8)", nil
+			return &llm.TextGenerationResponse{
+				Text: "sound(\"bd hh sd hh\").gain(0.8)",
+				Usage: llm.Usage{
+					InputTokens:  150,
+					OutputTokens: 25,
+				},
+			}, nil
 		},
 	}
 
@@ -166,13 +178,19 @@ func TestGenerateCodeWithConversationHistory(t *testing.T) {
 
 	mockRet := &mockRetriever{}
 	mockGen := &mockLLM{
-		generateTextFunc: func(_ context.Context, req llm.TextGenerationRequest) (string, error) {
+		generateTextFunc: func(_ context.Context, req llm.TextGenerationRequest) (*llm.TextGenerationResponse, error) {
 			// verify conversation history is included
 			if len(req.Messages) != 3 { // 2 history + 1 current
 				t.Errorf("expected 3 messages, got %d", len(req.Messages))
 			}
 
-			return "sound(\"bd hh sd hh\").fast(2)", nil
+			return &llm.TextGenerationResponse{
+				Text: "sound(\"bd hh sd hh\").fast(2)",
+				Usage: llm.Usage{
+					InputTokens:  200,
+					OutputTokens: 30,
+				},
+			}, nil
 		},
 	}
 

@@ -35,6 +35,8 @@ type GenerateResponse struct {
 	Model               string   `json:"model"`
 	IsActionable        bool     `json:"is_actionable"`
 	ClarifyingQuestions []string `json:"clarifying_questions,omitempty"`
+	InputTokens         int      `json:"input_tokens"`
+	OutputTokens        int      `json:"output_tokens"`
 }
 
 // represents a single conversation turn

@@ -197,7 +197,7 @@ func (g *OpenAIGenerator) Model() string {
 	return g.config.Model
 }
 
-func (g *OpenAIGenerator) GenerateText(ctx context.Context, req TextGenerationRequest) (string, error) {
+func (g *OpenAIGenerator) GenerateText(ctx context.Context, req TextGenerationRequest) (*TextGenerationResponse, error) {
 	messages := make([]openaiChatMessage, 0, len(req.Messages)+1)
 
 	// add system message
@@ -222,43 +222,49 @@ func (g *OpenAIGenerator) GenerateText(ctx context.Context, req TextGenerationRe
 
 	jsonData, err := json.Marshal(reqBody)
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal request: %w", err)
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, "POST", openaiChatCompletionsURL, bytes.NewBuffer(jsonData))
 	if err != nil {
-		return "", fmt.Errorf("failed to create request: %w", err)
+		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
 	httpReq.Header.Set("Content-Type", "application/json")
 	httpReq.Header.Set("Authorization", fmt.Sprintf("Bearer %s", g.config.APIKey))
 
 	if err := openaiRateLimiter.Wait(ctx); err != nil {
-		return "", fmt.Errorf("rate limiter error: %w", err)
+		return nil, fmt.Errorf("rate limiter error: %w", err)
 	}
 
 	resp, err := g.httpClient.Do(httpReq)
 	if err != nil {
-		return "", fmt.Errorf("failed to send request: %w", err)
+		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
 
 	defer resp.Body.Close() //nolint:errcheck
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body) //nolint:errcheck
-		return "", fmt.Errorf("API request failed with status %d: %s", resp.StatusCode, string(body))
+		return nil, fmt.Errorf("API request failed with status %d: %s", resp.StatusCode, string(body))
 	}
 
 	var chatResp openaiChatResponse
 	if err := json.NewDecoder(resp.Body).Decode(&chatResp); err != nil {
-		return "", fmt.Errorf("failed to decode response: %w", err)
+		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
 	if len(chatResp.Choices) == 0 {
-		return "", fmt.Errorf("no choices in response")
+		return nil, fmt.Errorf("no choices in response")
 	}
 
-	return chatResp.Choices[0].Message.Content, nil
+	return &TextGenerationResponse{
+		Text: chatResp.Choices[0].Message.Content,
+		Usage: Usage{
+			InputTokens:  chatResp.Usage.PromptTokens,
+			OutputTokens: chatResp.Usage.CompletionTokens,
+		},
+	}, nil
 }
 
 func (g *OpenAIGenerator) TransformQuery(ctx context.Context, userQuery string) (string, error) {

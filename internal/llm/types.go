@@ -40,7 +40,7 @@ type Embedder interface {
 
 // generates text/code from prompts
 type TextGenerator interface {
-	GenerateText(ctx context.Context, req TextGenerationRequest) (string, error)
+	GenerateText(ctx context.Context, req TextGenerationRequest) (*TextGenerationResponse, error)
 	Model() string
 }
 
@@ -49,6 +49,18 @@ type TextGenerationRequest struct {
 	SystemPrompt string    // system-level instructions
 	Messages     []Message // conversation history
 	MaxTokens    int       // max tokens to generate
+}
+
+// TextGenerationResponse contains output from text generation
+type TextGenerationResponse struct {
+	Text  string // generated text
+	Usage Usage  // token usage statistics
+}
+
+// Usage contains token usage statistics from LLM API calls
+type Usage struct {
+	InputTokens  int // tokens in the prompt
+	OutputTokens int // tokens in the response
 }
 
 // Message represents a conversation turn
