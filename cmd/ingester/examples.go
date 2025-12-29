@@ -15,7 +15,7 @@ import (
 )
 
 // loads and embeds code examples from a JSON file
-func IngestExamples(cfg *config.Config, db *pgxpool.Pool, flags config.Flags) error {
+func IngestExamples(cfg *config.Config, _ *pgxpool.Pool, flags config.Flags) error {
 	ctx := context.Background()
 	logger.Info("starting examples ingestion", "path", flags.Path, "clear", flags.Clear)
 

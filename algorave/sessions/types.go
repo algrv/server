@@ -5,17 +5,17 @@ import (
 	"time"
 )
 
-// Message type constants for session messages (must match DB check constraint)
+// message type constants for session messages (must match DB check constraint)
 const (
 	MessageTypeUserPrompt = "user_prompt"
 	MessageTypeAIResponse = "ai_response"
 	MessageTypeChat       = "chat"
 )
 
-// System user UUID for anonymous sessions
+// UUID for anonymous sessions (well-known pattern for system/default entities)
 const SystemUserID = "00000000-0000-0000-0000-000000000000"
 
-// handles session database operations
+// repository interface for session database operations
 type Repository interface {
 	// session operations
 	CreateSession(ctx context.Context, req *CreateSessionRequest) (*Session, error)

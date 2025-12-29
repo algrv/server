@@ -170,10 +170,7 @@ func (t *AnthropicTransformer) GenerateText(ctx context.Context, req TextGenerat
 	messages := make([]message, 0, len(req.Messages))
 
 	for _, msg := range req.Messages {
-		messages = append(messages, message{
-			Role:    msg.Role,
-			Content: msg.Content,
-		})
+		messages = append(messages, message(msg))
 	}
 
 	// determine max tokens (use request value or fall back to config)

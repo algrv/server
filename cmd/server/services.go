@@ -13,7 +13,7 @@ import (
 )
 
 // creates and configures all service clients
-func InitializeServices(cfg *config.Config, db *pgxpool.Pool) (*Services, error) {
+func InitializeServices(_ *config.Config, db *pgxpool.Pool) (*Services, error) {
 	llmClient, err := llm.NewLLM(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("failed to create LLM client: %w", err)

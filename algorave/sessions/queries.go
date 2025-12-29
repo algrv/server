@@ -1,7 +1,7 @@
 package sessions
 
 const (
-	// Session queries
+	// session queries
 	queryCreateSession = `
 		INSERT INTO sessions (host_user_id, title, code)
 		VALUES ($1, $2, $3)
@@ -48,7 +48,7 @@ const (
 		WHERE id = $1
 	`
 
-	// Authenticated participant queries
+	// authenticated participant queries
 	queryAddAuthenticatedParticipant = `
 		INSERT INTO session_participants (session_id, user_id, display_name, role)
 		VALUES ($1, $2, $3, $4)
@@ -94,7 +94,7 @@ const (
 		WHERE id = $2
 	`
 
-	// Anonymous participant queries
+	// anonymous participant queries
 	queryAddAnonymousParticipant = `
 		INSERT INTO anonymous_participants (session_id, display_name, role)
 		VALUES ($1, $2, $3)
@@ -120,7 +120,7 @@ const (
 		WHERE id = $1
 	`
 
-	// Invite token queries
+	// invite token queries
 	queryCreateInviteToken = `
 		INSERT INTO invite_tokens (session_id, token, role, max_uses, expires_at)
 		VALUES ($1, $2, $3, $4, $5)
@@ -153,7 +153,7 @@ const (
 		WHERE id = $1
 	`
 
-	// Message queries
+	// message queries
 	queryGetMessages = `
 		SELECT id, session_id, user_id, role, message_type, content, created_at
 		FROM session_messages
@@ -166,11 +166,6 @@ const (
 		INSERT INTO session_messages (session_id, user_id, role, message_type, content)
 		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id, session_id, user_id, role, message_type, content, created_at
-	`
-
-	queryAddMessage = `
-		INSERT INTO session_messages (session_id, user_id, role, message_type, content)
-		VALUES ($1, $2, $3, $4, $5)
 	`
 
 	queryUpdateLastActivity = `

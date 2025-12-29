@@ -13,7 +13,7 @@ import (
 )
 
 // chunks and embeds teaching concept files from MDX
-func IngestConcepts(cfg *config.Config, db *pgxpool.Pool, flags config.Flags) error {
+func IngestConcepts(cfg *config.Config, _ *pgxpool.Pool, flags config.Flags) error {
 	ctx := context.Background()
 
 	logger.Info("starting concepts ingestion", "path", flags.Path, "clear", flags.Clear)

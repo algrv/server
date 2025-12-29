@@ -13,7 +13,7 @@ import (
 )
 
 // chunks and embeds documentation files from the specified path
-func IngestDocs(cfg *config.Config, db *pgxpool.Pool, flags config.Flags) error {
+func IngestDocs(cfg *config.Config, _ *pgxpool.Pool, flags config.Flags) error {
 	ctx := context.Background()
 	logger.Info("starting docs ingestion", "path", flags.Path, "clear", flags.Clear)
 
