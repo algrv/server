@@ -192,439 +192,54 @@ response := agentClient.ProcessQuery(ctx, request)
 ---
 
 ### Phase 3: Remote SSH Access
-**Status**: REMOVED (not currently implemented)
 
-~~**Duration**: 1-2 days~~
-~~**Complexity**: Medium~~
-
-#### What We're Building
-~~SSH server for remote terminal access with multi-user support.~~
-
-**NOTE**: SSH functionality has been removed from the codebase. This section is kept for reference only.
-
-#### Components (Additional)
-```
-internal/ssh/
-  server.go                  # Wish SSH server
-  auth.go                    # SSH authentication
-  sessions.go                # Per-user session management
-  middleware.go              # Rate limiting, logging
-```
-
-#### Features
-- SSH server using Wish library
-- SSH key authentication
-- Per-connection TUI instances
-- Session isolation (no shared state)
-- Production mode enforcement
-- Connection limits and security
-- Graceful shutdown handling
-
-#### Architecture
-```
-┌──────────────────┐
-│  SSH Client #1   │ ──┐
-└──────────────────┘   │
-                       │
-┌──────────────────┐   │    ┌──────────────────┐
-│  SSH Client #2   │ ──┼───→│  Wish Server     │
-└──────────────────┘   │    │  :2222           │
-                       │    └────────┬─────────┘
-┌──────────────────┐   │             │
-│  SSH Client #3   │ ──┘             │
-└──────────────────┘                 ↓
-                            ┌─────────────────┐
-                            │  TUI Instance 1 │
-                            │  TUI Instance 2 │
-                            │  TUI Instance 3 │
-                            └─────────────────┘
-                                     │
-                            ┌─────────────────┐
-                            │  Shared Agent   │
-                            │  Backend        │
-                            └─────────────────┘
-```
-
-#### SSH Server Setup
-```go
-// Create Wish server
-server, err := wish.NewServer(
-    wish.WithAddress(fmt.Sprintf(":%d", cfg.SSHPort)),
-    wish.WithHostKeyPath(cfg.SSHHostKey),
-    wish.WithMiddleware(
-        bubbletea.Middleware(tuiHandler),
-        activeterm.Middleware(),
-        logging.Middleware(),
-    ),
-)
-
-// Handle each connection
-func tuiHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
-    // Create isolated TUI instance for this user
-    model := tui.NewModel(productionMode)
-    return model, []tea.ProgramOption{tea.WithAltScreen()}
-}
-```
-
-#### Security Considerations
-- SSH key auth (no passwords)
-- Rate limiting on agent requests (prevent abuse)
-- Connection limits per IP
-- Production mode forces safe commands only
-- Logging all connections and commands
-- Timeout idle sessions
-
-#### Success Criteria
-- [ ] Can SSH to `algorave@host`
-- [ ] Each connection gets isolated TUI
-- [ ] SSH authentication works correctly
-- [ ] Multiple users can connect simultaneously
-- [ ] Production mode enforced for remote users
-- [ ] Connection limits prevent DoS
-- [ ] Sessions timeout after inactivity
+**Status**: REMOVED - Not implemented. Would use Wish library for SSH-based TUI access. May revisit if remote access becomes a priority.
 
 ---
 
 ## File Structure
 
-### After All Phases
-
 ```
-algorave/
-├── cmd/
-│   ├── algorave/              # NEW: CLI entry point
-│   │   └── main.go
-│   ├── ingester/              # Existing
-│   │   └── main.go
-│   └── server/                # Existing
-│       └── main.go
-│
-├── internal/
-│   ├── tui/                   # NEW: TUI components
-│   │   ├── app.go             # Main Bubbletea app
-│   │   ├── welcome.go         # Welcome screen
-│   │   ├── editor.go          # Code editor
-│   │   ├── output.go          # Output view
-│   │   ├── agent.go           # Agent integration
-│   │   ├── state.go           # State management
-│   │   ├── styles.go          # Lipgloss styles
-│   │   └── commands.go        # Command handlers
-│   │
-│   ├── ssh/                   # NEW: SSH server (Phase 3)
-│   │   ├── server.go
-│   │   ├── auth.go
-│   │   ├── sessions.go
-│   │   └── middleware.go
-│   │
-│   ├── agent/                 # Existing
-│   ├── auth/                  # Existing
-│   ├── config/                # Existing
-│   └── ...
-│
-└── docs/
-    ├── system-specs/
-    │   ├── CLI_ARCHITECTURE.md       # NEW
-    │   ├── PRODUCT_ARCHITECTURE.md   # Updated
-    │   └── ...
-    └── CLI_IMPLEMENTATION_PLAN.md    # NEW (this doc)
+cmd/algorave/main.go       # CLI entry point
+internal/tui/              # TUI components (app, welcome, editor, output, styles)
 ```
 
 ---
 
 ## Dependencies
 
-### New Dependencies to Add
+Charm ecosystem: `bubbletea`, `lipgloss`, `bubbles`
 
-```go
-require (
-    // Phase 1 & 2
-    github.com/charmbracelet/bubbletea v0.25.0
-    github.com/charmbracelet/lipgloss v0.9.1
-    github.com/charmbracelet/bubbles v0.17.1
-
-    // Phase 3
-    github.com/charmbracelet/wish v1.3.0
-    github.com/charmbracelet/ssh v0.0.0-20230822194956-1a051f898e09
-
-    // Existing dependencies continue
-    // (no changes to agent, llm, storage, etc.)
-)
-```
-
-### Installation
 ```bash
 go get github.com/charmbracelet/bubbletea@latest
 go get github.com/charmbracelet/lipgloss@latest
 go get github.com/charmbracelet/bubbles@latest
-go get github.com/charmbracelet/wish@latest  # Phase 3
 ```
 
 ---
 
 ## Configuration
 
-### Environment Variables
-
-```bash
-# Mode (dev or production)
-ALGORAVE_ENV=production
-
-# SSH Server (Phase 3)
-ALGORAVE_SSH_ENABLED=true
-ALGORAVE_SSH_PORT=2222
-ALGORAVE_SSH_HOST_KEY=/path/to/ssh_host_key
-ALGORAVE_SSH_MAX_CONNECTIONS=50
-
-# Agent endpoint
-ALGORAVE_AGENT_ENDPOINT=http://localhost:8080
-
-# Existing vars
-OPENAI_API_KEY=...
-SUPABASE_CONNECTION_STRING=...
-ANTHROPIC_API_KEY=...
-```
-
-### Config File (Optional)
-
-```yaml
-# algorave.yaml
-mode: production
-
-ssh:
-  enabled: true
-  port: 2222
-  host_key_path: /etc/algorave/ssh_host_key
-  max_connections: 50
-
-agent:
-  endpoint: http://localhost:8080
-  timeout: 30s
-
-editor:
-  auto_save: true
-  session_timeout: 30m
-```
+Key environment variables:
+- `ALGORAVE_ENV` - `development` or `production`
+- `ALGORAVE_AGENT_ENDPOINT` - Agent API endpoint
 
 ---
 
-## Testing Strategy
+## Deployment
 
-### Unit Tests
-- TUI component state transitions
-- Command execution logic
-- Agent integration mocking
-- SSH auth handlers
-
-### Integration Tests
-- End-to-end CLI flows
-- Server/ingester integration
-- SSH connection handling
-- Multi-user scenarios
-
-### Manual Testing Scenarios
-
-**Phase 1**:
-- [ ] Start CLI, run each command
-- [ ] Test dev vs production mode
-- [ ] Verify server starts correctly
-- [ ] Verify ingester hidden in production
-
-**Phase 2**:
-- [ ] Write multi-line Strudel code
-- [ ] Get AI suggestions
-- [ ] Answer clarification questions
-- [ ] Exit and re-enter editor
-
-**Phase 3**:
-- [ ] SSH from remote machine
-- [ ] Multiple simultaneous connections
-- [ ] Connection timeout
-- [ ] Rate limiting under load
-
----
-
-## Deployment Plan
-
-### Local Development
 ```bash
-# Clone repo
-git clone <repo>
-cd algorave
+# Development
+ALGORAVE_ENV=development go run cmd/algorave/main.go
 
-# Install dependencies
-go mod download
-
-# Build CLI
-go build -o algorave cmd/algorave/main.go
-
-# Run in dev mode
-ALGORAVE_ENV=development ./algorave
-```
-
-### Production Deployment
-```bash
-# Build for production
+# Production build
 CGO_ENABLED=0 GOOS=linux go build -o algorave cmd/algorave/main.go
-
-# Copy to server
-scp algorave user@server:/usr/local/bin/
-
-# Generate SSH host key
-ssh-keygen -t ed25519 -f /etc/algorave/ssh_host_key
-
-# Run with systemd
-sudo systemctl start algorave-ssh
-```
-
-### Systemd Service (Phase 3)
-```ini
-[Unit]
-Description=Algorave SSH Server
-After=network.target
-
-[Service]
-Type=simple
-User=algorave
-Environment="ALGORAVE_ENV=production"
-Environment="ALGORAVE_SSH_ENABLED=true"
-Environment="ALGORAVE_SSH_PORT=2222"
-ExecStart=/usr/local/bin/algorave --ssh
-Restart=on-failure
-
-[Install]
-WantedBy=multi-user.target
 ```
 
 ---
 
-## Risk Assessment
+## Success Criteria
 
-### Potential Issues
+- Phase 1: CLI launches, commands execute, env modes work
+- Phase 2: Editor responsive, agent integration works, users complete tasks
 
-| Risk | Impact | Mitigation |
-|------|--------|-----------|
-| Bubbletea learning curve | Medium | Use examples from official docs, start simple |
-| SSH security vulnerabilities | High | Use Wish (battle-tested), key-only auth, rate limiting |
-| Multi-user state conflicts | Medium | Isolated sessions per connection (no sharing) |
-| Agent API rate limits | Medium | Connection limits, request queuing |
-| Terminal compatibility | Low | Bubbletea handles most edge cases |
-
-### Unknowns
-- Performance with 50+ simultaneous SSH connections
-- Agent response time under load
-- Terminal rendering on all platforms
-
-### Mitigation Strategies
-- Start with Phase 1 (minimal risk)
-- Test Phase 3 thoroughly before production
-- Implement connection limits and monitoring
-- Add graceful degradation for agent failures
-
----
-
-## Success Metrics
-
-### Phase 1
-- ✓ CLI launches without errors
-- ✓ All commands execute correctly
-- ✓ Environment modes work as expected
-
-### Phase 2
-- ✓ Editor is usable and responsive
-- ✓ Agent integration works reliably
-- ✓ Users can complete coding tasks
-
-### Phase 3
-- ✓ SSH server runs stably
-- ✓ Multiple users can connect
-- ✓ Production deployment successful
-
----
-
-## Next Steps
-
-1. **Review This Document**: User approves plan
-2. **Phase 1 Implementation**: Build local CLI
-3. **Phase 1 Testing**: Verify core functionality
-4. **Phase 2 Implementation**: Add editor
-5. **Phase 2 Testing**: Test AI integration
-6. **Phase 3 Implementation**: Add SSH server
-7. **Phase 3 Testing**: Multi-user scenarios
-8. **Production Deployment**: Deploy to remote server
-
----
-
-## Questions for Review
-
-Before we start implementation, please confirm:
-
-1. **Scope**: Are all 3 phases approved, or start with Phase 1 only?
-2. **Timeline**: Is 4-7 days acceptable, or should we prioritize?
-3. **Features**: Any additions/removals to the planned features?
-4. **Tech Stack**: Happy with Charm ecosystem (Bubbletea, Wish)?
-5. **Production**: Will this be deployed for public SSH access?
-6. **Authentication**: SSH keys only, or also support passwords/tokens?
-7. **Branding**: Any specific ASCII art or styling preferences for welcome screen?
-
----
-
-## Appendix: Example User Interactions
-
-### Example 1: Local Development Session
-
-```bash
-$ algorave
-┌─────────────────────────────────────────┐
-│          🎵 ALGORAVE                    │
-│   Create music with human language      │
-├─────────────────────────────────────────┤
-│  Commands:                              │
-│    start    Start the server            │
-│    ingest   Run doc ingester            │
-│    editor   Interactive code editor     │
-│    quit     Exit                        │
-│                                         │
-│  > start                                │
-└─────────────────────────────────────────┘
-
-✓ Server started on http://localhost:8080
-
-> editor
-
-┌─────────────────────────────────────────┐
-│  EDITOR MODE         [Ctrl+C to exit]   │
-├─────────────────────────────────────────┤
-│  1 │ make a drum beat                   │
-│  2 │ _                                  │
-├─────────────────────────────────────────┤
-│  OUTPUT:                                │
-│  ✓ Generated:                           │
-│    s("bd sd cp hh").fast(2)             │
-│                                         │
-│  💡 This creates a basic drum pattern   │
-│     Try adding .room(0.5) for reverb   │
-└─────────────────────────────────────────┘
-```
-
-### Example 2: Remote SSH Session
-
-```bash
-$ ssh algorave@remote.algorave.io
-┌─────────────────────────────────────────┐
-│          🎵 ALGORAVE                    │
-│        Remote Coding Session            │
-├─────────────────────────────────────────┤
-│  Commands:                              │
-│    start    Start the server            │
-│    editor   Interactive code editor     │
-│    quit     Disconnect                  │
-│                                         │
-│  > editor                               │
-└─────────────────────────────────────────┘
-
-[User writes code with AI assistance...]
-```
-
----
-
-**Ready for implementation?** Please review and provide feedback!
