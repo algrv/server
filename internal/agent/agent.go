@@ -39,12 +39,12 @@ func (a *Agent) Generate(ctx context.Context, req GenerateRequest) (*GenerateRes
 	}
 
 	// proceed with code generation for actionable queries
-	docs, err := a.retriever.HybridSearchDocs(ctx, req.UserQuery, req.EditorState, 5)
+	docs, err := a.retriever.HybridSearchDocs(ctx, req.UserQuery, req.EditorState, 3)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve docs: %w", err)
 	}
 
-	examples, err := a.retriever.HybridSearchExamples(ctx, req.UserQuery, req.EditorState, 3)
+	examples, err := a.retriever.HybridSearchExamples(ctx, req.UserQuery, req.EditorState, 2)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve examples: %w", err)
 	}
