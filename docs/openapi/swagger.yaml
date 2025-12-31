@@ -1,4 +1,3 @@
-basePath: /
 definitions:
   api_rest_auth.AuthResponse:
     properties:

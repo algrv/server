@@ -2095,7 +2095,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "algorave.ai",
-	BasePath:         "/",
+	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "Algorave API",
 	Description:      "AI-powered Strudel code generation and collaborative live coding platform\n\nFeatures:\n- AI-powered Strudel code generation from natural language\n- Real-time collaborative editing via WebSockets\n- OAuth authentication (Google, GitHub)\n- Anonymous session support\n- Save and share Strudel patterns",

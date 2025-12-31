@@ -32,7 +32,6 @@ import (
 // @license.url https://www.gnu.org/licenses/gpl-3.0.html
 
 // @host algorave.ai
-// @BasePath /
 
 // @securityDefinitions.apikey BearerAuth
 // @in header

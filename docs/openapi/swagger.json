@@ -14,7 +14,6 @@
         "version": "1.0"
     },
     "host": "algorave.ai",
-    "basePath": "/",
     "paths": {
         "/api/v1/auth/logout": {
             "post": {
