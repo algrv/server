@@ -61,10 +61,10 @@ Editor: s("bd sd").fast(2)
 
 | Aspect       | Assessment                                                    |
 |--------------|---------------------------------------------------------------|
-| Logic        | ✅ Sound - intent ensures relevance, context adds specificity |
-| Latency      | ✅ OK - all 4 searches run in parallel                        |
-| Empty editor | ⚠️ Skip context search when empty (avoid duplicate work)      |
-| Merging      | ✅ Existing RRF merge extends to 4 sources                    |
+| Logic        | Sound - intent ensures relevance, context adds specificity    |
+| Latency      | OK - all 4 searches run in parallel                           |
+| Empty editor | Skip context search when empty (avoid duplicate work)         |
+| Merging      | Existing RRF merge extends to 4 sources                       |
 
 ### Cost Consideration
 

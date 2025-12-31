@@ -117,15 +117,15 @@ Scheduled live coding events with waiting rooms. `events` table: `id`, `host_use
 
 ## Code Structure
 
-- `api/rest/` - REST handlers by domain (auth, strudels, generate, health)
+- `api/rest` - REST & Websocket handlers by domain (auth, strudels, generate, health)
 - `algorave/` - Business logic (users, strudels)
 - `internal/` - Infrastructure (auth, agent, retriever, storage, llm)
+- `algorave/` - Product/Business packages (strudels, session, users)
 
 ## Security
 
 - OAuth with CSRF protection
 - JWT tokens (7-day expiration)
-- Row-level security for user data
 - WebSocket: JWT auth, rate limiting, connection limits
 
 ## Scalability

@@ -24,7 +24,7 @@
 └─────────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────────┐
-│ OPTION C: Hybrid (Best Experience) ⭐                               │
+│ OPTION C: Hybrid (Best Experience)                                  │
 ├─────────────────────────────────────────────────────────────────────┤
 │ User Query → Transform → Primary (60%) + Contextual (40%)          │
 │                           ↓              ↓                          │
@@ -36,7 +36,7 @@
 │                                                                     │
 │ Pros: Handles ALL scenarios, self-balancing                        │
 │ Cons: More complex (but worth it!)                                 │
-│ Score: 95% satisfaction ⭐⭐⭐                                        │
+│ Score: 95% satisfaction                                             │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -68,15 +68,15 @@
 │   Problem: Too much drum context pollutes ambient results          │
 │                                                                     │
 │ ───────────────────────────────────────────────────────────────── │
-│ OPTION C (Hybrid): ⭐                                               │
+│ OPTION C (Hybrid):                                                  │
 │   Primary (60%):   "ambient, pad, atmosphere"                      │
 │     → Ambient textures (0.96) ← Dominates!                         │
 │     → Pad synthesis (0.94)                                          │
 │     → Atmospheric effects (0.91)                                    │
 │                                                                     │
 │   Contextual (40%): "ambient, pad, bd, hh, sound, room, delay..."  │
-│     → Layering pads with percussion (0.84) ⭐                       │
-│     → Using .room() for ambience (0.82) ⭐                          │
+│     → Layering pads with percussion (0.84)                          │
+│     → Using .room() for ambience (0.82)                             │
 │                                                                     │
 │   Merged: [Ambient textures, Pad synthesis, Atmospheric effects,   │
 │            Layering pads with percussion, Using .room()...]         │
@@ -93,9 +93,9 @@
 │           .gain(0.3)  ← Background volume                           │
 │       )  ← Uses .stack() pattern + ambient synthesis!              │
 │                                                                     │
-│   Result: ✅ Perfect! Gets ambient synthesis docs (intent)         │
-│            ✅ Plus integration tips (context)                       │
-│            ✅ Intent not polluted (primary dominates)               │
+│   Result: Perfect! Gets ambient synthesis docs (intent)             │
+│            Plus integration tips (context)                          │
+│            Intent not polluted (primary dominates)                  │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -105,14 +105,14 @@
                         Incremental  Pivoting  Empty    Complex  Overall
                         Building     To New    Editor   Code     Score
                         ─────────────────────────────────────────────────
-Option A (Pure)         7/10        10/10     10/10    8/10     ★★★☆☆
-Option B (Context)      9/10         6/10     10/10    5/10     ★★★★☆
+Option A (Pure)         7/10        10/10     10/10    8/10     ★★★★☆
+Option B (Context)      9/10         6/10     10/10    5/10     ★★★☆☆
 Option C (Hybrid)      10/10         9/10     10/10    9/10     ★★★★★
 
 User Satisfaction:
   Option A: 80% "works immediately"
   Option B: 85% "works immediately"
-  Option C: 95% "works immediately" ⭐
+  Option C: 95% "works immediately"
 ```
 
 ## Self-Balancing Behavior
