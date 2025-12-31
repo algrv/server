@@ -71,8 +71,10 @@ func CreateSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 // @Param id path string true "Session ID (UUID)"
 // @Success 200 {object} SessionResponse
 // @Failure 400 {object} errors.ErrorResponse
+// @Failure 401 {object} errors.ErrorResponse
 // @Failure 404 {object} errors.ErrorResponse
 // @Router /api/v1/sessions/{id} [get]
+// @Security BearerAuth
 func GetSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		sessionID, ok := errors.ValidatePathUUID(c, "id")
@@ -359,8 +361,10 @@ func CreateInviteTokenHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 // @Param id path string true "Session ID (UUID)"
 // @Success 200 {object} ParticipantsListResponse
 // @Failure 400 {object} errors.ErrorResponse
+// @Failure 401 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /api/v1/sessions/{id}/participants [get]
+// @Security BearerAuth
 func ListParticipantsHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		sessionID, ok := errors.ValidatePathUUID(c, "id")
@@ -510,8 +514,10 @@ func LeaveSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 // @Param limit query int false "Max messages to return (max 1000)" default(100)
 // @Success 200 {object} MessagesResponse
 // @Failure 400 {object} errors.ErrorResponse
+// @Failure 401 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /api/v1/sessions/{id}/messages [get]
+// @Security BearerAuth
 func GetSessionMessagesHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		sessionID, ok := errors.ValidatePathUUID(c, "id")

@@ -495,6 +495,11 @@ const docTemplate = `{
         },
         "/api/v1/sessions/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get session information including participants",
                 "produces": [
                     "application/json"
@@ -521,6 +526,12 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
@@ -939,6 +950,11 @@ const docTemplate = `{
         },
         "/api/v1/sessions/{id}/messages": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve chat messages from a session",
                 "produces": [
                     "application/json"
@@ -976,6 +992,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -987,6 +1009,11 @@ const docTemplate = `{
         },
         "/api/v1/sessions/{id}/participants": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get all participants in a session (authenticated and anonymous)",
                 "produces": [
                     "application/json"
@@ -1013,6 +1040,12 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }

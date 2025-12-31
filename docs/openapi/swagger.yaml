@@ -735,10 +735,16 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
             $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Get session details
       tags:
       - sessions
@@ -987,10 +993,16 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Get session chat messages
       tags:
       - sessions
@@ -1014,10 +1026,16 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: List session participants
       tags:
       - sessions
