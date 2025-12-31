@@ -104,15 +104,20 @@ func TestHubBroadcastToSession(t *testing.T) {
 	hub.Register <- client2
 	time.Sleep(100 * time.Millisecond)
 
-	// drain "user joined" messages
-	select {
-	case <-client1.send:
-	default:
+	// drain all "user joined" messages
+	for draining := true; draining; {
+		select {
+		case <-client1.send:
+		default:
+			draining = false
+		}
 	}
-
-	select {
-	case <-client2.send:
-	default:
+	for draining := true; draining; {
+		select {
+		case <-client2.send:
+		default:
+			draining = false
+		}
 	}
 
 	// create test message
@@ -176,6 +181,22 @@ func TestHubBroadcastToAllClients(t *testing.T) {
 	hub.Register <- client1
 	hub.Register <- client2
 	time.Sleep(100 * time.Millisecond)
+
+	// drain "user joined" messages from registration
+	for draining := true; draining; {
+		select {
+		case <-client1.send:
+		default:
+			draining = false
+		}
+	}
+	for draining := true; draining; {
+		select {
+		case <-client2.send:
+		default:
+			draining = false
+		}
+	}
 
 	// create test message
 	msg, err := NewMessage(TypeCodeUpdate, "session-1", "user-1", CodeUpdatePayload{
@@ -286,16 +307,15 @@ func TestHubMultipleClientsInSession(t *testing.T) {
 	count := hub.GetClientCount(sessionID)
 	assert.Equal(t, numClients, count)
 
-	// Drain "user joined" messages
+	// drain "user joined" messages
 	for i := range numClients {
-		for {
+		for draining := true; draining; {
 			select {
 			case <-clients[i].send:
 			default:
-				goto nextClient
+				draining = false
 			}
 		}
-	nextClient:
 	}
 
 	// broadcast message
@@ -303,6 +323,7 @@ func TestHubMultipleClientsInSession(t *testing.T) {
 		Code:        "sound(\"bd\")",
 		DisplayName: "A",
 	})
+
 	require.NoError(t, err)
 
 	hub.BroadcastToSession(sessionID, msg, "a")
@@ -329,6 +350,7 @@ func TestHubMultipleClientsInSession(t *testing.T) {
 
 func TestHubSessionCleanupAfterAllClientsLeave(t *testing.T) {
 	hub := NewHub()
+
 	go hub.Run()
 	defer hub.Shutdown()
 
@@ -364,7 +386,6 @@ func TestHubSessionCleanupAfterAllClientsLeave(t *testing.T) {
 func TestHubConcurrentBroadcasts(t *testing.T) {
 	hub := NewHub()
 	go hub.Run()
-	defer hub.Shutdown()
 
 	sessionID := "test-session"
 	numClients := 10
@@ -372,6 +393,7 @@ func TestHubConcurrentBroadcasts(t *testing.T) {
 
 	// create and register clients
 	clients := make([]*Client, numClients)
+
 	for i := range numClients {
 		clients[i] = &Client{
 			ID:          string(rune('a' + i)),
@@ -389,21 +411,20 @@ func TestHubConcurrentBroadcasts(t *testing.T) {
 
 	// drain any "user joined" messages that were sent during registration
 	for i := range numClients {
-		for {
+		for draining := true; draining; {
 			select {
 			case <-clients[i].send:
-				// drain message
 			default:
-				goto drained
+				draining = false
 			}
 		}
-	drained:
 	}
 
 	// broadcast multiple messages concurrently
 	var wg sync.WaitGroup
 	for i := range numMessages {
 		wg.Add(1)
+
 		go func(_ int) {
 			defer wg.Done()
 			msg, _ := NewMessage(TypeCodeUpdate, sessionID, "a", CodeUpdatePayload{ //nolint:errcheck // test code
@@ -421,16 +442,18 @@ func TestHubConcurrentBroadcasts(t *testing.T) {
 	for i := 1; i < numClients; i++ {
 		receivedCount := 0
 
-		for {
+		for counting := true; counting; {
 			select {
 			case <-clients[i].send:
 				receivedCount++
 			default:
-				goto done
+				counting = false
 			}
 		}
 
-	done:
 		assert.Equal(t, numMessages, receivedCount, "client %d should receive all messages", i)
 	}
+
+	// hub explicitly shutdown at the end to avoid race with concurrent broadcasts
+	hub.Shutdown()
 }
