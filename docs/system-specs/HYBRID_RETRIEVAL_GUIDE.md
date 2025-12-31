@@ -87,18 +87,21 @@ func HybridSearchExamples(ctx, userQuery, editorState, topK) []ExampleResult:
     return mergeVectorAndBM25Examples(vectorResults, bm25Results, topK)
 ```
 
-### Merge & Rank (RRF Fusion)
+### Merge & Rank (Weighted Score Fusion)
 
 ```
 func mergeVectorAndBM25(vector, bm25 []SearchResult, topK) []SearchResult:
-    // Reciprocal Rank Fusion
+    // Weighted similarity score fusion
     scores = map[id]float64{}
 
-    for rank, result in vector:
-        scores[result.ID] += 0.7 / (60 + rank)  // vector weight
+    for _, result in vector:
+        scores[result.ID] = result.Similarity * 0.7  // vector weight
 
-    for rank, result in bm25:
-        scores[result.ID] += 0.3 / (60 + rank)  // bm25 weight
+    for _, result in bm25:
+        if scores[result.ID] exists:
+            scores[result.ID] += result.Similarity * 0.3  // add bm25 weight
+        else:
+            scores[result.ID] = result.Similarity * 0.3
 
     // Sort by combined score, return top K
 ```

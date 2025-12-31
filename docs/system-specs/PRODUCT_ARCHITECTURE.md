@@ -23,8 +23,6 @@ Interactive terminal interface for local development:
 - Live code editor with AI assistance
 - Production-safe command filtering
 
-See [CLI Architecture](./CLI_ARCHITECTURE.md) for detailed design.
-
 ### 2. Authentication System
 
 **Location**: `internal/auth/`, `api/rest/auth/`, `algorave/users/`
@@ -82,9 +80,11 @@ Protected (require authentication):
 Public:
 - `GET /api/v1/public/strudels?limit=50` - List public strudels
 
-### 4. Collaborative Sessions (Phase 1)
+### 4. Collaborative Sessions
 
-**Status**: Planned, not yet implemented
+**Location**: `algorave/sessions/`, `internal/websocket/`, `api/websocket/`
+
+**Status**: Implemented
 
 Real-time collaborative coding via WebSocket.
 
@@ -96,13 +96,12 @@ Real-time collaborative coding via WebSocket.
 
 #### Architecture
 
-WebSocket Hub (in-memory for Phase 1, Redis pub/sub for scaling)
+WebSocket Hub (in-memory, with Redis pub/sub planned for scaling)
 
-#### Database Tables (Planned)
+#### Database Tables
 
-- `sessions`: `id`, `host_user_id`, `title`, `code`, `is_active`
-- `session_participants`: `session_id`, `user_id`, `role`, `status`
-- `invite_tokens`: `session_id`, `token`, `role`, `max_uses`
+- `collaborative_sessions`: `id`, `host_user_id`, `title`, `code`, `is_active`
+- Session participants and invite tokens supported
 
 #### WebSocket Events
 
@@ -117,15 +116,16 @@ Scheduled live coding events with waiting rooms. `events` table: `id`, `host_use
 
 ## Code Structure
 
-- `api/rest` - REST & Websocket handlers by domain (auth, strudels, generate, health)
-- `algorave/` - Business logic (users, strudels)
-- `internal/` - Infrastructure (auth, agent, retriever, storage, llm)
-- `algorave/` - Product/Business packages (strudels, session, users)
+- `api/rest/` - REST handlers by domain (auth, strudels, generate, health)
+- `api/websocket/` - WebSocket handlers for real-time collaboration
+- `algorave/` - Business logic (users, strudels, sessions)
+- `internal/` - Infrastructure (auth, agent, retriever, storage, llm, websocket)
 
 ## Security
 
 - OAuth with CSRF protection
 - JWT tokens (7-day expiration)
+- Row-level security for user data
 - WebSocket: JWT auth, rate limiting, connection limits
 
 ## Scalability
