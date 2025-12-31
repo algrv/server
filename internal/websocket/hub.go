@@ -200,8 +200,8 @@ func (h *Hub) handleMessage(msg *Message) {
 
 // sends a message to all clients in a session
 func (h *Hub) BroadcastToSession(sessionID string, msg *Message, excludeClientID string) {
-	h.mu.RLock()
-	defer h.mu.RUnlock()
+	h.mu.Lock()
+	defer h.mu.Unlock()
 	h.broadcastToSession(sessionID, msg, excludeClientID)
 }
 
