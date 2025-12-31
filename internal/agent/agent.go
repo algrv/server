@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/algorave/server/internal/llm"
+	"github.com/algoraveai/server/internal/llm"
 )
 
 func New(ret Retriever, llmClient llm.LLM) *Agent {

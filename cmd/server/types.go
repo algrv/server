@@ -1,15 +1,15 @@
 package main
 
 import (
-	"github.com/algorave/server/algorave/sessions"
-	"github.com/algorave/server/algorave/strudels"
-	"github.com/algorave/server/algorave/users"
-	"github.com/algorave/server/internal/agent"
-	"github.com/algorave/server/internal/config"
-	"github.com/algorave/server/internal/llm"
-	"github.com/algorave/server/internal/retriever"
-	"github.com/algorave/server/internal/storage"
-	ws "github.com/algorave/server/internal/websocket"
+	"github.com/algoraveai/server/algorave/sessions"
+	"github.com/algoraveai/server/algorave/strudels"
+	"github.com/algoraveai/server/algorave/users"
+	"github.com/algoraveai/server/internal/agent"
+	"github.com/algoraveai/server/internal/config"
+	"github.com/algoraveai/server/internal/llm"
+	"github.com/algoraveai/server/internal/retriever"
+	"github.com/algoraveai/server/internal/storage"
+	ws "github.com/algoraveai/server/internal/websocket"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 )

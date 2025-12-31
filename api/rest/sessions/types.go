@@ -1,6 +1,6 @@
 package sessions
 
-import "github.com/algorave/server/algorave/strudels"
+import "github.com/algoraveai/server/algorave/strudels"
 
 type TransferSessionRequest struct {
 	SessionID string `json:"session_id" binding:"required"`

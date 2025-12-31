@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/algorave/server/algorave/sessions"
-	"github.com/algorave/server/algorave/strudels"
-	"github.com/algorave/server/algorave/users"
-	"github.com/algorave/server/internal/config"
-	ws "github.com/algorave/server/internal/websocket"
+	"github.com/algoraveai/server/algorave/sessions"
+	"github.com/algoraveai/server/algorave/strudels"
+	"github.com/algoraveai/server/algorave/users"
+	"github.com/algoraveai/server/internal/config"
+	ws "github.com/algoraveai/server/internal/websocket"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 )

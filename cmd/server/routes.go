@@ -1,13 +1,13 @@
 package main
 
 import (
-	"github.com/algorave/server/api/rest/auth"
-	"github.com/algorave/server/api/rest/collaboration"
-	"github.com/algorave/server/api/rest/health"
-	restSessions "github.com/algorave/server/api/rest/sessions"
-	"github.com/algorave/server/api/rest/strudels"
-	"github.com/algorave/server/api/rest/users"
-	"github.com/algorave/server/api/websocket"
+	"github.com/algoraveai/server/api/rest/auth"
+	"github.com/algoraveai/server/api/rest/collaboration"
+	"github.com/algoraveai/server/api/rest/health"
+	restSessions "github.com/algoraveai/server/api/rest/sessions"
+	"github.com/algoraveai/server/api/rest/strudels"
+	"github.com/algoraveai/server/api/rest/users"
+	"github.com/algoraveai/server/api/websocket"
 	"github.com/gin-gonic/gin"
 )
 

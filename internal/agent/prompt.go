@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/algorave/server/internal/retriever"
+	"github.com/algoraveai/server/internal/retriever"
 )
 
 // holds all the context needed to build the system prompt

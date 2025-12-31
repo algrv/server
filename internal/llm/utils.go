@@ -1,6 +1,6 @@
 package llm
 
-import "github.com/algorave/server/internal/config"
+import "github.com/algoraveai/server/internal/config"
 
 // returns the appropriate API key for the given provider
 func getAPIKeyForProvider(provider Provider, baseConfig *config.Config) string {

@@ -3,11 +3,11 @@ package sessions
 import (
 	"net/http"
 
-	"github.com/algorave/server/algorave/sessions"
-	"github.com/algorave/server/algorave/strudels"
-	"github.com/algorave/server/internal/agent"
-	"github.com/algorave/server/internal/auth"
-	"github.com/algorave/server/internal/errors"
+	"github.com/algoraveai/server/algorave/sessions"
+	"github.com/algoraveai/server/algorave/strudels"
+	"github.com/algoraveai/server/internal/agent"
+	"github.com/algoraveai/server/internal/auth"
+	"github.com/algoraveai/server/internal/errors"
 	"github.com/gin-gonic/gin"
 )
 

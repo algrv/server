@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/algorave/server/internal/chunker"
-	"github.com/algorave/server/internal/logger"
+	"github.com/algoraveai/server/internal/chunker"
+	"github.com/algoraveai/server/internal/logger"
 	"github.com/jackc/pgx/v5"
 	"github.com/pgvector/pgvector-go"
 )

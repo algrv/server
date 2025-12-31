@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/algorave/server/internal/logger"
+	"github.com/algoraveai/server/internal/logger"
 	"github.com/gin-gonic/gin"
 )
 

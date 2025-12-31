@@ -5,10 +5,10 @@ import (
 
 	"slices"
 
-	"github.com/algorave/server/algorave/users"
-	"github.com/algorave/server/internal/auth"
-	"github.com/algorave/server/internal/errors"
-	"github.com/algorave/server/internal/logger"
+	"github.com/algoraveai/server/algorave/users"
+	"github.com/algoraveai/server/internal/auth"
+	"github.com/algoraveai/server/internal/errors"
+	"github.com/algoraveai/server/internal/logger"
 	"github.com/gin-gonic/gin"
 	"github.com/markbates/goth/gothic"
 )

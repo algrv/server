@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/algorave/server/internal/config"
-	"github.com/algorave/server/internal/examples"
-	"github.com/algorave/server/internal/llm"
-	"github.com/algorave/server/internal/logger"
-	"github.com/algorave/server/internal/storage"
+	"github.com/algoraveai/server/internal/config"
+	"github.com/algoraveai/server/internal/examples"
+	"github.com/algoraveai/server/internal/llm"
+	"github.com/algoraveai/server/internal/logger"
+	"github.com/algoraveai/server/internal/storage"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 

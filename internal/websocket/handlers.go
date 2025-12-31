@@ -4,11 +4,11 @@ import (
 	"context"
 	"strings"
 
-	"github.com/algorave/server/algorave/sessions"
-	"github.com/algorave/server/algorave/users"
-	"github.com/algorave/server/internal/agent"
-	"github.com/algorave/server/internal/llm"
-	"github.com/algorave/server/internal/logger"
+	"github.com/algoraveai/server/algorave/sessions"
+	"github.com/algoraveai/server/algorave/users"
+	"github.com/algoraveai/server/internal/agent"
+	"github.com/algoraveai/server/internal/llm"
+	"github.com/algoraveai/server/internal/logger"
 )
 
 // handles code update messages

@@ -1,6 +1,6 @@
 package auth
 
-import "github.com/algorave/server/algorave/users"
+import "github.com/algoraveai/server/algorave/users"
 
 // AuthResponse returned after successful OAuth callback
 type AuthResponse struct {

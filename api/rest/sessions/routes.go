@@ -1,9 +1,9 @@
 package sessions
 
 import (
-	"github.com/algorave/server/algorave/sessions"
-	"github.com/algorave/server/algorave/strudels"
-	"github.com/algorave/server/internal/auth"
+	"github.com/algoraveai/server/algorave/sessions"
+	"github.com/algoraveai/server/algorave/strudels"
+	"github.com/algoraveai/server/internal/auth"
 	"github.com/gin-gonic/gin"
 )
 

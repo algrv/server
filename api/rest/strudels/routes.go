@@ -1,8 +1,8 @@
 package strudels
 
 import (
-	"github.com/algorave/server/algorave/strudels"
-	"github.com/algorave/server/internal/auth"
+	"github.com/algoraveai/server/algorave/strudels"
+	"github.com/algoraveai/server/internal/auth"
 	"github.com/gin-gonic/gin"
 )
 

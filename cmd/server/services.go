@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/algorave/server/internal/agent"
-	"github.com/algorave/server/internal/config"
-	"github.com/algorave/server/internal/llm"
-	"github.com/algorave/server/internal/retriever"
-	"github.com/algorave/server/internal/storage"
+	"github.com/algoraveai/server/internal/agent"
+	"github.com/algoraveai/server/internal/config"
+	"github.com/algoraveai/server/internal/llm"
+	"github.com/algoraveai/server/internal/retriever"
+	"github.com/algoraveai/server/internal/storage"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 

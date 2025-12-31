@@ -8,9 +8,9 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/algorave/server/internal/errors"
-	"github.com/algorave/server/internal/llm"
-	"github.com/algorave/server/internal/logger"
+	"github.com/algoraveai/server/internal/errors"
+	"github.com/algoraveai/server/internal/llm"
+	"github.com/algoraveai/server/internal/logger"
 )
 
 func createBYOKGenerator(provider, apiKey string) (llm.TextGenerator, error) {

@@ -3,7 +3,7 @@ package collaboration
 import (
 	"time"
 
-	"github.com/algorave/server/algorave/sessions"
+	"github.com/algoraveai/server/algorave/sessions"
 )
 
 type CreateSessionRequest struct {

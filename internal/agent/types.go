@@ -3,8 +3,8 @@ package agent
 import (
 	"context"
 
-	"github.com/algorave/server/internal/llm"
-	"github.com/algorave/server/internal/retriever"
+	"github.com/algoraveai/server/internal/llm"
+	"github.com/algoraveai/server/internal/retriever"
 )
 
 // interface for document and example retrieval

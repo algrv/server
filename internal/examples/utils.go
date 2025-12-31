@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/algorave/server/internal/strudel"
+	"github.com/algoraveai/server/internal/strudel"
 )
 
 // analyzes strudel code and extracts relevant tags
