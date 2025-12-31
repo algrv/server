@@ -193,8 +193,8 @@ func (c *Client) sendBufferOverflowError() {
 	}
 
 	// write directly to websocket with short deadline
-	c.conn.SetWriteDeadline(time.Now().Add(2 * time.Second))
-	c.conn.WriteMessage(websocket.TextMessage, errorBytes) //nolint:errcheck,gosec
+	c.conn.SetWriteDeadline(time.Now().Add(2 * time.Second)) //nolint:errcheck,gosec
+	c.conn.WriteMessage(websocket.TextMessage, errorBytes)   //nolint:errcheck,gosec
 }
 
 // sends an error message to the client

@@ -43,17 +43,17 @@ func (c *WSClient) Connect() error {
 
 	// set up ping/pong handlers to keep theconnection alive
 	conn.SetPongHandler(func(string) error {
-		conn.SetReadDeadline(time.Now().Add(pongWait))
+		conn.SetReadDeadline(time.Now().Add(pongWait)) //nolint:errcheck,gosec
 		return nil
 	})
 
 	// set initial read deadline
-	conn.SetReadDeadline(time.Now().Add(pongWait))
+	conn.SetReadDeadline(time.Now().Add(pongWait)) //nolint:errcheck,gosec
 
 	// read the welcome message to get session ID
 	var welcomeMsg wsMessage
 	if err := conn.ReadJSON(&welcomeMsg); err != nil {
-		conn.Close()
+		conn.Close() //nolint:errcheck,gosec
 		c.mu.Unlock()
 		return fmt.Errorf("failed to read welcome: %w", err)
 	}
@@ -85,7 +85,7 @@ func (c *WSClient) pingPump() {
 			return
 		}
 
-		c.conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
+		c.conn.SetWriteDeadline(time.Now().Add(10 * time.Second)) //nolint:errcheck,gosec
 		if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
 			c.mu.Unlock()
 			return
@@ -101,14 +101,14 @@ func (c *WSClient) readPump() {
 		c.mu.Lock()
 		c.connected = false
 		if c.conn != nil {
-			c.conn.Close()
+			c.conn.Close() //nolint:errcheck,gosec
 		}
 		c.mu.Unlock()
 	}()
 
 	for {
 		// reset read deadline on each successful read
-		c.conn.SetReadDeadline(time.Now().Add(pongWait))
+		c.conn.SetReadDeadline(time.Now().Add(pongWait)) //nolint:errcheck,gosec
 
 		var msg wsMessage
 		if err := c.conn.ReadJSON(&msg); err != nil {
@@ -152,7 +152,7 @@ func (c *WSClient) Close() {
 	defer c.mu.Unlock()
 
 	if c.conn != nil {
-		c.conn.Close()
+		c.conn.Close() //nolint:errcheck,gosec
 		c.conn = nil
 	}
 	c.connected = false
@@ -206,7 +206,7 @@ func (c *WSClient) SendAgentRequest(ctx context.Context, userQuery, editorState 
 	}
 
 	c.mu.Lock()
-	conn.SetWriteDeadline(time.Now().Add(30 * time.Second))
+	conn.SetWriteDeadline(time.Now().Add(30 * time.Second)) //nolint:errcheck,gosec
 	err = conn.WriteJSON(reqMsg)
 	c.mu.Unlock()
 
