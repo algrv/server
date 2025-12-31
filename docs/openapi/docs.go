@@ -11,11 +11,11 @@ const docTemplate = `{
         "title": "{{.Title}}",
         "contact": {
             "name": "API Support",
-            "url": "https://github.com/algorave/server"
+            "url": "https://github.com/algoraveai/server"
         },
         "license": {
-            "name": "MIT",
-            "url": "https://opensource.org/licenses/MIT"
+            "name": "GPL-3.0",
+            "url": "https://www.gnu.org/licenses/gpl-3.0.html"
         },
         "version": "{{.Version}}"
     },
@@ -67,13 +67,13 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -116,19 +116,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -165,7 +165,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -205,13 +205,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -266,7 +266,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -306,13 +306,13 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -355,19 +355,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -412,19 +412,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Invalid or expired invite",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -469,25 +469,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -522,13 +522,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -578,31 +578,31 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -640,31 +640,31 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -704,31 +704,31 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -778,31 +778,31 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -849,31 +849,31 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -913,25 +913,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -973,13 +973,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -1014,13 +1014,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -1067,31 +1067,31 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -1122,13 +1122,13 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -1157,7 +1157,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_algorave_strudels.CreateStrudelRequest"
+                            "$ref": "#/definitions/github_com_algoraveai_server_algorave_strudels.CreateStrudelRequest"
                         }
                     }
                 ],
@@ -1165,25 +1165,25 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_algorave_strudels.Strudel"
+                            "$ref": "#/definitions/github_com_algoraveai_server_algorave_strudels.Strudel"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -1217,25 +1217,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_algorave_strudels.Strudel"
+                            "$ref": "#/definitions/github_com_algoraveai_server_algorave_strudels.Strudel"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -1271,7 +1271,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_algorave_strudels.UpdateStrudelRequest"
+                            "$ref": "#/definitions/github_com_algoraveai_server_algorave_strudels.UpdateStrudelRequest"
                         }
                     }
                 ],
@@ -1279,25 +1279,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_algorave_strudels.Strudel"
+                            "$ref": "#/definitions/github_com_algoraveai_server_algorave_strudels.Strudel"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -1335,19 +1335,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -1378,92 +1378,13 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/ws": {
-            "get": {
-                "description": "Establish WebSocket connection for real-time collaboration. Supports authentication via JWT token or invite token. If no session_id is provided, creates a new anonymous session.\n\nMessage Types:\n- code_update: Real-time code changes\n- agent_request: AI code generation requests\n- chat_message: Chat messages\n- user_joined: User join notifications\n- user_left: User leave notifications",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "websocket"
-                ],
-                "summary": "WebSocket connection",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Session ID (UUID) - if not provided, creates new anonymous session",
-                        "name": "session_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "JWT authentication token",
-                        "name": "token",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Session invite token",
-                        "name": "invite_token",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Display name for anonymous users",
-                        "name": "display_name",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "101": {
-                        "description": "Switching Protocols",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
-                        }
-                    },
-                    "429": {
-                        "description": "Too Many Requests",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -1498,7 +1419,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user": {
-                    "$ref": "#/definitions/github_com_algorave_server_algorave_users.User"
+                    "$ref": "#/definitions/github_com_algoraveai_server_algorave_users.User"
                 }
             }
         },
@@ -1530,7 +1451,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "user": {
-                    "$ref": "#/definitions/github_com_algorave_server_algorave_users.User"
+                    "$ref": "#/definitions/github_com_algoraveai_server_algorave_users.User"
                 }
             }
         },
@@ -1681,7 +1602,7 @@ const docTemplate = `{
                 "messages": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_algorave_server_algorave_sessions.Message"
+                        "$ref": "#/definitions/github_com_algoraveai_server_algorave_sessions.Message"
                     }
                 }
             }
@@ -1837,7 +1758,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "strudel": {
-                    "$ref": "#/definitions/github_com_algorave_server_algorave_strudels.Strudel"
+                    "$ref": "#/definitions/github_com_algoraveai_server_algorave_strudels.Strudel"
                 },
                 "strudel_id": {
                     "type": "string"
@@ -1858,7 +1779,7 @@ const docTemplate = `{
                 "strudels": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_algorave_server_algorave_strudels.Strudel"
+                        "$ref": "#/definitions/github_com_algoraveai_server_algorave_strudels.Strudel"
                     }
                 }
             }
@@ -1904,7 +1825,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_algorave_server_algorave_sessions.Message": {
+        "github_com_algoraveai_server_algorave_sessions.Message": {
             "type": "object",
             "properties": {
                 "content": {
@@ -1932,7 +1853,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_algorave_server_algorave_strudels.CreateStrudelRequest": {
+        "github_com_algoraveai_server_algorave_strudels.CreateStrudelRequest": {
             "type": "object",
             "required": [
                 "code",
@@ -1957,7 +1878,7 @@ const docTemplate = `{
                     "type": "array",
                     "maxItems": 100,
                     "items": {
-                        "$ref": "#/definitions/github_com_algorave_server_internal_agent.Message"
+                        "$ref": "#/definitions/github_com_algoraveai_server_internal_agent.Message"
                     }
                 },
                 "description": {
@@ -1981,7 +1902,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_algorave_server_algorave_strudels.Strudel": {
+        "github_com_algoraveai_server_algorave_strudels.Strudel": {
             "type": "object",
             "properties": {
                 "categories": {
@@ -1996,7 +1917,7 @@ const docTemplate = `{
                 "conversation_history": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_algorave_server_internal_agent.Message"
+                        "$ref": "#/definitions/github_com_algoraveai_server_internal_agent.Message"
                     }
                 },
                 "created_at": {
@@ -2028,7 +1949,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_algorave_server_algorave_strudels.UpdateStrudelRequest": {
+        "github_com_algoraveai_server_algorave_strudels.UpdateStrudelRequest": {
             "type": "object",
             "properties": {
                 "categories": {
@@ -2047,7 +1968,7 @@ const docTemplate = `{
                     "type": "array",
                     "maxItems": 100,
                     "items": {
-                        "$ref": "#/definitions/github_com_algorave_server_internal_agent.Message"
+                        "$ref": "#/definitions/github_com_algoraveai_server_internal_agent.Message"
                     }
                 },
                 "description": {
@@ -2070,7 +1991,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_algorave_server_algorave_users.User": {
+        "github_com_algoraveai_server_algorave_users.User": {
             "type": "object",
             "properties": {
                 "avatar_url": {
@@ -2096,7 +2017,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_algorave_server_internal_agent.Message": {
+        "github_com_algoraveai_server_internal_agent.Message": {
             "type": "object",
             "properties": {
                 "content": {
@@ -2109,7 +2030,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_algorave_server_internal_errors.ErrorResponse": {
+        "github_com_algoraveai_server_internal_errors.ErrorResponse": {
             "type": "object",
             "properties": {
                 "details": {
@@ -2140,7 +2061,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
+	Host:             "algorave.ai",
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "Algorave API",

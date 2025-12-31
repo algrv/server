@@ -28,10 +28,10 @@ import (
 // @contact.name API Support
 // @contact.url https://github.com/algoraveai/server
 
-// @license.name MIT
-// @license.url https://opensource.org/licenses/MIT
+// @license.name GPL-3.0
+// @license.url https://www.gnu.org/licenses/gpl-3.0.html
 
-// @host localhost:8080
+// @host algorave.ai
 // @BasePath /
 
 // @securityDefinitions.apikey BearerAuth
