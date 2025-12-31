@@ -51,3 +51,8 @@ docs/strudel
 
 # env config
 .envrc
+
+# planning 
+.bs
+.brainstorm
+.claude
