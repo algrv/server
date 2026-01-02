@@ -56,15 +56,16 @@ func InitializeProviders() error {
 }
 
 // creates a JWT token for the user
-func GenerateJWT(userID, email string) (string, error) {
+func GenerateJWT(userID, email string, isAdmin bool) (string, error) {
 	secret := os.Getenv("JWT_SECRET")
 	if secret == "" {
 		return "", fmt.Errorf("JWT_SECRET not set")
 	}
 
 	claims := Claims{
-		UserID: userID,
-		Email:  email,
+		UserID:  userID,
+		Email:   email,
+		IsAdmin: isAdmin,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(7 * 24 * time.Hour)), // 7 days
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

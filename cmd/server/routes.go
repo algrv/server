@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/algoraveai/server/api/rest/admin"
 	"github.com/algoraveai/server/api/rest/auth"
 	"github.com/algoraveai/server/api/rest/collaboration"
 	"github.com/algoraveai/server/api/rest/health"
@@ -26,6 +27,7 @@ func RegisterRoutes(router *gin.Engine, server *Server) {
 		restSessions.RegisterRoutes(v1, server.sessionRepo, server.strudelRepo)
 		collaboration.RegisterRoutes(v1, server.sessionRepo)
 		users.RegisterRoutes(v1, server.db)
+		admin.RegisterRoutes(v1, server.strudelRepo)
 		websocket.RegisterRoutes(v1, server.hub, server.sessionRepo, server.userRepo)
 	}
 }

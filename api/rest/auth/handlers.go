@@ -77,7 +77,7 @@ func CallbackHandler(userRepo *users.Repository) gin.HandlerFunc {
 			return
 		}
 
-		token, err := auth.GenerateJWT(user.ID, user.Email)
+		token, err := auth.GenerateJWT(user.ID, user.Email, user.IsAdmin)
 		if err != nil {
 			errors.InternalError(c, "failed to generate token", err)
 			return

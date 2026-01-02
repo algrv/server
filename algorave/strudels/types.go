@@ -19,7 +19,7 @@ type Strudel struct {
 	Title               string              `json:"title"`
 	Code                string              `json:"code"`
 	IsPublic            bool                `json:"is_public"`
-	AllowTraining       bool                `json:"allow_training"`
+	UseInTraining       bool                `json:"-"` // admin-only, not exposed to users
 	Description         string              `json:"description,omitempty"`
 	Tags                []string            `json:"tags,omitempty"`
 	Categories          []string            `json:"categories,omitempty"`
@@ -56,7 +56,6 @@ type CreateStrudelRequest struct {
 	Title               string              `json:"title" binding:"required,max=200"`
 	Code                string              `json:"code" binding:"required,max=1048576"` // 1MB limit
 	IsPublic            bool                `json:"is_public"`
-	AllowTraining       bool                `json:"allow_training"`
 	Description         string              `json:"description,omitempty" binding:"max=2000"`
 	Tags                []string            `json:"tags,omitempty" binding:"max=20,dive,max=50"`       // max 20 tags, each max 50 chars
 	Categories          []string            `json:"categories,omitempty" binding:"max=10,dive,max=50"` // max 10 categories, each max 50 chars
@@ -67,7 +66,6 @@ type UpdateStrudelRequest struct {
 	Title               *string             `json:"title,omitempty" binding:"omitempty,max=200"`
 	Code                *string             `json:"code,omitempty" binding:"omitempty,max=1048576"` // 1MB limit
 	IsPublic            *bool               `json:"is_public,omitempty"`
-	AllowTraining       *bool               `json:"allow_training,omitempty"`
 	Description         *string             `json:"description,omitempty" binding:"omitempty,max=2000"`
 	Tags                []string            `json:"tags,omitempty" binding:"max=20,dive,max=50"`
 	Categories          []string            `json:"categories,omitempty" binding:"max=10,dive,max=50"`

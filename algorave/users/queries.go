@@ -10,11 +10,11 @@ const (
 			name = EXCLUDED.name,
 			avatar_url = EXCLUDED.avatar_url,
 			updated_at = NOW()
-		RETURNING id, email, provider, provider_id, name, avatar_url, tier, training_consent, ai_features_enabled, created_at, updated_at
+		RETURNING id, email, provider, provider_id, name, avatar_url, tier, is_admin, training_consent, ai_features_enabled, created_at, updated_at
 	`
 
 	queryFindByID = `
-		SELECT id, email, provider, provider_id, name, avatar_url, tier, training_consent, ai_features_enabled, created_at, updated_at
+		SELECT id, email, provider, provider_id, name, avatar_url, tier, is_admin, training_consent, ai_features_enabled, created_at, updated_at
 		FROM users
 		WHERE id = $1
 	`
@@ -23,21 +23,21 @@ const (
 		UPDATE users
 		SET name = $1, avatar_url = $2, updated_at = NOW()
 		WHERE id = $3
-		RETURNING id, email, provider, provider_id, name, avatar_url, tier, training_consent, ai_features_enabled, created_at, updated_at
+		RETURNING id, email, provider, provider_id, name, avatar_url, tier, is_admin, training_consent, ai_features_enabled, created_at, updated_at
 	`
 
 	queryUpdateTrainingConsent = `
 		UPDATE users
 		SET training_consent = $1, updated_at = NOW()
 		WHERE id = $2
-		RETURNING id, email, provider, provider_id, name, avatar_url, tier, training_consent, ai_features_enabled, created_at, updated_at
+		RETURNING id, email, provider, provider_id, name, avatar_url, tier, is_admin, training_consent, ai_features_enabled, created_at, updated_at
 	`
 
 	queryUpdateAIFeaturesEnabled = `
 		UPDATE users
 		SET ai_features_enabled = $1, updated_at = NOW()
 		WHERE id = $2
-		RETURNING id, email, provider, provider_id, name, avatar_url, tier, training_consent, ai_features_enabled, created_at, updated_at
+		RETURNING id, email, provider, provider_id, name, avatar_url, tier, is_admin, training_consent, ai_features_enabled, created_at, updated_at
 	`
 
 	queryGetUserDailyUsage = `

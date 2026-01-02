@@ -17,7 +17,7 @@ func TestGenerateJWT_Success(t *testing.T) {
 	defer os.Unsetenv( //nolint:errcheck // test cleanup
 		"JWT_SECRET")
 
-	token, err := GenerateJWT("user-123", "test@example.com")
+	token, err := GenerateJWT("user-123", "test@example.com", false)
 
 	require.NoError(t, err)
 	assert.NotEmpty(t, token)
@@ -29,7 +29,7 @@ func TestGenerateJWT_MissingSecret(t *testing.T) {
 	os.Unsetenv( //nolint:errcheck // test cleanup
 		"JWT_SECRET")
 
-	_, err := GenerateJWT("user-123", "test@example.com")
+	_, err := GenerateJWT("user-123", "test@example.com", false)
 
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "JWT_SECRET not set")
@@ -41,7 +41,7 @@ func TestValidateJWT_ValidToken(t *testing.T) {
 	defer os.Unsetenv( //nolint:errcheck // test cleanup
 		"JWT_SECRET")
 
-	token, err := GenerateJWT("user-123", "test@example.com")
+	token, err := GenerateJWT("user-123", "test@example.com", false)
 	require.NoError(t, err)
 
 	claims, err := ValidateJWT(token)
@@ -49,6 +49,7 @@ func TestValidateJWT_ValidToken(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "user-123", claims.UserID)
 	assert.Equal(t, "test@example.com", claims.Email)
+	assert.False(t, claims.IsAdmin)
 }
 
 func TestValidateJWT_ExpiredToken(t *testing.T) {
@@ -82,7 +83,7 @@ func TestValidateJWT_TamperedToken(t *testing.T) {
 	defer os.Unsetenv( //nolint:errcheck // test cleanup
 		"JWT_SECRET")
 
-	token, err := GenerateJWT("user-123", "test@example.com")
+	token, err := GenerateJWT("user-123", "test@example.com", false)
 	require.NoError(t, err)
 
 	// tamper with the token by changing a character
@@ -95,7 +96,7 @@ func TestValidateJWT_TamperedToken(t *testing.T) {
 func TestValidateJWT_WrongSecret(t *testing.T) {
 	os.Setenv( //nolint:errcheck // test fixture
 		"JWT_SECRET", "test-secret-key-for-testing")
-	token, err := GenerateJWT("user-123", "test@example.com")
+	token, err := GenerateJWT("user-123", "test@example.com", false)
 	require.NoError(t, err)
 
 	// change the secret
@@ -158,7 +159,7 @@ func TestJWT_TokenExpiration(t *testing.T) {
 	defer os.Unsetenv( //nolint:errcheck // test cleanup
 		"JWT_SECRET")
 
-	token, err := GenerateJWT("user-123", "test@example.com")
+	token, err := GenerateJWT("user-123", "test@example.com", false)
 	require.NoError(t, err)
 
 	claims, err := ValidateJWT(token)
@@ -188,7 +189,7 @@ func TestJWT_ClaimsIntegrity(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		token, err := GenerateJWT(tc.userID, tc.email)
+		token, err := GenerateJWT(tc.userID, tc.email, false)
 		require.NoError(t, err)
 
 		claims, err := ValidateJWT(token)
@@ -197,4 +198,27 @@ func TestJWT_ClaimsIntegrity(t *testing.T) {
 		assert.Equal(t, tc.userID, claims.UserID, "userID should match")
 		assert.Equal(t, tc.email, claims.Email, "email should match")
 	}
+}
+
+func TestGenerateJWT_AdminFlag(t *testing.T) {
+	os.Setenv( //nolint:errcheck // test fixture
+		"JWT_SECRET", "test-secret-key-for-testing")
+	defer os.Unsetenv( //nolint:errcheck // test cleanup
+		"JWT_SECRET")
+
+	// Test admin token
+	adminToken, err := GenerateJWT("admin-123", "admin@example.com", true)
+	require.NoError(t, err)
+
+	claims, err := ValidateJWT(adminToken)
+	require.NoError(t, err)
+	assert.True(t, claims.IsAdmin, "IsAdmin should be true for admin user")
+
+	// Test non-admin token
+	userToken, err := GenerateJWT("user-123", "user@example.com", false)
+	require.NoError(t, err)
+
+	claims, err = ValidateJWT(userToken)
+	require.NoError(t, err)
+	assert.False(t, claims.IsAdmin, "IsAdmin should be false for regular user")
 }

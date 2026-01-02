@@ -50,7 +50,7 @@ const (
 		FROM user_strudels us
 		INNER JOIN users u ON us.user_id = u.id
 		WHERE us.searchable_tsvector @@ websearch_to_tsquery('english', $1)
-		  AND us.allow_training = true
+		  AND us.use_in_training = true
 		  AND us.is_public = true
 		  AND u.training_consent = true
 		ORDER BY rank DESC

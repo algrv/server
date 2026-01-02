@@ -29,7 +29,6 @@ func (r *Repository) Create(
 		req.Title,
 		req.Code,
 		req.IsPublic,
-		req.AllowTraining,
 		req.Description,
 		req.Tags,
 		req.Categories,
@@ -40,7 +39,7 @@ func (r *Repository) Create(
 		&strudel.Title,
 		&strudel.Code,
 		&strudel.IsPublic,
-		&strudel.AllowTraining,
+		&strudel.UseInTraining,
 		&strudel.Description,
 		&strudel.Tags,
 		&strudel.Categories,
@@ -73,7 +72,7 @@ func (r *Repository) List(ctx context.Context, userID string) ([]Strudel, error)
 			&s.Title,
 			&s.Code,
 			&s.IsPublic,
-			&s.AllowTraining,
+			&s.UseInTraining,
 			&s.Description,
 			&s.Tags,
 			&s.Categories,
@@ -111,7 +110,7 @@ func (r *Repository) ListPublic(ctx context.Context, limit int) ([]Strudel, erro
 			&s.Title,
 			&s.Code,
 			&s.IsPublic,
-			&s.AllowTraining,
+			&s.UseInTraining,
 			&s.Description,
 			&s.Tags,
 			&s.Categories,
@@ -142,7 +141,7 @@ func (r *Repository) Get(ctx context.Context, strudelID, userID string) (*Strude
 		&strudel.Title,
 		&strudel.Code,
 		&strudel.IsPublic,
-		&strudel.AllowTraining,
+		&strudel.UseInTraining,
 		&strudel.Description,
 		&strudel.Tags,
 		&strudel.Categories,
@@ -171,7 +170,6 @@ func (r *Repository) Update(
 		req.Title,
 		req.Code,
 		req.IsPublic,
-		req.AllowTraining,
 		req.Description,
 		req.Tags,
 		req.Categories,
@@ -184,7 +182,7 @@ func (r *Repository) Update(
 		&strudel.Title,
 		&strudel.Code,
 		&strudel.IsPublic,
-		&strudel.AllowTraining,
+		&strudel.UseInTraining,
 		&strudel.Description,
 		&strudel.Tags,
 		&strudel.Categories,
@@ -230,7 +228,7 @@ func (r *Repository) ListTrainableWithoutEmbedding(ctx context.Context, limit in
 			&s.Title,
 			&s.Code,
 			&s.IsPublic,
-			&s.AllowTraining,
+			&s.UseInTraining,
 			&s.Description,
 			&s.Tags,
 			&s.Categories,
@@ -255,4 +253,56 @@ func (r *Repository) ListTrainableWithoutEmbedding(ctx context.Context, limit in
 func (r *Repository) UpdateEmbedding(ctx context.Context, strudelID string, embedding []float32) error {
 	_, err := r.db.Exec(ctx, queryUpdateEmbedding, embedding, strudelID)
 	return err
+}
+
+// AdminGetStrudel gets any strudel by ID (admin only, no user check)
+func (r *Repository) AdminGetStrudel(ctx context.Context, strudelID string) (*Strudel, error) {
+	var strudel Strudel
+
+	err := r.db.QueryRow(ctx, queryAdminGetStrudel, strudelID).Scan(
+		&strudel.ID,
+		&strudel.UserID,
+		&strudel.Title,
+		&strudel.Code,
+		&strudel.IsPublic,
+		&strudel.UseInTraining,
+		&strudel.Description,
+		&strudel.Tags,
+		&strudel.Categories,
+		&strudel.ConversationHistory,
+		&strudel.CreatedAt,
+		&strudel.UpdatedAt,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &strudel, nil
+}
+
+// AdminSetUseInTraining sets the use_in_training flag (admin only)
+func (r *Repository) AdminSetUseInTraining(ctx context.Context, strudelID string, useInTraining bool) (*Strudel, error) {
+	var strudel Strudel
+
+	err := r.db.QueryRow(ctx, queryAdminSetUseInTraining, useInTraining, strudelID).Scan(
+		&strudel.ID,
+		&strudel.UserID,
+		&strudel.Title,
+		&strudel.Code,
+		&strudel.IsPublic,
+		&strudel.UseInTraining,
+		&strudel.Description,
+		&strudel.Tags,
+		&strudel.Categories,
+		&strudel.ConversationHistory,
+		&strudel.CreatedAt,
+		&strudel.UpdatedAt,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &strudel, nil
 }
