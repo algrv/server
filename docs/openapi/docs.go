@@ -22,6 +22,128 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/v1/admin/strudels/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "AdminKeyAuth": []
+                    }
+                ],
+                "description": "Admin-only endpoint to get any strudel regardless of ownership",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Get any strudel by ID (admin)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Strudel ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/admin.StrudelAdminResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/strudels/{id}/use-in-training": {
+            "put": {
+                "security": [
+                    {
+                        "AdminKeyAuth": []
+                    }
+                ],
+                "description": "Admin-only endpoint to mark a strudel for use in training data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Set use_in_training flag on a strudel",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Strudel ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Use in training data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/admin.SetUseInTrainingRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/admin.StrudelAdminResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/auth/logout": {
             "post": {
                 "description": "Clear authentication session",
@@ -36,7 +158,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api_rest_auth.MessageResponse"
+                            "$ref": "#/definitions/auth.MessageResponse"
                         }
                     }
                 }
@@ -61,19 +183,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api_rest_auth.UserResponse"
+                            "$ref": "#/definitions/auth.UserResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     }
                 }
@@ -102,7 +224,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api_rest_auth.UpdateProfileRequest"
+                            "$ref": "#/definitions/auth.UpdateProfileRequest"
                         }
                     }
                 ],
@@ -110,25 +232,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api_rest_auth.UserResponse"
+                            "$ref": "#/definitions/auth.UserResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     }
                 }
@@ -165,7 +287,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     }
                 }
@@ -199,19 +321,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api_rest_auth.AuthResponse"
+                            "$ref": "#/definitions/auth.AuthResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     }
                 }
@@ -231,7 +353,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api_rest_health.PingResponse"
+                            "$ref": "#/definitions/health.PingResponse"
                         }
                     }
                 }
@@ -260,13 +382,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api_rest_strudels.StrudelsListResponse"
+                            "$ref": "#/definitions/strudels.StrudelsListResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     }
                 }
@@ -300,19 +422,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api_rest_collaboration.SessionsListResponse"
+                            "$ref": "#/definitions/collaboration.SessionsListResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     }
                 }
@@ -341,7 +463,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api_rest_collaboration.CreateSessionRequest"
+                            "$ref": "#/definitions/collaboration.CreateSessionRequest"
                         }
                     }
                 ],
@@ -349,25 +471,25 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/api_rest_collaboration.CreateSessionResponse"
+                            "$ref": "#/definitions/collaboration.CreateSessionResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     }
                 }
@@ -398,7 +520,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api_rest_collaboration.JoinSessionRequest"
+                            "$ref": "#/definitions/collaboration.JoinSessionRequest"
                         }
                     }
                 ],
@@ -406,25 +528,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api_rest_collaboration.JoinSessionResponse"
+                            "$ref": "#/definitions/collaboration.JoinSessionResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Invalid or expired invite",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     }
                 }
@@ -455,7 +577,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api_rest_sessions.TransferSessionRequest"
+                            "$ref": "#/definitions/sessions.TransferSessionRequest"
                         }
                     }
                 ],
@@ -463,31 +585,31 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/api_rest_sessions.TransferSessionResponse"
+                            "$ref": "#/definitions/sessions.TransferSessionResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     }
                 }
@@ -521,25 +643,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api_rest_collaboration.SessionResponse"
+                            "$ref": "#/definitions/collaboration.SessionResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     }
                 }
@@ -575,7 +697,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api_rest_collaboration.UpdateSessionCodeRequest"
+                            "$ref": "#/definitions/collaboration.UpdateSessionCodeRequest"
                         }
                     }
                 ],
@@ -583,37 +705,37 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api_rest_collaboration.UpdateSessionCodeResponse"
+                            "$ref": "#/definitions/collaboration.UpdateSessionCodeResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     }
                 }
@@ -645,37 +767,37 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api_rest_collaboration.MessageResponse"
+                            "$ref": "#/definitions/collaboration.MessageResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     }
                 }
@@ -709,37 +831,37 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api_rest_collaboration.InviteTokensListResponse"
+                            "$ref": "#/definitions/collaboration.InviteTokensListResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     }
                 }
@@ -775,7 +897,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api_rest_collaboration.CreateInviteTokenRequest"
+                            "$ref": "#/definitions/collaboration.CreateInviteTokenRequest"
                         }
                     }
                 ],
@@ -783,37 +905,37 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/api_rest_collaboration.InviteTokenResponse"
+                            "$ref": "#/definitions/collaboration.InviteTokenResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     }
                 }
@@ -854,37 +976,37 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api_rest_collaboration.MessageResponse"
+                            "$ref": "#/definitions/collaboration.MessageResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     }
                 }
@@ -918,31 +1040,31 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api_rest_collaboration.MessageResponse"
+                            "$ref": "#/definitions/collaboration.MessageResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     }
                 }
@@ -983,25 +1105,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api_rest_collaboration.MessagesResponse"
+                            "$ref": "#/definitions/collaboration.MessagesResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     }
                 }
@@ -1035,25 +1157,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api_rest_collaboration.ParticipantsListResponse"
+                            "$ref": "#/definitions/collaboration.ParticipantsListResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     }
                 }
@@ -1094,37 +1216,37 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api_rest_collaboration.MessageResponse"
+                            "$ref": "#/definitions/collaboration.MessageResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     }
                 }
@@ -1149,19 +1271,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api_rest_strudels.StrudelsListResponse"
+                            "$ref": "#/definitions/strudels.StrudelsListResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     }
                 }
@@ -1190,7 +1312,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_algorave_strudels.CreateStrudelRequest"
+                            "$ref": "#/definitions/strudels.CreateStrudelRequest"
                         }
                     }
                 ],
@@ -1198,25 +1320,25 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_algorave_strudels.Strudel"
+                            "$ref": "#/definitions/strudels.Strudel"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     }
                 }
@@ -1250,25 +1372,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_algorave_strudels.Strudel"
+                            "$ref": "#/definitions/strudels.Strudel"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     }
                 }
@@ -1304,7 +1426,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_algorave_strudels.UpdateStrudelRequest"
+                            "$ref": "#/definitions/strudels.UpdateStrudelRequest"
                         }
                     }
                 ],
@@ -1312,25 +1434,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_algorave_strudels.Strudel"
+                            "$ref": "#/definitions/strudels.Strudel"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     }
                 }
@@ -1362,25 +1484,139 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api_rest_strudels.MessageResponse"
+                            "$ref": "#/definitions/strudels.MessageResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/users/ai-features-enabled": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Toggle whether AI features (prompt bar, code generation) are enabled for the user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Update user's AI features setting",
+                "parameters": [
+                    {
+                        "description": "AI features enabled data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/users.AIFeaturesEnabledRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/users.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/users/training-consent": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Toggle whether the user's public strudels can be used for AI training",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Update user's training consent",
+                "parameters": [
+                    {
+                        "description": "Consent data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/users.TrainingConsentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/users.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     }
                 }
@@ -1405,19 +1641,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api_rest_users.UsageResponse"
+                            "$ref": "#/definitions/users.UsageResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/errors.ErrorResponse"
                         }
                     }
                 }
@@ -1437,7 +1673,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api_rest_health.Response"
+                            "$ref": "#/definitions/health.Response"
                         }
                     }
                 }
@@ -1445,18 +1681,71 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "api_rest_auth.AuthResponse": {
+        "admin.SetUseInTrainingRequest": {
+            "type": "object",
+            "properties": {
+                "use_in_training": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "admin.StrudelAdminResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_public": {
+                    "type": "boolean"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                },
+                "use_in_training": {
+                    "type": "boolean"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "agent.Message": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "description": "message content",
+                    "type": "string"
+                },
+                "role": {
+                    "description": "\"user\" or \"assistant\"",
+                    "type": "string"
+                }
+            }
+        },
+        "auth.AuthResponse": {
             "type": "object",
             "properties": {
                 "token": {
                     "type": "string"
                 },
                 "user": {
-                    "$ref": "#/definitions/github_com_algoraveai_server_algorave_users.User"
+                    "$ref": "#/definitions/users.User"
                 }
             }
         },
-        "api_rest_auth.MessageResponse": {
+        "auth.MessageResponse": {
             "type": "object",
             "properties": {
                 "message": {
@@ -1464,7 +1753,7 @@ const docTemplate = `{
                 }
             }
         },
-        "api_rest_auth.UpdateProfileRequest": {
+        "auth.UpdateProfileRequest": {
             "type": "object",
             "required": [
                 "name"
@@ -1480,15 +1769,15 @@ const docTemplate = `{
                 }
             }
         },
-        "api_rest_auth.UserResponse": {
+        "auth.UserResponse": {
             "type": "object",
             "properties": {
                 "user": {
-                    "$ref": "#/definitions/github_com_algoraveai_server_algorave_users.User"
+                    "$ref": "#/definitions/users.User"
                 }
             }
         },
-        "api_rest_collaboration.CreateInviteTokenRequest": {
+        "collaboration.CreateInviteTokenRequest": {
             "type": "object",
             "required": [
                 "role"
@@ -1509,7 +1798,7 @@ const docTemplate = `{
                 }
             }
         },
-        "api_rest_collaboration.CreateSessionRequest": {
+        "collaboration.CreateSessionRequest": {
             "type": "object",
             "required": [
                 "title"
@@ -1526,7 +1815,7 @@ const docTemplate = `{
                 }
             }
         },
-        "api_rest_collaboration.CreateSessionResponse": {
+        "collaboration.CreateSessionResponse": {
             "type": "object",
             "properties": {
                 "code": {
@@ -1552,7 +1841,7 @@ const docTemplate = `{
                 }
             }
         },
-        "api_rest_collaboration.InviteTokenResponse": {
+        "collaboration.InviteTokenResponse": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -1581,18 +1870,18 @@ const docTemplate = `{
                 }
             }
         },
-        "api_rest_collaboration.InviteTokensListResponse": {
+        "collaboration.InviteTokensListResponse": {
             "type": "object",
             "properties": {
                 "tokens": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/api_rest_collaboration.InviteTokenResponse"
+                        "$ref": "#/definitions/collaboration.InviteTokenResponse"
                     }
                 }
             }
         },
-        "api_rest_collaboration.JoinSessionRequest": {
+        "collaboration.JoinSessionRequest": {
             "type": "object",
             "required": [
                 "invite_token"
@@ -1607,7 +1896,7 @@ const docTemplate = `{
                 }
             }
         },
-        "api_rest_collaboration.JoinSessionResponse": {
+        "collaboration.JoinSessionResponse": {
             "type": "object",
             "properties": {
                 "display_name": {
@@ -1621,7 +1910,7 @@ const docTemplate = `{
                 }
             }
         },
-        "api_rest_collaboration.MessageResponse": {
+        "collaboration.MessageResponse": {
             "type": "object",
             "properties": {
                 "message": {
@@ -1629,18 +1918,18 @@ const docTemplate = `{
                 }
             }
         },
-        "api_rest_collaboration.MessagesResponse": {
+        "collaboration.MessagesResponse": {
             "type": "object",
             "properties": {
                 "messages": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_algoraveai_server_algorave_sessions.Message"
+                        "$ref": "#/definitions/sessions.Message"
                     }
                 }
             }
         },
-        "api_rest_collaboration.ParticipantResponse": {
+        "collaboration.ParticipantResponse": {
             "type": "object",
             "properties": {
                 "display_name": {
@@ -1666,18 +1955,18 @@ const docTemplate = `{
                 }
             }
         },
-        "api_rest_collaboration.ParticipantsListResponse": {
+        "collaboration.ParticipantsListResponse": {
             "type": "object",
             "properties": {
                 "participants": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/api_rest_collaboration.ParticipantResponse"
+                        "$ref": "#/definitions/collaboration.ParticipantResponse"
                     }
                 }
             }
         },
-        "api_rest_collaboration.SessionResponse": {
+        "collaboration.SessionResponse": {
             "type": "object",
             "properties": {
                 "code": {
@@ -1704,7 +1993,7 @@ const docTemplate = `{
                 "participants": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/api_rest_collaboration.ParticipantResponse"
+                        "$ref": "#/definitions/collaboration.ParticipantResponse"
                     }
                 },
                 "title": {
@@ -1712,18 +2001,18 @@ const docTemplate = `{
                 }
             }
         },
-        "api_rest_collaboration.SessionsListResponse": {
+        "collaboration.SessionsListResponse": {
             "type": "object",
             "properties": {
                 "sessions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/api_rest_collaboration.SessionResponse"
+                        "$ref": "#/definitions/collaboration.SessionResponse"
                     }
                 }
             }
         },
-        "api_rest_collaboration.UpdateSessionCodeRequest": {
+        "collaboration.UpdateSessionCodeRequest": {
             "type": "object",
             "required": [
                 "code"
@@ -1736,7 +2025,7 @@ const docTemplate = `{
                 }
             }
         },
-        "api_rest_collaboration.UpdateSessionCodeResponse": {
+        "collaboration.UpdateSessionCodeResponse": {
             "type": "object",
             "properties": {
                 "code": {
@@ -1747,7 +2036,24 @@ const docTemplate = `{
                 }
             }
         },
-        "api_rest_health.PingResponse": {
+        "errors.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "details": {
+                    "description": "optional details (sanitized in production)",
+                    "type": "string"
+                },
+                "error": {
+                    "description": "error code (e.g., \"unauthorized\", \"not_found\")",
+                    "type": "string"
+                },
+                "message": {
+                    "description": "user-friendly message",
+                    "type": "string"
+                }
+            }
+        },
+        "health.PingResponse": {
             "type": "object",
             "properties": {
                 "message": {
@@ -1755,7 +2061,7 @@ const docTemplate = `{
                 }
             }
         },
-        "api_rest_health.Response": {
+        "health.Response": {
             "type": "object",
             "properties": {
                 "service": {
@@ -1769,96 +2075,7 @@ const docTemplate = `{
                 }
             }
         },
-        "api_rest_sessions.TransferSessionRequest": {
-            "type": "object",
-            "required": [
-                "session_id",
-                "title"
-            ],
-            "properties": {
-                "session_id": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                }
-            }
-        },
-        "api_rest_sessions.TransferSessionResponse": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string"
-                },
-                "strudel": {
-                    "$ref": "#/definitions/github_com_algoraveai_server_algorave_strudels.Strudel"
-                },
-                "strudel_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "api_rest_strudels.MessageResponse": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
-        "api_rest_strudels.StrudelsListResponse": {
-            "type": "object",
-            "properties": {
-                "strudels": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/github_com_algoraveai_server_algorave_strudels.Strudel"
-                    }
-                }
-            }
-        },
-        "api_rest_users.DailyUsage": {
-            "type": "object",
-            "properties": {
-                "count": {
-                    "description": "Number of generations",
-                    "type": "integer"
-                },
-                "date": {
-                    "description": "Format: \"2006-01-02\"",
-                    "type": "string"
-                }
-            }
-        },
-        "api_rest_users.UsageResponse": {
-            "type": "object",
-            "properties": {
-                "history": {
-                    "description": "Last 30 days",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/api_rest_users.DailyUsage"
-                    }
-                },
-                "limit": {
-                    "description": "Daily limit (-1 for unlimited)",
-                    "type": "integer"
-                },
-                "remaining": {
-                    "description": "Remaining generations today (-1 for unlimited)",
-                    "type": "integer"
-                },
-                "tier": {
-                    "description": "\"free\", \"payg\", \"byok\"",
-                    "type": "string"
-                },
-                "today": {
-                    "description": "Generations used today",
-                    "type": "integer"
-                }
-            }
-        },
-        "github_com_algoraveai_server_algorave_sessions.Message": {
+        "sessions.Message": {
             "type": "object",
             "properties": {
                 "content": {
@@ -1886,7 +2103,36 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_algoraveai_server_algorave_strudels.CreateStrudelRequest": {
+        "sessions.TransferSessionRequest": {
+            "type": "object",
+            "required": [
+                "session_id",
+                "title"
+            ],
+            "properties": {
+                "session_id": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "sessions.TransferSessionResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "strudel": {
+                    "$ref": "#/definitions/strudels.Strudel"
+                },
+                "strudel_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "strudels.CreateStrudelRequest": {
             "type": "object",
             "required": [
                 "code",
@@ -1911,7 +2157,7 @@ const docTemplate = `{
                     "type": "array",
                     "maxItems": 100,
                     "items": {
-                        "$ref": "#/definitions/github_com_algoraveai_server_internal_agent.Message"
+                        "$ref": "#/definitions/agent.Message"
                     }
                 },
                 "description": {
@@ -1935,7 +2181,15 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_algoraveai_server_algorave_strudels.Strudel": {
+        "strudels.MessageResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "strudels.Strudel": {
             "type": "object",
             "properties": {
                 "categories": {
@@ -1950,7 +2204,7 @@ const docTemplate = `{
                 "conversation_history": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_algoraveai_server_internal_agent.Message"
+                        "$ref": "#/definitions/agent.Message"
                     }
                 },
                 "created_at": {
@@ -1982,7 +2236,18 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_algoraveai_server_algorave_strudels.UpdateStrudelRequest": {
+        "strudels.StrudelsListResponse": {
+            "type": "object",
+            "properties": {
+                "strudels": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/strudels.Strudel"
+                    }
+                }
+            }
+        },
+        "strudels.UpdateStrudelRequest": {
             "type": "object",
             "properties": {
                 "categories": {
@@ -2001,7 +2266,7 @@ const docTemplate = `{
                     "type": "array",
                     "maxItems": 100,
                     "items": {
-                        "$ref": "#/definitions/github_com_algoraveai_server_internal_agent.Message"
+                        "$ref": "#/definitions/agent.Message"
                     }
                 },
                 "description": {
@@ -2024,9 +2289,69 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_algoraveai_server_algorave_users.User": {
+        "users.AIFeaturesEnabledRequest": {
             "type": "object",
             "properties": {
+                "ai_features_enabled": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "users.DailyUsage": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "description": "Number of generations",
+                    "type": "integer"
+                },
+                "date": {
+                    "description": "Format: \"2006-01-02\"",
+                    "type": "string"
+                }
+            }
+        },
+        "users.TrainingConsentRequest": {
+            "type": "object",
+            "properties": {
+                "training_consent": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "users.UsageResponse": {
+            "type": "object",
+            "properties": {
+                "history": {
+                    "description": "Last 30 days",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/users.DailyUsage"
+                    }
+                },
+                "limit": {
+                    "description": "Daily limit (-1 for unlimited)",
+                    "type": "integer"
+                },
+                "remaining": {
+                    "description": "Remaining generations today (-1 for unlimited)",
+                    "type": "integer"
+                },
+                "tier": {
+                    "description": "\"free\", \"payg\", \"byok\"",
+                    "type": "string"
+                },
+                "today": {
+                    "description": "Generations used today",
+                    "type": "integer"
+                }
+            }
+        },
+        "users.User": {
+            "type": "object",
+            "properties": {
+                "ai_features_enabled": {
+                    "type": "boolean"
+                },
                 "avatar_url": {
                     "type": "string"
                 },
@@ -2045,37 +2370,10 @@ const docTemplate = `{
                 "provider": {
                     "type": "string"
                 },
+                "training_consent": {
+                    "type": "boolean"
+                },
                 "updated_at": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_algoraveai_server_internal_agent.Message": {
-            "type": "object",
-            "properties": {
-                "content": {
-                    "description": "message content",
-                    "type": "string"
-                },
-                "role": {
-                    "description": "\"user\" or \"assistant\"",
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_algoraveai_server_internal_errors.ErrorResponse": {
-            "type": "object",
-            "properties": {
-                "details": {
-                    "description": "optional details (sanitized in production)",
-                    "type": "string"
-                },
-                "error": {
-                    "description": "error code (e.g., \"unauthorized\", \"not_found\")",
-                    "type": "string"
-                },
-                "message": {
-                    "description": "user-friendly message",
                     "type": "string"
                 }
             }

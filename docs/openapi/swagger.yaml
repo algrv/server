@@ -1,17 +1,52 @@
 definitions:
-  api_rest_auth.AuthResponse:
+  admin.SetUseInTrainingRequest:
+    properties:
+      use_in_training:
+        type: boolean
+    type: object
+  admin.StrudelAdminResponse:
+    properties:
+      code:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      is_public:
+        type: boolean
+      tags:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+      use_in_training:
+        type: boolean
+      user_id:
+        type: string
+    type: object
+  agent.Message:
+    properties:
+      content:
+        description: message content
+        type: string
+      role:
+        description: '"user" or "assistant"'
+        type: string
+    type: object
+  auth.AuthResponse:
     properties:
       token:
         type: string
       user:
-        $ref: '#/definitions/github_com_algoraveai_server_algorave_users.User'
+        $ref: '#/definitions/users.User'
     type: object
-  api_rest_auth.MessageResponse:
+  auth.MessageResponse:
     properties:
       message:
         type: string
     type: object
-  api_rest_auth.UpdateProfileRequest:
+  auth.UpdateProfileRequest:
     properties:
       avatar_url:
         maxLength: 500
@@ -22,12 +57,12 @@ definitions:
     required:
     - name
     type: object
-  api_rest_auth.UserResponse:
+  auth.UserResponse:
     properties:
       user:
-        $ref: '#/definitions/github_com_algoraveai_server_algorave_users.User'
+        $ref: '#/definitions/users.User'
     type: object
-  api_rest_collaboration.CreateInviteTokenRequest:
+  collaboration.CreateInviteTokenRequest:
     properties:
       expires_at:
         type: string
@@ -41,7 +76,7 @@ definitions:
     required:
     - role
     type: object
-  api_rest_collaboration.CreateSessionRequest:
+  collaboration.CreateSessionRequest:
     properties:
       code:
         description: 1MB limit
@@ -53,7 +88,7 @@ definitions:
     required:
     - title
     type: object
-  api_rest_collaboration.CreateSessionResponse:
+  collaboration.CreateSessionResponse:
     properties:
       code:
         type: string
@@ -70,7 +105,7 @@ definitions:
       title:
         type: string
     type: object
-  api_rest_collaboration.InviteTokenResponse:
+  collaboration.InviteTokenResponse:
     properties:
       created_at:
         type: string
@@ -89,14 +124,14 @@ definitions:
       uses_count:
         type: integer
     type: object
-  api_rest_collaboration.InviteTokensListResponse:
+  collaboration.InviteTokensListResponse:
     properties:
       tokens:
         items:
-          $ref: '#/definitions/api_rest_collaboration.InviteTokenResponse'
+          $ref: '#/definitions/collaboration.InviteTokenResponse'
         type: array
     type: object
-  api_rest_collaboration.JoinSessionRequest:
+  collaboration.JoinSessionRequest:
     properties:
       display_name:
         maxLength: 100
@@ -106,7 +141,7 @@ definitions:
     required:
     - invite_token
     type: object
-  api_rest_collaboration.JoinSessionResponse:
+  collaboration.JoinSessionResponse:
     properties:
       display_name:
         type: string
@@ -115,19 +150,19 @@ definitions:
       session_id:
         type: string
     type: object
-  api_rest_collaboration.MessageResponse:
+  collaboration.MessageResponse:
     properties:
       message:
         type: string
     type: object
-  api_rest_collaboration.MessagesResponse:
+  collaboration.MessagesResponse:
     properties:
       messages:
         items:
-          $ref: '#/definitions/github_com_algoraveai_server_algorave_sessions.Message'
+          $ref: '#/definitions/sessions.Message'
         type: array
     type: object
-  api_rest_collaboration.ParticipantResponse:
+  collaboration.ParticipantResponse:
     properties:
       display_name:
         type: string
@@ -144,14 +179,14 @@ definitions:
       user_id:
         type: string
     type: object
-  api_rest_collaboration.ParticipantsListResponse:
+  collaboration.ParticipantsListResponse:
     properties:
       participants:
         items:
-          $ref: '#/definitions/api_rest_collaboration.ParticipantResponse'
+          $ref: '#/definitions/collaboration.ParticipantResponse'
         type: array
     type: object
-  api_rest_collaboration.SessionResponse:
+  collaboration.SessionResponse:
     properties:
       code:
         type: string
@@ -169,19 +204,19 @@ definitions:
         type: string
       participants:
         items:
-          $ref: '#/definitions/api_rest_collaboration.ParticipantResponse'
+          $ref: '#/definitions/collaboration.ParticipantResponse'
         type: array
       title:
         type: string
     type: object
-  api_rest_collaboration.SessionsListResponse:
+  collaboration.SessionsListResponse:
     properties:
       sessions:
         items:
-          $ref: '#/definitions/api_rest_collaboration.SessionResponse'
+          $ref: '#/definitions/collaboration.SessionResponse'
         type: array
     type: object
-  api_rest_collaboration.UpdateSessionCodeRequest:
+  collaboration.UpdateSessionCodeRequest:
     properties:
       code:
         description: 1MB limit
@@ -190,19 +225,31 @@ definitions:
     required:
     - code
     type: object
-  api_rest_collaboration.UpdateSessionCodeResponse:
+  collaboration.UpdateSessionCodeResponse:
     properties:
       code:
         type: string
       message:
         type: string
     type: object
-  api_rest_health.PingResponse:
+  errors.ErrorResponse:
+    properties:
+      details:
+        description: optional details (sanitized in production)
+        type: string
+      error:
+        description: error code (e.g., "unauthorized", "not_found")
+        type: string
+      message:
+        description: user-friendly message
+        type: string
+    type: object
+  health.PingResponse:
     properties:
       message:
         type: string
     type: object
-  api_rest_health.Response:
+  health.Response:
     properties:
       service:
         type: string
@@ -211,67 +258,7 @@ definitions:
       version:
         type: string
     type: object
-  api_rest_sessions.TransferSessionRequest:
-    properties:
-      session_id:
-        type: string
-      title:
-        type: string
-    required:
-    - session_id
-    - title
-    type: object
-  api_rest_sessions.TransferSessionResponse:
-    properties:
-      message:
-        type: string
-      strudel:
-        $ref: '#/definitions/github_com_algoraveai_server_algorave_strudels.Strudel'
-      strudel_id:
-        type: string
-    type: object
-  api_rest_strudels.MessageResponse:
-    properties:
-      message:
-        type: string
-    type: object
-  api_rest_strudels.StrudelsListResponse:
-    properties:
-      strudels:
-        items:
-          $ref: '#/definitions/github_com_algoraveai_server_algorave_strudels.Strudel'
-        type: array
-    type: object
-  api_rest_users.DailyUsage:
-    properties:
-      count:
-        description: Number of generations
-        type: integer
-      date:
-        description: 'Format: "2006-01-02"'
-        type: string
-    type: object
-  api_rest_users.UsageResponse:
-    properties:
-      history:
-        description: Last 30 days
-        items:
-          $ref: '#/definitions/api_rest_users.DailyUsage'
-        type: array
-      limit:
-        description: Daily limit (-1 for unlimited)
-        type: integer
-      remaining:
-        description: Remaining generations today (-1 for unlimited)
-        type: integer
-      tier:
-        description: '"free", "payg", "byok"'
-        type: string
-      today:
-        description: Generations used today
-        type: integer
-    type: object
-  github_com_algoraveai_server_algorave_sessions.Message:
+  sessions.Message:
     properties:
       content:
         type: string
@@ -290,7 +277,26 @@ definitions:
       userID:
         type: string
     type: object
-  github_com_algoraveai_server_algorave_strudels.CreateStrudelRequest:
+  sessions.TransferSessionRequest:
+    properties:
+      session_id:
+        type: string
+      title:
+        type: string
+    required:
+    - session_id
+    - title
+    type: object
+  sessions.TransferSessionResponse:
+    properties:
+      message:
+        type: string
+      strudel:
+        $ref: '#/definitions/strudels.Strudel'
+      strudel_id:
+        type: string
+    type: object
+  strudels.CreateStrudelRequest:
     properties:
       categories:
         description: max 10 categories, each max 50 chars
@@ -305,7 +311,7 @@ definitions:
       conversation_history:
         description: max 100 messages
         items:
-          $ref: '#/definitions/github_com_algoraveai_server_internal_agent.Message'
+          $ref: '#/definitions/agent.Message'
         maxItems: 100
         type: array
       description:
@@ -326,7 +332,12 @@ definitions:
     - code
     - title
     type: object
-  github_com_algoraveai_server_algorave_strudels.Strudel:
+  strudels.MessageResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  strudels.Strudel:
     properties:
       categories:
         items:
@@ -336,7 +347,7 @@ definitions:
         type: string
       conversation_history:
         items:
-          $ref: '#/definitions/github_com_algoraveai_server_internal_agent.Message'
+          $ref: '#/definitions/agent.Message'
         type: array
       created_at:
         type: string
@@ -357,7 +368,14 @@ definitions:
       user_id:
         type: string
     type: object
-  github_com_algoraveai_server_algorave_strudels.UpdateStrudelRequest:
+  strudels.StrudelsListResponse:
+    properties:
+      strudels:
+        items:
+          $ref: '#/definitions/strudels.Strudel'
+        type: array
+    type: object
+  strudels.UpdateStrudelRequest:
     properties:
       categories:
         items:
@@ -370,7 +388,7 @@ definitions:
         type: string
       conversation_history:
         items:
-          $ref: '#/definitions/github_com_algoraveai_server_internal_agent.Message'
+          $ref: '#/definitions/agent.Message'
         maxItems: 100
         type: array
       description:
@@ -387,8 +405,49 @@ definitions:
         maxLength: 200
         type: string
     type: object
-  github_com_algoraveai_server_algorave_users.User:
+  users.AIFeaturesEnabledRequest:
     properties:
+      ai_features_enabled:
+        type: boolean
+    type: object
+  users.DailyUsage:
+    properties:
+      count:
+        description: Number of generations
+        type: integer
+      date:
+        description: 'Format: "2006-01-02"'
+        type: string
+    type: object
+  users.TrainingConsentRequest:
+    properties:
+      training_consent:
+        type: boolean
+    type: object
+  users.UsageResponse:
+    properties:
+      history:
+        description: Last 30 days
+        items:
+          $ref: '#/definitions/users.DailyUsage'
+        type: array
+      limit:
+        description: Daily limit (-1 for unlimited)
+        type: integer
+      remaining:
+        description: Remaining generations today (-1 for unlimited)
+        type: integer
+      tier:
+        description: '"free", "payg", "byok"'
+        type: string
+      today:
+        description: Generations used today
+        type: integer
+    type: object
+  users.User:
+    properties:
+      ai_features_enabled:
+        type: boolean
       avatar_url:
         type: string
       created_at:
@@ -401,28 +460,9 @@ definitions:
         type: string
       provider:
         type: string
+      training_consent:
+        type: boolean
       updated_at:
-        type: string
-    type: object
-  github_com_algoraveai_server_internal_agent.Message:
-    properties:
-      content:
-        description: message content
-        type: string
-      role:
-        description: '"user" or "assistant"'
-        type: string
-    type: object
-  github_com_algoraveai_server_internal_errors.ErrorResponse:
-    properties:
-      details:
-        description: optional details (sanitized in production)
-        type: string
-      error:
-        description: error code (e.g., "unauthorized", "not_found")
-        type: string
-      message:
-        description: user-friendly message
         type: string
     type: object
 host: algorave.ai
@@ -445,6 +485,84 @@ info:
   title: Algorave API
   version: "1.0"
 paths:
+  /api/v1/admin/strudels/{id}:
+    get:
+      description: Admin-only endpoint to get any strudel regardless of ownership
+      parameters:
+      - description: Strudel ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/admin.StrudelAdminResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - AdminKeyAuth: []
+      summary: Get any strudel by ID (admin)
+      tags:
+      - admin
+  /api/v1/admin/strudels/{id}/use-in-training:
+    put:
+      consumes:
+      - application/json
+      description: Admin-only endpoint to mark a strudel for use in training data
+      parameters:
+      - description: Strudel ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Use in training data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/admin.SetUseInTrainingRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/admin.StrudelAdminResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - AdminKeyAuth: []
+      summary: Set use_in_training flag on a strudel
+      tags:
+      - admin
   /api/v1/auth/{provider}:
     get:
       description: Begin OAuth authentication flow with specified provider (google,
@@ -467,7 +585,7 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
       summary: Start OAuth authentication
       tags:
       - auth
@@ -490,15 +608,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api_rest_auth.AuthResponse'
+            $ref: '#/definitions/auth.AuthResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
       summary: OAuth callback
       tags:
       - auth
@@ -511,7 +629,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api_rest_auth.MessageResponse'
+            $ref: '#/definitions/auth.MessageResponse'
       summary: Logout
       tags:
       - auth
@@ -524,15 +642,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api_rest_auth.UserResponse'
+            $ref: '#/definitions/auth.UserResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get current user
@@ -548,26 +666,26 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/api_rest_auth.UpdateProfileRequest'
+          $ref: '#/definitions/auth.UpdateProfileRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api_rest_auth.UserResponse'
+            $ref: '#/definitions/auth.UserResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Update user profile
@@ -582,7 +700,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api_rest_health.PingResponse'
+            $ref: '#/definitions/health.PingResponse'
       summary: Ping
       tags:
       - health
@@ -601,11 +719,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api_rest_strudels.StrudelsListResponse'
+            $ref: '#/definitions/strudels.StrudelsListResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
       summary: List public strudels
       tags:
       - strudels
@@ -624,15 +742,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api_rest_collaboration.SessionsListResponse'
+            $ref: '#/definitions/collaboration.SessionsListResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: List user's sessions
@@ -649,26 +767,26 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/api_rest_collaboration.CreateSessionRequest'
+          $ref: '#/definitions/collaboration.CreateSessionRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/api_rest_collaboration.CreateSessionResponse'
+            $ref: '#/definitions/collaboration.CreateSessionResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Create collaboration session
@@ -689,27 +807,27 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api_rest_collaboration.MessageResponse'
+            $ref: '#/definitions/collaboration.MessageResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: End session
@@ -729,19 +847,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api_rest_collaboration.SessionResponse'
+            $ref: '#/definitions/collaboration.SessionResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get session details
@@ -762,34 +880,34 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/api_rest_collaboration.UpdateSessionCodeRequest'
+          $ref: '#/definitions/collaboration.UpdateSessionCodeRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api_rest_collaboration.UpdateSessionCodeResponse'
+            $ref: '#/definitions/collaboration.UpdateSessionCodeResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Update session code
@@ -810,27 +928,27 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api_rest_collaboration.InviteTokensListResponse'
+            $ref: '#/definitions/collaboration.InviteTokensListResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: List invite tokens
@@ -851,34 +969,34 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/api_rest_collaboration.CreateInviteTokenRequest'
+          $ref: '#/definitions/collaboration.CreateInviteTokenRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/api_rest_collaboration.InviteTokenResponse'
+            $ref: '#/definitions/collaboration.InviteTokenResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Create invite token
@@ -904,27 +1022,27 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api_rest_collaboration.MessageResponse'
+            $ref: '#/definitions/collaboration.MessageResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Revoke invite token
@@ -945,23 +1063,23 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api_rest_collaboration.MessageResponse'
+            $ref: '#/definitions/collaboration.MessageResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Leave session
@@ -987,19 +1105,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api_rest_collaboration.MessagesResponse'
+            $ref: '#/definitions/collaboration.MessagesResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get session chat messages
@@ -1020,19 +1138,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api_rest_collaboration.ParticipantsListResponse'
+            $ref: '#/definitions/collaboration.ParticipantsListResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: List session participants
@@ -1058,27 +1176,27 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api_rest_collaboration.MessageResponse'
+            $ref: '#/definitions/collaboration.MessageResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Remove participant
@@ -1096,26 +1214,26 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/api_rest_collaboration.JoinSessionRequest'
+          $ref: '#/definitions/collaboration.JoinSessionRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api_rest_collaboration.JoinSessionResponse'
+            $ref: '#/definitions/collaboration.JoinSessionResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "403":
           description: Invalid or expired invite
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Join session with invite
@@ -1133,30 +1251,30 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/api_rest_sessions.TransferSessionRequest'
+          $ref: '#/definitions/sessions.TransferSessionRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/api_rest_sessions.TransferSessionResponse'
+            $ref: '#/definitions/sessions.TransferSessionResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Transfer anonymous session
@@ -1171,15 +1289,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api_rest_strudels.StrudelsListResponse'
+            $ref: '#/definitions/strudels.StrudelsListResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: List user's strudels
@@ -1195,26 +1313,26 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_algoraveai_server_algorave_strudels.CreateStrudelRequest'
+          $ref: '#/definitions/strudels.CreateStrudelRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_algorave_strudels.Strudel'
+            $ref: '#/definitions/strudels.Strudel'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Create strudel
@@ -1235,19 +1353,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api_rest_strudels.MessageResponse'
+            $ref: '#/definitions/strudels.MessageResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Delete strudel
@@ -1267,19 +1385,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_algorave_strudels.Strudel'
+            $ref: '#/definitions/strudels.Strudel'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get strudel by ID
@@ -1300,31 +1418,104 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_algoraveai_server_algorave_strudels.UpdateStrudelRequest'
+          $ref: '#/definitions/strudels.UpdateStrudelRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_algorave_strudels.Strudel'
+            $ref: '#/definitions/strudels.Strudel'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Update strudel
       tags:
       - strudels
+  /api/v1/users/ai-features-enabled:
+    put:
+      consumes:
+      - application/json
+      description: Toggle whether AI features (prompt bar, code generation) are enabled
+        for the user
+      parameters:
+      - description: AI features enabled data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/users.AIFeaturesEnabledRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/users.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update user's AI features setting
+      tags:
+      - users
+  /api/v1/users/training-consent:
+    put:
+      consumes:
+      - application/json
+      description: Toggle whether the user's public strudels can be used for AI training
+      parameters:
+      - description: Consent data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/users.TrainingConsentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/users.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update user's training consent
+      tags:
+      - users
   /api/v1/users/usage:
     get:
       description: Returns usage statistics for the authenticated user including today's
@@ -1335,15 +1526,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api_rest_users.UsageResponse'
+            $ref: '#/definitions/users.UsageResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/github_com_algoraveai_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get user's usage statistics
@@ -1358,7 +1549,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api_rest_health.Response'
+            $ref: '#/definitions/health.Response'
       summary: Health check
       tags:
       - health
