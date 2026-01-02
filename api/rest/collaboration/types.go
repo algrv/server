@@ -8,8 +8,8 @@ import (
 
 type CreateSessionRequest struct {
 	Title          string `json:"title" binding:"required,max=200"`
-	Code           string `json:"code" binding:"max=1048576"`          // 1MB limit
-	IsDiscoverable *bool  `json:"is_discoverable,omitempty"`           // optional, defaults to false
+	Code           string `json:"code" binding:"max=1048576"` // 1MB limit
+	IsDiscoverable *bool  `json:"is_discoverable,omitempty"`  // optional, defaults to false
 }
 
 type CreateSessionResponse struct {
