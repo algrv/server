@@ -7,30 +7,33 @@ import (
 )
 
 type CreateSessionRequest struct {
-	Title string `json:"title" binding:"required,max=200"`
-	Code  string `json:"code" binding:"max=1048576"` // 1MB limit
+	Title          string `json:"title" binding:"required,max=200"`
+	Code           string `json:"code" binding:"max=1048576"`          // 1MB limit
+	IsDiscoverable *bool  `json:"is_discoverable,omitempty"`           // optional, defaults to false
 }
 
 type CreateSessionResponse struct {
-	ID           string    `json:"id"`
-	HostUserID   string    `json:"host_user_id"`
-	Title        string    `json:"title"`
-	Code         string    `json:"code"`
-	IsActive     bool      `json:"is_active"`
-	CreatedAt    time.Time `json:"created_at"`
-	LastActivity time.Time `json:"last_activity"`
+	ID             string    `json:"id"`
+	HostUserID     string    `json:"host_user_id"`
+	Title          string    `json:"title"`
+	Code           string    `json:"code"`
+	IsActive       bool      `json:"is_active"`
+	IsDiscoverable bool      `json:"is_discoverable"`
+	CreatedAt      time.Time `json:"created_at"`
+	LastActivity   time.Time `json:"last_activity"`
 }
 
 type SessionResponse struct {
-	ID           string                `json:"id"`
-	HostUserID   string                `json:"host_user_id"`
-	Title        string                `json:"title"`
-	Code         string                `json:"code"`
-	IsActive     bool                  `json:"is_active"`
-	CreatedAt    time.Time             `json:"created_at"`
-	EndedAt      *time.Time            `json:"ended_at,omitempty"`
-	LastActivity time.Time             `json:"last_activity"`
-	Participants []ParticipantResponse `json:"participants,omitempty"`
+	ID             string                `json:"id"`
+	HostUserID     string                `json:"host_user_id"`
+	Title          string                `json:"title"`
+	Code           string                `json:"code"`
+	IsActive       bool                  `json:"is_active"`
+	IsDiscoverable bool                  `json:"is_discoverable"`
+	CreatedAt      time.Time             `json:"created_at"`
+	EndedAt        *time.Time            `json:"ended_at,omitempty"`
+	LastActivity   time.Time             `json:"last_activity"`
+	Participants   []ParticipantResponse `json:"participants,omitempty"`
 }
 
 type ParticipantResponse struct {
@@ -110,4 +113,23 @@ type UpdateRoleResponse struct {
 // MessagesResponse wraps chat messages
 type MessagesResponse struct {
 	Messages []*sessions.Message `json:"messages"`
+}
+
+// SetDiscoverableRequest for updating session discoverability
+type SetDiscoverableRequest struct {
+	IsDiscoverable bool `json:"is_discoverable"`
+}
+
+// LiveSessionResponse for public listing of discoverable sessions
+type LiveSessionResponse struct {
+	ID               string    `json:"id"`
+	Title            string    `json:"title"`
+	ParticipantCount int       `json:"participant_count"`
+	CreatedAt        time.Time `json:"created_at"`
+	LastActivity     time.Time `json:"last_activity"`
+}
+
+// LiveSessionsListResponse wraps a list of live sessions
+type LiveSessionsListResponse struct {
+	Sessions []LiveSessionResponse `json:"sessions"`
 }

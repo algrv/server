@@ -5,23 +5,23 @@ const (
 	queryCreateSession = `
 		INSERT INTO sessions (host_user_id, title, code)
 		VALUES ($1, $2, $3)
-		RETURNING id, host_user_id, title, code, is_active, created_at, ended_at, last_activity
+		RETURNING id, host_user_id, title, code, is_active, is_discoverable, created_at, ended_at, last_activity
 	`
 
 	queryCreateAnonymousSession = `
 		INSERT INTO sessions (host_user_id, title, code)
 		VALUES ('00000000-0000-0000-0000-000000000000', 'Anonymous Session', '')
-		RETURNING id, host_user_id, title, code, is_active, created_at, ended_at, last_activity
+		RETURNING id, host_user_id, title, code, is_active, is_discoverable, created_at, ended_at, last_activity
 	`
 
 	queryGetSession = `
-		SELECT id, host_user_id, title, code, is_active, created_at, ended_at, last_activity
+		SELECT id, host_user_id, title, code, is_active, is_discoverable, created_at, ended_at, last_activity
 		FROM sessions
 		WHERE id = $1
 	`
 
 	queryGetUserSessions = `
-		SELECT DISTINCT s.id, s.host_user_id, s.title, s.code, s.is_active, s.created_at, s.ended_at, s.last_activity
+		SELECT DISTINCT s.id, s.host_user_id, s.title, s.code, s.is_active, s.is_discoverable, s.created_at, s.ended_at, s.last_activity
 		FROM sessions s
 		LEFT JOIN session_participants sp ON s.id = sp.session_id
 		WHERE s.host_user_id = $1 OR sp.user_id = $1
@@ -29,16 +29,30 @@ const (
 	`
 
 	queryGetUserSessionsActiveOnly = `
-		SELECT DISTINCT s.id, s.host_user_id, s.title, s.code, s.is_active, s.created_at, s.ended_at, s.last_activity
+		SELECT DISTINCT s.id, s.host_user_id, s.title, s.code, s.is_active, s.is_discoverable, s.created_at, s.ended_at, s.last_activity
 		FROM sessions s
 		LEFT JOIN session_participants sp ON s.id = sp.session_id
 		WHERE (s.host_user_id = $1 OR sp.user_id = $1) AND s.is_active = true
 		ORDER BY s.last_activity DESC
 	`
 
+	queryListDiscoverableSessions = `
+		SELECT id, host_user_id, title, code, is_active, is_discoverable, created_at, ended_at, last_activity
+		FROM sessions
+		WHERE is_discoverable = true AND is_active = true
+		ORDER BY last_activity DESC
+		LIMIT $1
+	`
+
 	queryUpdateSessionCode = `
 		UPDATE sessions
 		SET code = $1, last_activity = NOW()
+		WHERE id = $2
+	`
+
+	querySetDiscoverable = `
+		UPDATE sessions
+		SET is_discoverable = $1
 		WHERE id = $2
 	`
 

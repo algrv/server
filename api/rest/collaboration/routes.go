@@ -8,6 +8,9 @@ import (
 )
 
 func RegisterRoutes(router *gin.RouterGroup, sessionRepo sessions.Repository) {
+	// public endpoints (no auth)
+	router.GET("/sessions/live", ListLiveSessionsHandler(sessionRepo))
+
 	// session management (authenticated)
 	router.POST("/sessions", auth.AuthMiddleware(), CreateSessionHandler(sessionRepo))
 	router.GET("/sessions", auth.AuthMiddleware(), ListUserSessionsHandler(sessionRepo))
@@ -15,6 +18,7 @@ func RegisterRoutes(router *gin.RouterGroup, sessionRepo sessions.Repository) {
 	router.PUT("/sessions/:id", auth.AuthMiddleware(), UpdateSessionCodeHandler(sessionRepo))
 	router.DELETE("/sessions/:id", auth.AuthMiddleware(), EndSessionHandler(sessionRepo))
 	router.POST("/sessions/:id/leave", auth.AuthMiddleware(), LeaveSessionHandler(sessionRepo))
+	router.PUT("/sessions/:id/discoverable", auth.AuthMiddleware(), SetDiscoverableHandler(sessionRepo))
 
 	// session messages
 	router.GET("/sessions/:id/messages", auth.AuthMiddleware(), GetSessionMessagesHandler(sessionRepo))

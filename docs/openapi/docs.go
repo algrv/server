@@ -552,6 +552,41 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/sessions/live": {
+            "get": {
+                "description": "Get all discoverable active sessions (public endpoint, no auth required)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sessions"
+                ],
+                "summary": "List live sessions",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 50,
+                        "description": "Max sessions to return (max 100)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/collaboration.LiveSessionsListResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/sessions/transfer": {
             "post": {
                 "security": [
@@ -768,6 +803,82 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/collaboration.MessageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sessions/{id}/discoverable": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Toggle whether a session appears in the live sessions list (host only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sessions"
+                ],
+                "summary": "Set session discoverability",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session ID (UUID)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Discoverability settings",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/collaboration.SetDiscoverableRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/collaboration.SessionResponse"
                         }
                     },
                     "400": {
@@ -1809,6 +1920,10 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 1048576
                 },
+                "is_discoverable": {
+                    "description": "optional, defaults to false",
+                    "type": "boolean"
+                },
                 "title": {
                     "type": "string",
                     "maxLength": 200
@@ -1831,6 +1946,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "is_active": {
+                    "type": "boolean"
+                },
+                "is_discoverable": {
                     "type": "boolean"
                 },
                 "last_activity": {
@@ -1907,6 +2025,37 @@ const docTemplate = `{
                 },
                 "session_id": {
                     "type": "string"
+                }
+            }
+        },
+        "collaboration.LiveSessionResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "last_activity": {
+                    "type": "string"
+                },
+                "participant_count": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "collaboration.LiveSessionsListResponse": {
+            "type": "object",
+            "properties": {
+                "sessions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/collaboration.LiveSessionResponse"
+                    }
                 }
             }
         },
@@ -1987,6 +2136,9 @@ const docTemplate = `{
                 "is_active": {
                     "type": "boolean"
                 },
+                "is_discoverable": {
+                    "type": "boolean"
+                },
                 "last_activity": {
                     "type": "string"
                 },
@@ -2009,6 +2161,14 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/collaboration.SessionResponse"
                     }
+                }
+            }
+        },
+        "collaboration.SetDiscoverableRequest": {
+            "type": "object",
+            "properties": {
+                "is_discoverable": {
+                    "type": "boolean"
                 }
             }
         },

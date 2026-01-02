@@ -22,7 +22,9 @@ type Repository interface {
 	CreateAnonymousSession(ctx context.Context) (*Session, error)
 	GetSession(ctx context.Context, sessionID string) (*Session, error)
 	GetUserSessions(ctx context.Context, userID string, activeOnly bool) ([]*Session, error)
+	ListDiscoverableSessions(ctx context.Context, limit int) ([]*Session, error)
 	UpdateSessionCode(ctx context.Context, sessionID, code string) error
+	SetDiscoverable(ctx context.Context, sessionID string, isDiscoverable bool) error
 	EndSession(ctx context.Context, sessionID string) error
 
 	// authenticated participant operations
@@ -55,14 +57,15 @@ type Repository interface {
 
 // represents a collaborative coding session
 type Session struct {
-	ID           string     `json:"id"`
-	HostUserID   string     `json:"host_user_id"`
-	Title        string     `json:"title"`
-	Code         string     `json:"code"`
-	IsActive     bool       `json:"is_active"`
-	CreatedAt    time.Time  `json:"created_at"`
-	EndedAt      *time.Time `json:"ended_at,omitempty"`
-	LastActivity time.Time  `json:"last_activity"`
+	ID             string     `json:"id"`
+	HostUserID     string     `json:"host_user_id"`
+	Title          string     `json:"title"`
+	Code           string     `json:"code"`
+	IsActive       bool       `json:"is_active"`
+	IsDiscoverable bool       `json:"is_discoverable"`
+	CreatedAt      time.Time  `json:"created_at"`
+	EndedAt        *time.Time `json:"ended_at,omitempty"`
+	LastActivity   time.Time  `json:"last_activity"`
 }
 
 // represents a user in a session

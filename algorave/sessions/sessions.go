@@ -33,6 +33,7 @@ func (r *repository) CreateSession(ctx context.Context, req *CreateSessionReques
 		&session.Title,
 		&session.Code,
 		&session.IsActive,
+		&session.IsDiscoverable,
 		&session.CreatedAt,
 		&session.EndedAt,
 		&session.LastActivity,
@@ -55,6 +56,7 @@ func (r *repository) CreateAnonymousSession(ctx context.Context) (*Session, erro
 		&session.Title,
 		&session.Code,
 		&session.IsActive,
+		&session.IsDiscoverable,
 		&session.CreatedAt,
 		&session.EndedAt,
 		&session.LastActivity,
@@ -77,6 +79,7 @@ func (r *repository) GetSession(ctx context.Context, sessionID string) (*Session
 		&session.Title,
 		&session.Code,
 		&session.IsActive,
+		&session.IsDiscoverable,
 		&session.CreatedAt,
 		&session.EndedAt,
 		&session.LastActivity,
@@ -113,6 +116,7 @@ func (r *repository) GetUserSessions(ctx context.Context, userID string, activeO
 			&s.Title,
 			&s.Code,
 			&s.IsActive,
+			&s.IsDiscoverable,
 			&s.CreatedAt,
 			&s.EndedAt,
 			&s.LastActivity,
@@ -128,6 +132,48 @@ func (r *repository) GetUserSessions(ctx context.Context, userID string, activeO
 	}
 
 	return sessions, nil
+}
+
+// lists all discoverable active sessions
+func (r *repository) ListDiscoverableSessions(ctx context.Context, limit int) ([]*Session, error) {
+	rows, err := r.db.Query(ctx, queryListDiscoverableSessions, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+	var sessions []*Session
+
+	for rows.Next() {
+		var s Session
+		err := rows.Scan(
+			&s.ID,
+			&s.HostUserID,
+			&s.Title,
+			&s.Code,
+			&s.IsActive,
+			&s.IsDiscoverable,
+			&s.CreatedAt,
+			&s.EndedAt,
+			&s.LastActivity,
+		)
+		if err != nil {
+			return nil, err
+		}
+		sessions = append(sessions, &s)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return sessions, nil
+}
+
+// sets the discoverable flag for a session
+func (r *repository) SetDiscoverable(ctx context.Context, sessionID string, isDiscoverable bool) error {
+	_, err := r.db.Exec(ctx, querySetDiscoverable, isDiscoverable, sessionID)
+	return err
 }
 
 func (r *repository) UpdateSessionCode(ctx context.Context, sessionID, code string) error {

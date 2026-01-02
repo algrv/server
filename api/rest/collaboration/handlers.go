@@ -51,14 +51,24 @@ func CreateSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 			return
 		}
 
+		// Set discoverable if requested
+		if req.IsDiscoverable != nil && *req.IsDiscoverable {
+			if err := sessionRepo.SetDiscoverable(c.Request.Context(), session.ID, true); err != nil {
+				logger.ErrorErr(err, "failed to set session discoverable", "session_id", session.ID)
+			} else {
+				session.IsDiscoverable = true
+			}
+		}
+
 		c.JSON(http.StatusCreated, CreateSessionResponse{
-			ID:           session.ID,
-			HostUserID:   session.HostUserID,
-			Title:        session.Title,
-			Code:         session.Code,
-			IsActive:     session.IsActive,
-			CreatedAt:    session.CreatedAt,
-			LastActivity: session.LastActivity,
+			ID:             session.ID,
+			HostUserID:     session.HostUserID,
+			Title:          session.Title,
+			Code:           session.Code,
+			IsActive:       session.IsActive,
+			IsDiscoverable: session.IsDiscoverable,
+			CreatedAt:      session.CreatedAt,
+			LastActivity:   session.LastActivity,
 		})
 	}
 }
@@ -112,15 +122,16 @@ func GetSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, SessionResponse{
-			ID:           session.ID,
-			HostUserID:   session.HostUserID,
-			Title:        session.Title,
-			Code:         session.Code,
-			IsActive:     session.IsActive,
-			CreatedAt:    session.CreatedAt,
-			EndedAt:      session.EndedAt,
-			LastActivity: session.LastActivity,
-			Participants: participantResponses,
+			ID:             session.ID,
+			HostUserID:     session.HostUserID,
+			Title:          session.Title,
+			Code:           session.Code,
+			IsActive:       session.IsActive,
+			IsDiscoverable: session.IsDiscoverable,
+			CreatedAt:      session.CreatedAt,
+			EndedAt:        session.EndedAt,
+			LastActivity:   session.LastActivity,
+			Participants:   participantResponses,
 		})
 	}
 }
@@ -158,14 +169,15 @@ func ListUserSessionsHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 
 		for _, s := range userSessions {
 			responses = append(responses, SessionResponse{
-				ID:           s.ID,
-				HostUserID:   s.HostUserID,
-				Title:        s.Title,
-				Code:         s.Code,
-				IsActive:     s.IsActive,
-				CreatedAt:    s.CreatedAt,
-				EndedAt:      s.EndedAt,
-				LastActivity: s.LastActivity,
+				ID:             s.ID,
+				HostUserID:     s.HostUserID,
+				Title:          s.Title,
+				Code:           s.Code,
+				IsActive:       s.IsActive,
+				IsDiscoverable: s.IsDiscoverable,
+				CreatedAt:      s.CreatedAt,
+				EndedAt:        s.EndedAt,
+				LastActivity:   s.LastActivity,
 			})
 		}
 
@@ -783,5 +795,123 @@ func RevokeInviteTokenHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, MessageResponse{Message: "invite token revoked successfully"})
+	}
+}
+
+// ListLiveSessionsHandler godoc
+// @Summary List live sessions
+// @Description Get all discoverable active sessions (public endpoint, no auth required)
+// @Tags sessions
+// @Produce json
+// @Param limit query int false "Max sessions to return (max 100)" default(50)
+// @Success 200 {object} LiveSessionsListResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /api/v1/sessions/live [get]
+func ListLiveSessionsHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		limit := 50
+
+		if limitStr := c.Query("limit"); limitStr != "" {
+			var parsedLimit int
+			if _, err := fmt.Sscanf(limitStr, "%d", &parsedLimit); err == nil {
+				if parsedLimit > 0 && parsedLimit <= 100 {
+					limit = parsedLimit
+				}
+			}
+		}
+
+		liveSessions, err := sessionRepo.ListDiscoverableSessions(c.Request.Context(), limit)
+		if err != nil {
+			errors.InternalError(c, "failed to retrieve live sessions", err)
+			return
+		}
+
+		responses := make([]LiveSessionResponse, 0, len(liveSessions))
+
+		for _, s := range liveSessions {
+			participants, err := sessionRepo.ListAllParticipants(c.Request.Context(), s.ID)
+
+			participantCount := 0
+			if err == nil {
+				participantCount = len(participants)
+			}
+
+			responses = append(responses, LiveSessionResponse{
+				ID:               s.ID,
+				Title:            s.Title,
+				ParticipantCount: participantCount,
+				CreatedAt:        s.CreatedAt,
+				LastActivity:     s.LastActivity,
+			})
+		}
+
+		c.JSON(http.StatusOK, LiveSessionsListResponse{Sessions: responses})
+	}
+}
+
+// SetDiscoverableHandler godoc
+// @Summary Set session discoverability
+// @Description Toggle whether a session appears in the live sessions list (host only)
+// @Tags sessions
+// @Accept json
+// @Produce json
+// @Param id path string true "Session ID (UUID)"
+// @Param request body SetDiscoverableRequest true "Discoverability settings"
+// @Success 200 {object} SessionResponse
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 401 {object} errors.ErrorResponse
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /api/v1/sessions/{id}/discoverable [put]
+// @Security BearerAuth
+func SetDiscoverableHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		sessionID, ok := errors.ValidatePathUUID(c, "id")
+		if !ok {
+			return
+		}
+
+		userID, exists := auth.GetUserID(c)
+		if !exists {
+			errors.Unauthorized(c, "")
+			return
+		}
+
+		session, err := sessionRepo.GetSession(c.Request.Context(), sessionID)
+		if err != nil {
+			errors.SessionNotFound(c)
+			return
+		}
+
+		if session.HostUserID != userID {
+			errors.Forbidden(c, "only the host can change discoverability")
+			return
+		}
+
+		var req SetDiscoverableRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			errors.ValidationError(c, err)
+			return
+		}
+
+		if err := sessionRepo.SetDiscoverable(c.Request.Context(), sessionID, req.IsDiscoverable); err != nil {
+			errors.InternalError(c, "failed to update discoverability", err)
+			return
+		}
+
+		session.IsDiscoverable = req.IsDiscoverable
+
+		c.JSON(http.StatusOK, SessionResponse{
+			ID:             session.ID,
+			HostUserID:     session.HostUserID,
+			Title:          session.Title,
+			Code:           session.Code,
+			IsActive:       session.IsActive,
+			IsDiscoverable: session.IsDiscoverable,
+			CreatedAt:      session.CreatedAt,
+			EndedAt:        session.EndedAt,
+			LastActivity:   session.LastActivity,
+		})
 	}
 }

@@ -82,6 +82,9 @@ definitions:
         description: 1MB limit
         maxLength: 1048576
         type: string
+      is_discoverable:
+        description: optional, defaults to false
+        type: boolean
       title:
         maxLength: 200
         type: string
@@ -99,6 +102,8 @@ definitions:
       id:
         type: string
       is_active:
+        type: boolean
+      is_discoverable:
         type: boolean
       last_activity:
         type: string
@@ -150,6 +155,26 @@ definitions:
       session_id:
         type: string
     type: object
+  collaboration.LiveSessionResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      last_activity:
+        type: string
+      participant_count:
+        type: integer
+      title:
+        type: string
+    type: object
+  collaboration.LiveSessionsListResponse:
+    properties:
+      sessions:
+        items:
+          $ref: '#/definitions/collaboration.LiveSessionResponse'
+        type: array
+    type: object
   collaboration.MessageResponse:
     properties:
       message:
@@ -200,6 +225,8 @@ definitions:
         type: string
       is_active:
         type: boolean
+      is_discoverable:
+        type: boolean
       last_activity:
         type: string
       participants:
@@ -215,6 +242,11 @@ definitions:
         items:
           $ref: '#/definitions/collaboration.SessionResponse'
         type: array
+    type: object
+  collaboration.SetDiscoverableRequest:
+    properties:
+      is_discoverable:
+        type: boolean
     type: object
   collaboration.UpdateSessionCodeRequest:
     properties:
@@ -913,6 +945,56 @@ paths:
       summary: Update session code
       tags:
       - sessions
+  /api/v1/sessions/{id}/discoverable:
+    put:
+      consumes:
+      - application/json
+      description: Toggle whether a session appears in the live sessions list (host
+        only)
+      parameters:
+      - description: Session ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Discoverability settings
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/collaboration.SetDiscoverableRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/collaboration.SessionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Set session discoverability
+      tags:
+      - sessions
   /api/v1/sessions/{id}/invite:
     get:
       description: Get all invite tokens for a session (host only)
@@ -1237,6 +1319,30 @@ paths:
       security:
       - BearerAuth: []
       summary: Join session with invite
+      tags:
+      - sessions
+  /api/v1/sessions/live:
+    get:
+      description: Get all discoverable active sessions (public endpoint, no auth
+        required)
+      parameters:
+      - default: 50
+        description: Max sessions to return (max 100)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/collaboration.LiveSessionsListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: List live sessions
       tags:
       - sessions
   /api/v1/sessions/transfer:
