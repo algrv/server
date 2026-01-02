@@ -31,6 +31,8 @@ Use REST for **authenticated CRUD operations only**.
 | `GET/POST/PUT/DELETE /api/v1/strudels/*` | Required | Strudel management                    |
 | `GET/POST/PUT/DELETE /api/v1/sessions/*` | Required | Session management                    |
 | `POST /api/v1/sessions/transfer`         | Required | Transfer anonymous session to strudel |
+| `PUT /api/v1/sessions/{id}/discoverable` | Required | Toggle session discoverability (host) |
+| `GET /api/v1/sessions/live`              | Public   | List discoverable live sessions       |
 | `GET /api/v1/public/strudels`            | Public   | Browse public strudels                |
 | `POST /api/v1/sessions/join`             | Optional | Join session with invite token        |
 
@@ -110,6 +112,42 @@ URL format: https://algorave.ai/join?invite={invite_token}
 3. If user is logged in, also include JWT token
 ```
 
+### Go Live Flow (Discoverable Sessions)
+
+Hosts can make their sessions publicly discoverable so anyone can join from a "Live Sessions" page.
+
+```
+1. Host creates or opens a session
+
+2. Host clicks "Go Live" button:
+   → PUT /api/v1/sessions/{id}/discoverable
+   → Body: { "is_discoverable": true }
+
+3. Session appears in public listing:
+   → GET /api/v1/sessions/live returns:
+   {
+     "sessions": [
+       {
+         "id": "uuid",
+         "title": "Session Title",
+         "participant_count": 5,
+         "created_at": "...",
+         "last_activity": "..."
+       }
+     ]
+   }
+
+4. Viewer clicks on a live session:
+   → Host must create invite token for viewers
+   → Or implement auto-join for discoverable sessions
+
+5. Host clicks "Stop Live" to hide session:
+   → PUT /api/v1/sessions/{id}/discoverable
+   → Body: { "is_discoverable": false }
+```
+
+**Note:** Discoverable sessions still require an invite token to join. The live listing shows available sessions, but joining requires the host to have created an invite token (typically with unlimited uses for public sessions).
+
 ## WebSocket Messages
 
 ### Client Sends
@@ -149,3 +187,31 @@ URL format: https://algorave.ai/join?invite={invite_token}
 2. **Session IDs are secrets** - treat them like tokens for anonymous users
 3. **REST session endpoints require auth** - anonymous users use WebSocket exclusively
 4. **Invite tokens are single-use or limited** - respect max_uses and expiration
+
+## Admin Endpoints
+
+Admin endpoints require a JWT token from a user with `is_admin = true`.
+
+| Endpoint                                         | Auth  | Purpose                                |
+| ------------------------------------------------ | ----- | -------------------------------------- |
+| `GET /api/v1/admin/strudels/{id}`                | Admin | Get any strudel (regardless of owner)  |
+| `PUT /api/v1/admin/strudels/{id}/use-in-training`| Admin | Mark strudel for AI training data      |
+
+### Admin Authentication
+
+Admins use the same JWT authentication as regular users. The `is_admin` claim is embedded in the JWT when the user logs in.
+
+```
+Authorization: Bearer {jwt_with_admin_claim}
+```
+
+### Use in Training Flag
+
+Admins can mark public strudels for inclusion in AI training data:
+
+```
+PUT /api/v1/admin/strudels/{id}/use-in-training
+Body: { "use_in_training": true }
+```
+
+This is separate from user consent - both the user's `training_consent` AND the strudel's `use_in_training` must be true for the strudel to be used in training.
