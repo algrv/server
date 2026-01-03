@@ -166,7 +166,7 @@ Finished Strudel code examples from users strudels, showing working patterns.
 **Purpose:** Show working examples of requested patterns
 
 #### 4. **Current Editor State** (Always Included)
-The code the user has written so far in the Strudel editor.
+The code the user has written so far in the strudel editor.
 
 **Purpose:** Context for "add this", "change that", continuity
 **Size:** Variable (200-1000 tokens)
