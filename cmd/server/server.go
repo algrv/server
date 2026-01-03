@@ -11,6 +11,7 @@ import (
 	"github.com/algoraveai/server/internal/config"
 	ws "github.com/algoraveai/server/internal/websocket"
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -23,12 +24,18 @@ func NewServer(cfg *config.Config) (*Server, error) {
 		return nil, fmt.Errorf("failed to parse database config: %w", err)
 	}
 
-	// configure connection pool for supabase pooler compatibility
-	poolConfig.MaxConns = 10
-	poolConfig.MinConns = 2
+	// configure connection pool for supabase free tier pooler compatibility
+	// free tier has ~10-15 pooler connections, so keep our pool small
+	poolConfig.MaxConns = 5
+	poolConfig.MinConns = 1
 	poolConfig.MaxConnLifetime = 30 * time.Minute
 	poolConfig.MaxConnIdleTime = 5 * time.Minute
 	poolConfig.HealthCheckPeriod = 1 * time.Minute
+
+	// CRITICAL: use simple protocol for supabase pooler (PgBouncer) compatibility
+	// pgBouncer in transaction mode doesn't support prepared statements,
+	// which causes connections to hang on subsequent queries
+	poolConfig.ConnConfig.DefaultQueryExecMode = pgx.QueryExecModeSimpleProtocol
 
 	db, err := pgxpool.NewWithConfig(ctx, poolConfig)
 	if err != nil {

@@ -3,6 +3,7 @@ package websocket
 import (
 	"context"
 	"strings"
+	"time"
 
 	"github.com/algoraveai/server/algorave/sessions"
 	"github.com/algoraveai/server/algorave/users"
@@ -10,6 +11,8 @@ import (
 	"github.com/algoraveai/server/internal/llm"
 	"github.com/algoraveai/server/internal/logger"
 )
+
+const dbTimeout = 10 * time.Second
 
 // handles code update messages
 func CodeUpdateHandler(sessionRepo sessions.Repository) MessageHandler {
@@ -41,7 +44,8 @@ func CodeUpdateHandler(sessionRepo sessions.Repository) MessageHandler {
 		}
 
 		// update session code in database
-		ctx := context.Background()
+		ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
+		defer cancel()
 		if err := sessionRepo.UpdateSessionCode(ctx, client.SessionID, payload.Code); err != nil {
 			logger.ErrorErr(err, "failed to update session code",
 				"client_id", client.ID,
@@ -93,7 +97,8 @@ func GenerateHandler(agentClient *agent.Agent, sessionRepo sessions.Repository, 
 		}
 
 		isBYOK := payload.ProviderAPIKey != ""
-		ctx := context.Background()
+		ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second) // longer timeout for AI generation
+		defer cancel()
 
 		// check daily rate limit
 		if client.IsAuthenticated && client.UserID != "" {
@@ -322,7 +327,8 @@ func ChatHandler(sessionRepo sessions.Repository) MessageHandler {
 		}
 
 		// save to database
-		ctx := context.Background()
+		ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
+		defer cancel()
 
 		_, err := sessionRepo.AddMessage(ctx, client.SessionID, client.UserID, "user", sessions.MessageTypeChat, trimmedMessage)
 		if err != nil {
