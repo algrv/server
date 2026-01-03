@@ -31,11 +31,16 @@ type Strudel struct {
 type ConversationHistory []agent.Message
 
 func (ch ConversationHistory) Value() (driver.Value, error) {
-	if ch == nil {
-		return json.Marshal([]agent.Message{})
+	if len(ch) == 0 {
+		return "[]", nil
 	}
 
-	return json.Marshal(ch)
+	bytes, err := json.Marshal(ch)
+	if err != nil {
+		return nil, err
+	}
+
+	return string(bytes), nil
 }
 
 func (ch *ConversationHistory) Scan(value interface{}) error {
