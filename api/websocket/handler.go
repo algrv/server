@@ -1,7 +1,9 @@
 package websocket
 
 import (
+	"context"
 	"fmt"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -30,7 +32,10 @@ func WebSocketHandler(hub *ws.Hub, sessionRepo sessions.Repository, userRepo *us
 			return
 		}
 
-		ctx := c.Request.Context()
+		// use timeout context for DB operations to prevent hanging
+		ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+		defer cancel()
+
 		var session *sessions.Session
 		var userID string
 		var displayName string
