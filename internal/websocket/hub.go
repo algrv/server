@@ -117,7 +117,11 @@ func (h *Hub) unregisterClient(client *Client) {
 		}
 
 		if client.IPAddress != "" {
-			h.UntrackIPConnection(client.IPAddress)
+			h.ipConnections[client.IPAddress]--
+
+			if h.ipConnections[client.IPAddress] <= 0 {
+				delete(h.ipConnections, client.IPAddress)
+			}
 		}
 
 		logger.Info("client unregistered",
@@ -128,6 +132,7 @@ func (h *Hub) unregisterClient(client *Client) {
 		if len(sessionClients) == 0 {
 			delete(h.sessions, client.SessionID)
 			delete(h.sessionSequences, client.SessionID)
+
 			logger.Info("session has no more clients, removed",
 				"session_id", client.SessionID,
 			)
