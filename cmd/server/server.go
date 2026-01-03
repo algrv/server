@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/algoraveai/server/algorave/sessions"
 	"github.com/algoraveai/server/algorave/strudels"
@@ -17,7 +18,19 @@ import (
 func NewServer(cfg *config.Config) (*Server, error) {
 	ctx := context.Background()
 
-	db, err := pgxpool.New(ctx, cfg.SupabaseConnString)
+	poolConfig, err := pgxpool.ParseConfig(cfg.SupabaseConnString)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse database config: %w", err)
+	}
+
+	// configure connection pool for supabase pooler compatibility
+	poolConfig.MaxConns = 10
+	poolConfig.MinConns = 2
+	poolConfig.MaxConnLifetime = 30 * time.Minute
+	poolConfig.MaxConnIdleTime = 5 * time.Minute
+	poolConfig.HealthCheckPeriod = 1 * time.Minute
+
+	db, err := pgxpool.NewWithConfig(ctx, poolConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create database pool: %w", err)
 	}
