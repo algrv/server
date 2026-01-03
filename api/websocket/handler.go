@@ -65,6 +65,21 @@ func WebSocketHandler(hub *ws.Hub, sessionRepo sessions.Repository, userRepo *us
 					displayName = "Host"
 					role = "host"
 
+					// copy code from previous session if provided
+					if params.PreviousSessionID != "" {
+						oldSession, err := sessionRepo.GetSession(ctx, params.PreviousSessionID)
+						if err == nil && oldSession.Code != "" {
+							session.Code = oldSession.Code
+							if updateErr := sessionRepo.UpdateSessionCode(ctx, session.ID, oldSession.Code); updateErr != nil {
+								logger.Warn("failed to copy code from previous session",
+									"new_session_id", session.ID,
+									"previous_session_id", params.PreviousSessionID,
+									"error", updateErr,
+								)
+							}
+						}
+					}
+
 					// look up user's subscription tier for rate limiting
 					user, err := userRepo.FindByID(ctx, userID)
 					if err == nil && user != nil {
