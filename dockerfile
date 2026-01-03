@@ -8,7 +8,7 @@ RUN go mod download && go mod verify
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -o server ./cmd/server
 
-FROM node:20-alpine AS node-builder
+FROM node:20-slim AS node-builder
 
 WORKDIR /app/scripts/validate-strudel
 
