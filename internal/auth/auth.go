@@ -2,7 +2,9 @@ package auth
 
 import (
 	"fmt"
+	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -23,9 +25,21 @@ func InitializeProviders() error {
 		return fmt.Errorf("SESSION_SECRET must be set")
 	}
 
-	gothic.Store = sessions.NewCookieStore([]byte(sessionSecret))
+	store := sessions.NewCookieStore([]byte(sessionSecret))
 
 	baseURL := os.Getenv("BASE_URL")
+	isHTTPS := strings.HasPrefix(baseURL, "https://")
+
+	// configure cookie for OAuth redirects
+	store.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   300, // 5 minutes, enough for OAuth flow
+		HttpOnly: true,
+		Secure:   isHTTPS,
+		SameSite: http.SameSiteLaxMode,
+	}
+
+	gothic.Store = store
 
 	if baseURL == "" {
 		baseURL = "http://localhost:8080"
