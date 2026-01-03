@@ -188,8 +188,6 @@ func WebSocketHandler(hub *ws.Hub, sessionRepo sessions.Repository, userRepo *us
 			return
 		}
 
-		hub.TrackIPConnection(ipAddress)
-
 		// upgrade HTTP connection to WebSocket
 		conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 		if err != nil {
@@ -200,6 +198,9 @@ func WebSocketHandler(hub *ws.Hub, sessionRepo sessions.Repository, userRepo *us
 
 			return
 		}
+
+		// track IP connection only after successful upgrade
+		hub.TrackIPConnection(ipAddress)
 
 		isAuthenticated := userID != ""
 		client := ws.NewClient(clientID, params.SessionID, userID, displayName, role, tier, ipAddress, isAuthenticated, conn, hub)
