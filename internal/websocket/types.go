@@ -135,8 +135,9 @@ type AgentRequestPayload struct {
 	UserQuery           string `json:"user_query"`
 	EditorState         string `json:"editor_state,omitempty"` // private, not broadcasted
 	ConversationHistory []struct {
-		Role    string `json:"role"`
-		Content string `json:"content"`
+		Role        string `json:"role"`
+		Content     string `json:"content"`
+		DisplayName string `json:"display_name,omitempty"`
 	} `json:"conversation_history,omitempty"` // private, not broadcasted
 	ProviderAPIKey string `json:"provider_api_key,omitempty"` // private, not broadcasted
 	Provider       string `json:"provider,omitempty"`         // private, not broadcasted
@@ -188,6 +189,7 @@ type SessionStateMessage struct {
 	Role         string `json:"role"` // user, assistant
 	Content      string `json:"content"`
 	IsActionable bool   `json:"is_actionable"`
+	DisplayName  string `json:"display_name,omitempty"`
 	Timestamp    int64  `json:"timestamp"` // Unix milliseconds
 }
 

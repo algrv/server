@@ -231,6 +231,43 @@ func (h *Hub) BroadcastToSession(sessionID string, msg *Message, excludeClientID
 	h.broadcastToSession(sessionID, msg, excludeClientID)
 }
 
+// sends a message only to clients with write permissions (host and co-authors)
+func (h *Hub) BroadcastToWriters(sessionID string, msg *Message, excludeClientID string) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	h.broadcastToWriters(sessionID, msg, excludeClientID)
+}
+
+// the internal broadcast to writers function (must be called with lock held)
+func (h *Hub) broadcastToWriters(sessionID string, msg *Message, excludeClientID string) {
+	sessionClients, exists := h.sessions[sessionID]
+	if !exists {
+		return
+	}
+
+	// assign sequence number to message
+	h.sessionSequences[sessionID]++
+	msg.Sequence = h.sessionSequences[sessionID]
+
+	for clientID, client := range sessionClients {
+		if clientID == excludeClientID {
+			continue
+		}
+
+		// only send to clients with write permissions
+		if !client.CanWrite() {
+			continue
+		}
+
+		if err := client.Send(msg); err != nil {
+			logger.ErrorErr(err, "failed to send message to client",
+				"client_id", clientID,
+				"session_id", sessionID,
+			)
+		}
+	}
+}
+
 // the internal broadcast function (must be called with lock held)
 func (h *Hub) broadcastToSession(sessionID string, msg *Message, excludeClientID string) {
 	sessionClients, exists := h.sessions[sessionID]

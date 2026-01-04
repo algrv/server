@@ -83,6 +83,12 @@ func CodeUpdateHandler(sessionRepo sessions.Repository) MessageHandler {
 // handles code generation request messages
 func GenerateHandler(agentClient *agent.Agent, sessionRepo sessions.Repository, userRepo *users.Repository) MessageHandler {
 	return func(hub *Hub, client *Client, msg *Message) error {
+		// check if client has write permissions (viewers cannot use agent)
+		if !client.CanWrite() {
+			client.SendError("forbidden", "only host and co-authors can use the AI assistant", "")
+			return ErrReadOnly
+		}
+
 		// check per-minute rate limit
 		if !client.checkAgentRequestRateLimit() {
 			client.SendError("too_many_requests", "too many agent requests. maximum 10 per minute.", "")
@@ -131,7 +137,7 @@ func GenerateHandler(agentClient *agent.Agent, sessionRepo sessions.Repository, 
 			}
 		}
 
-		// broadcast the user's prompt to all clients (sanitized - no private data)
+		// broadcast the user's prompt to writers only (sanitized - no private data)
 		broadcastPayload := AgentRequestPayload{
 			UserQuery:   payload.UserQuery,
 			DisplayName: client.DisplayName,
@@ -139,7 +145,7 @@ func GenerateHandler(agentClient *agent.Agent, sessionRepo sessions.Repository, 
 
 		broadcastMsg, err := NewMessage(TypeAgentRequest, client.SessionID, client.UserID, broadcastPayload)
 		if err == nil {
-			hub.BroadcastToSession(client.SessionID, broadcastMsg, "")
+			hub.BroadcastToWriters(client.SessionID, broadcastMsg, "")
 		} else {
 			logger.Warn("failed to create broadcast message for agent request",
 				"client_id", client.ID,
@@ -270,8 +276,8 @@ func GenerateHandler(agentClient *agent.Agent, sessionRepo sessions.Repository, 
 			return err
 		}
 
-		// send response to all clients in the session (including requester)
-		hub.BroadcastToSession(client.SessionID, responseMsg, "")
+		// send response to writers only (host and co-authors)
+		hub.BroadcastToWriters(client.SessionID, responseMsg, "")
 
 		// update last activity
 		if err := sessionRepo.UpdateLastActivity(ctx, client.SessionID); err != nil {

@@ -248,11 +248,16 @@ func WebSocketHandler(hub *ws.Hub, sessionRepo sessions.Repository, userRepo *us
 				switch msg.MessageType {
 				case sessions.MessageTypeUserPrompt, sessions.MessageTypeAIResponse:
 					// llm conversation messages
+					msgDisplayName := ""
+					if msg.DisplayName != nil {
+						msgDisplayName = *msg.DisplayName
+					}
 					conversationHistory = append(conversationHistory, ws.SessionStateMessage{
 						ID:           msg.ID,
 						Role:         msg.Role,
 						Content:      msg.Content,
 						IsActionable: msg.IsActionable,
+						DisplayName:  msgDisplayName,
 						Timestamp:    msg.CreatedAt.UnixMilli(),
 					})
 				case sessions.MessageTypeChat:
