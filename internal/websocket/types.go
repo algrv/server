@@ -52,6 +52,12 @@ const (
 
 	// is sent when host ends the session
 	TypeSessionEnded = "session_ended"
+
+	// is sent by client to persist code to database
+	TypeAutoSave = "auto_save"
+
+	// is sent by client to switch strudel context without reconnecting
+	TypeSwitchStrudel = "switch_strudel"
 )
 
 // client connection constants
@@ -223,6 +229,18 @@ type SessionEndedPayload struct {
 	Reason string `json:"reason,omitempty"`
 }
 
+// contains code to persist to database
+type AutoSavePayload struct {
+	Code string `json:"code"`
+}
+
+// contains strudel context switch information
+type SwitchStrudelPayload struct {
+	StrudelID           *string               `json:"strudel_id"`                     // null for scratch/anonymous
+	Code                string                `json:"code,omitempty"`                 // only for restore from localStorage
+	ConversationHistory []SessionStateMessage `json:"conversation_history,omitempty"` // only for restore from localStorage
+}
+
 // represents a WebSocket client connection
 type Client struct {
 	// unique identifier for this client
@@ -251,6 +269,12 @@ type Client struct {
 
 	// initial code to send on connect (for joining existing sessions)
 	InitialCode string
+
+	// last known code (updated on each code_update, used for save on disconnect)
+	LastCode string
+
+	// current strudel ID (nil for scratch/anonymous context)
+	CurrentStrudelID *string
 
 	// initial conversation history to send on connect
 	InitialConversationHistory []SessionStateMessage
@@ -317,6 +341,9 @@ type Hub struct {
 
 	// sequence numbers per session for message ordering
 	sessionSequences map[string]uint64
+
+	// callback for client disconnect (e.g., save code to DB)
+	onClientDisconnect func(client *Client)
 }
 
 // processes a specific message type

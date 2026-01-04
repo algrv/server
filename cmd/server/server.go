@@ -9,6 +9,7 @@ import (
 	"github.com/algrv/server/algorave/strudels"
 	"github.com/algrv/server/algorave/users"
 	"github.com/algrv/server/internal/config"
+	"github.com/algrv/server/internal/logger"
 	ws "github.com/algrv/server/internal/websocket"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
@@ -60,11 +61,40 @@ func NewServer(cfg *config.Config) (*Server, error) {
 	hub := ws.NewHub()
 
 	// register websocket message handlers
-	hub.RegisterHandler(ws.TypeCodeUpdate, ws.CodeUpdateHandler(sessionRepo))
+	hub.RegisterHandler(ws.TypeCodeUpdate, ws.CodeUpdateHandler())
+	hub.RegisterHandler(ws.TypeAutoSave, ws.AutoSaveHandler(sessionRepo))
 	hub.RegisterHandler(ws.TypeAgentRequest, ws.GenerateHandler(services.Agent, sessionRepo, userRepo))
 	hub.RegisterHandler(ws.TypeChatMessage, ws.ChatHandler(sessionRepo))
 	hub.RegisterHandler(ws.TypePlay, ws.PlayHandler())
 	hub.RegisterHandler(ws.TypeStop, ws.StopHandler())
+	hub.RegisterHandler(ws.TypeSwitchStrudel, ws.SwitchStrudelHandler(strudelRepo))
+
+	// save code on client disconnect
+	hub.OnClientDisconnect(func(client *ws.Client) {
+		if !client.CanWrite() {
+			return
+		}
+
+		lastCode := client.GetLastCode()
+		if lastCode == "" {
+			return
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		if err := sessionRepo.UpdateSessionCode(ctx, client.SessionID, lastCode); err != nil {
+			logger.ErrorErr(err, "failed to save code on disconnect",
+				"client_id", client.ID,
+				"session_id", client.SessionID,
+			)
+		} else {
+			logger.Debug("code saved on disconnect",
+				"client_id", client.ID,
+				"session_id", client.SessionID,
+			)
+		}
+	})
 
 	router := gin.Default()
 

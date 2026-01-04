@@ -11,12 +11,13 @@ wss://host/api/v1/ws  (production)
 
 ### Query Parameters
 
-| Parameter      | Type   | Required | Description                                                  |
-| -------------- | ------ | -------- | ------------------------------------------------------------ |
-| `session_id`   | UUID   | No       | Session to join. If omitted, creates a new anonymous session |
-| `token`        | string | No       | JWT authentication token                                     |
-| `invite`       | string | No       | Invite token for joining a session                           |
-| `display_name` | string | No       | Display name (max 100 chars). Defaults to "Anonymous"        |
+| Parameter             | Type   | Required | Description                                                  |
+| --------------------- | ------ | -------- | ------------------------------------------------------------ |
+| `session_id`          | UUID   | No       | Session to join. If omitted, creates a new anonymous session |
+| `token`               | string | No       | JWT authentication token                                     |
+| `invite`              | string | No       | Invite token for joining a session                           |
+| `display_name`        | string | No       | Display name (max 100 chars). Defaults to "Anonymous"        |
+| `previous_session_id` | UUID   | No       | Copy code from this session when creating a new one          |
 
 ### Connection Scenarios
 
@@ -47,11 +48,11 @@ ws://host/api/v1/ws?session_id=<uuid>&invite=<token>&display_name=Guest
 
 ### Roles
 
-| Role        | Permissions                                              |
-| ----------- | -------------------------------------------------------- |
-| `host`      | Full access (edit code, use agent, chat, manage session) |
-| `co-author` | Edit code, use agent, chat                               |
-| `viewer`    | Read-only, chat only                                     |
+| Role        | Permissions                                                       |
+| ----------- | ----------------------------------------------------------------- |
+| `host`      | Full access (edit code, use agent, chat, manage session, switch strudel) |
+| `co-author` | Edit code, use agent, chat, switch strudel                        |
+| `viewer`    | Read-only, chat only (no AI conversation history)                 |
 
 ---
 
@@ -65,9 +66,12 @@ All messages use this envelope:
   "session_id": "uuid",
   "user_id": "uuid or empty",
   "timestamp": "2024-01-01T00:00:00Z",
+  "seq": 123,
   "payload": { ... }
 }
 ```
+
+The `seq` field is a sequence number for message ordering within a session.
 
 ---
 
@@ -77,10 +81,11 @@ All messages use this envelope:
 
 Update the shared code editor. Requires `host` or `co-author` role.
 
+**Note:** This broadcasts the update to other clients but does NOT persist to database. Use `auto_save` for persistence.
+
 ```json
 {
   "type": "code_update",
-  "session_id": "uuid",
   "payload": {
     "code": "sound(\"bd sd\").fast(2)",
     "cursor_line": 1,
@@ -99,23 +104,115 @@ Update the shared code editor. Requires `host` or `co-author` role.
 
 ---
 
+### `auto_save`
+
+Persist code to database. Requires `host` or `co-author` role. Use this periodically (e.g., every 30 seconds) or before important actions.
+
+```json
+{
+  "type": "auto_save",
+  "payload": {
+    "code": "sound(\"bd sd\").fast(2)"
+  }
+}
+```
+
+| Field  | Type   | Required | Description                     |
+| ------ | ------ | -------- | ------------------------------- |
+| `code` | string | Yes      | Full editor content (max 100KB) |
+
+**Note:** Code is also automatically saved when a client with write permissions disconnects.
+
+---
+
+### `switch_strudel`
+
+Switch strudel context without reconnecting. Requires `host` or `co-author` role.
+
+**1. Switch to a saved strudel (authenticated users only):**
+
+```json
+{
+  "type": "switch_strudel",
+  "payload": {
+    "strudel_id": "uuid"
+  }
+}
+```
+
+Backend fetches the strudel from database (verifies ownership) and returns code + conversation history.
+
+**2. Switch to fresh scratch context:**
+
+```json
+{
+  "type": "switch_strudel",
+  "payload": {
+    "strudel_id": null
+  }
+}
+```
+
+Returns empty code and empty conversation history.
+
+**3. Restore from localStorage (after accidental tab close):**
+
+```json
+{
+  "type": "switch_strudel",
+  "payload": {
+    "strudel_id": null,
+    "code": "sound(\"bd sd\")",
+    "conversation_history": [
+      {
+        "id": "msg-1",
+        "role": "user",
+        "content": "make a beat",
+        "is_code_response": false,
+        "display_name": "User",
+        "timestamp": 1704067200000
+      },
+      {
+        "id": "msg-2",
+        "role": "assistant",
+        "content": "sound(\"bd sd\")",
+        "is_code_response": true,
+        "display_name": "Assistant",
+        "timestamp": 1704067201000
+      }
+    ]
+  }
+}
+```
+
+| Field                  | Type   | Required | Description                                     |
+| ---------------------- | ------ | -------- | ----------------------------------------------- |
+| `strudel_id`           | string | No       | Strudel UUID, or null for scratch               |
+| `code`                 | string | No       | Code to restore (only for scratch/localStorage) |
+| `conversation_history` | array  | No       | Conversation to restore (only for localStorage) |
+
+**Response:** Server sends `session_state` back to the requesting client only.
+
+---
+
 ### `agent_request`
 
 Request AI code generation. Requires `host` or `co-author` role.
 
+**Important:** Only broadcast to other hosts/co-authors, NOT to viewers.
+
 ```json
 {
   "type": "agent_request",
-  "session_id": "uuid",
   "payload": {
-    "provider": "anthropic",
-    "provider_api_key": "sk-..."
     "user_query": "add a kick drum on every beat",
     "editor_state": "sound(\"hh*8\")",
     "conversation_history": [
       { "role": "user", "content": "make a beat" },
       { "role": "assistant", "content": "sound(\"hh*8\")" }
     ],
+    "provider": "anthropic",
+    "provider_api_key": "sk-..."
   }
 }
 ```
@@ -136,12 +233,11 @@ Request AI code generation. Requires `host` or `co-author` role.
 
 ### `chat_message`
 
-Send a chat message to the session.
+Send a chat message to the session. All roles can send chat messages.
 
 ```json
 {
   "type": "chat_message",
-  "session_id": "uuid",
   "payload": {
     "message": "Hey, try adding some reverb!"
   }
@@ -163,7 +259,6 @@ Start playback for all session participants. Requires `host` or `co-author` role
 ```json
 {
   "type": "play",
-  "session_id": "uuid",
   "payload": {}
 }
 ```
@@ -177,7 +272,6 @@ Stop playback for all session participants. Requires `host` or `co-author` role.
 ```json
 {
   "type": "stop",
-  "session_id": "uuid",
   "payload": {}
 }
 ```
@@ -191,7 +285,6 @@ Keep connection alive. Server responds with `pong`.
 ```json
 {
   "type": "ping",
-  "session_id": "uuid",
   "payload": {}
 }
 ```
@@ -202,7 +295,9 @@ Keep connection alive. Server responds with `pong`.
 
 ### `session_state`
 
-Sent immediately after connection is established. Contains initial session state.
+Sent in two scenarios:
+1. Immediately after connection is established
+2. In response to a `switch_strudel` message
 
 ```json
 {
@@ -218,8 +313,22 @@ Sent immediately after connection is established. Contains initial session state
       { "user_id": "", "display_name": "Guest", "role": "viewer" }
     ],
     "conversation_history": [
-      { "role": "user", "content": "make a beat" },
-      { "role": "assistant", "content": "sound(\"bd sd\")" }
+      {
+        "id": "msg-123",
+        "role": "user",
+        "content": "make a beat",
+        "is_code_response": false,
+        "display_name": "User",
+        "timestamp": 1704067200000
+      },
+      {
+        "id": "msg-124",
+        "role": "assistant",
+        "content": "sound(\"bd sd\")",
+        "is_code_response": true,
+        "display_name": "Assistant",
+        "timestamp": 1704067201000
+      }
     ],
     "chat_history": [
       {
@@ -241,7 +350,10 @@ Sent immediately after connection is established. Contains initial session state
 | `conversation_history` | array  | LLM conversation history (user prompts + AI responses) |
 | `chat_history`         | array  | Chat message history with timestamps                   |
 
-**Note:** `conversation_history` contains only LLM interactions (`user_prompt` and `ai_response` message types). `chat_history` contains user chat messages with `display_name`, `avatar_url`, `content`, and `timestamp` (Unix milliseconds).
+**Note:**
+- `conversation_history` is **empty for viewers** - they don't see AI conversation.
+- When sent in response to `switch_strudel`, `participants` may be empty (not re-sent).
+- `chat_history` is session-scoped (shared with all participants including viewers).
 
 ---
 
@@ -255,6 +367,7 @@ Sent when another user updates the code.
   "session_id": "uuid",
   "user_id": "uuid",
   "timestamp": "2024-01-01T00:00:00Z",
+  "seq": 42,
   "payload": {
     "code": "sound(\"bd sd\").fast(2)",
     "cursor_line": 1,
@@ -270,12 +383,15 @@ Sent when another user updates the code.
 
 Sent when a user submits an AI request (sanitized - no private data).
 
+**Important:** Only sent to hosts and co-authors, NOT to viewers.
+
 ```json
 {
   "type": "agent_request",
   "session_id": "uuid",
   "user_id": "uuid",
   "timestamp": "2024-01-01T00:00:00Z",
+  "seq": 43,
   "payload": {
     "user_query": "add a kick drum on every beat",
     "display_name": "DJ Cool"
@@ -285,9 +401,11 @@ Sent when a user submits an AI request (sanitized - no private data).
 
 ---
 
-### `agent_response` (broadcast)
+### `agent_response`
 
 Sent when AI completes code generation or answers a question.
+
+**Important:** Only sent to hosts and co-authors, NOT to viewers.
 
 **Code generation response (should update editor):**
 
@@ -296,13 +414,19 @@ Sent when AI completes code generation or answers a question.
   "type": "agent_response",
   "session_id": "uuid",
   "timestamp": "2024-01-01T00:00:00Z",
+  "seq": 44,
   "payload": {
     "code": "sound(\"bd\").fast(4)\n.stack(sound(\"hh*8\"))",
     "docs_retrieved": 3,
     "examples_retrieved": 2,
     "model": "claude-sonnet-4-20250514",
     "is_actionable": true,
-    "is_code_response": true
+    "is_code_response": true,
+    "rate_limit": {
+      "requests_remaining": 8,
+      "requests_limit": 10,
+      "reset_seconds": 45
+    }
   }
 }
 ```
@@ -346,11 +470,19 @@ Sent when AI completes code generation or answers a question.
 }
 ```
 
+| Field                  | Type   | Description                                        |
+| ---------------------- | ------ | -------------------------------------------------- |
+| `code`                 | string | Generated code or explanation                      |
+| `is_actionable`        | bool   | Whether the response is actionable                 |
+| `is_code_response`     | bool   | If true, frontend should update the editor         |
+| `clarifying_questions` | array  | Questions to ask user (when is_actionable = false) |
+| `rate_limit`           | object | Current rate limit status                          |
+
 ---
 
 ### `chat_message` (broadcast)
 
-Sent when a user sends a chat message.
+Sent when a user sends a chat message. Broadcast to ALL participants including viewers.
 
 ```json
 {
@@ -358,6 +490,7 @@ Sent when a user sends a chat message.
   "session_id": "uuid",
   "user_id": "uuid",
   "timestamp": "2024-01-01T00:00:00Z",
+  "seq": 45,
   "payload": {
     "message": "Hey, try adding some reverb!",
     "display_name": "DJ Cool"
@@ -376,6 +509,7 @@ Sent when a new user joins the session.
   "type": "user_joined",
   "session_id": "uuid",
   "timestamp": "2024-01-01T00:00:00Z",
+  "seq": 46,
   "payload": {
     "user_id": "uuid",
     "display_name": "New User",
@@ -395,6 +529,7 @@ Sent when a user leaves the session.
   "type": "user_left",
   "session_id": "uuid",
   "timestamp": "2024-01-01T00:00:00Z",
+  "seq": 47,
   "payload": {
     "user_id": "uuid",
     "display_name": "DJ Cool"
@@ -414,6 +549,7 @@ Sent when host or co-author starts playback. Frontend should programmatically tr
   "session_id": "uuid",
   "user_id": "uuid",
   "timestamp": "2024-01-01T00:00:00Z",
+  "seq": 48,
   "payload": {
     "display_name": "DJ Cool"
   }
@@ -432,6 +568,7 @@ Sent when host or co-author stops playback. Frontend should programmatically tri
   "session_id": "uuid",
   "user_id": "uuid",
   "timestamp": "2024-01-01T00:00:00Z",
+  "seq": 49,
   "payload": {
     "display_name": "DJ Cool"
   }
@@ -463,6 +600,23 @@ Frontend should handle this by:
 
 ---
 
+### `server_shutdown` (broadcast)
+
+Sent when the server is shutting down for maintenance.
+
+```json
+{
+  "type": "server_shutdown",
+  "session_id": "uuid",
+  "timestamp": "2024-01-01T00:00:00Z",
+  "payload": {
+    "reason": "server is shutting down for maintenance"
+  }
+}
+```
+
+---
+
 ### `error`
 
 Sent when an error occurs processing a message.
@@ -484,6 +638,8 @@ Sent when an error occurs processing a message.
 | ------------------- | ------------------------------------------------------ |
 | `too_many_requests` | Rate limit exceeded                                    |
 | `forbidden`         | Insufficient permissions (e.g., viewer trying to edit) |
+| `unauthorized`      | Authentication required (e.g., loading saved strudel)  |
+| `not_found`         | Resource not found (e.g., strudel doesn't exist)       |
 | `validation_error`  | Invalid message format                                 |
 | `bad_request`       | Invalid request (e.g., code too large)                 |
 | `server_error`      | Internal server error                                  |
@@ -502,6 +658,67 @@ Response to client `ping`.
   "payload": {}
 }
 ```
+
+---
+
+## Strudel Context Management
+
+### Data Flow
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        DATA SOURCES                              │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  Saved Strudels (DB)          Session Messages (DB)              │
+│  ┌──────────────────┐         ┌──────────────────┐              │
+│  │ strudels table   │         │ session_messages │              │
+│  │ - code           │         │ - chat messages  │              │
+│  │ - conversation   │         │ - agent log      │              │
+│  │   history        │         │ (audit trail)    │              │
+│  └──────────────────┘         └──────────────────┘              │
+│           │                            │                         │
+│           │ switch_strudel             │ on connect              │
+│           │ (strudel_id)               │ (session history)       │
+│           ▼                            ▼                         │
+│  ┌──────────────────────────────────────────────────┐           │
+│  │              session_state response               │           │
+│  │  - code (from strudel or provided)               │           │
+│  │  - conversation_history (filtered for viewers)   │           │
+│  │  - chat_history (session-scoped)                 │           │
+│  └──────────────────────────────────────────────────┘           │
+│                                                                  │
+│  localStorage (Frontend)                                         │
+│  ┌──────────────────┐                                           │
+│  │ Unsaved sessions │                                           │
+│  │ - code           │──── switch_strudel ────▶ Restore          │
+│  │ - conversation   │     (null + data)                         │
+│  └──────────────────┘                                           │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Switching Strudels
+
+| Scenario                 | Payload                                         | Who Can Do It      |
+| ------------------------ | ----------------------------------------------- | ------------------ |
+| Open saved strudel       | `{strudel_id: "uuid"}`                          | Auth users only    |
+| Start fresh scratch      | `{strudel_id: null}`                            | Anyone (host/co-author) |
+| Restore from localStorage| `{strudel_id: null, code: "...", conversation_history: [...]}` | Anyone (host/co-author) |
+
+### Access Control Summary
+
+| Feature                    | Host | Co-author | Viewer |
+| -------------------------- | ---- | --------- | ------ |
+| See code                   | ✓    | ✓         | ✓      |
+| Edit code                  | ✓    | ✓         | ✗      |
+| Use AI assistant           | ✓    | ✓         | ✗      |
+| See AI conversation        | ✓    | ✓         | ✗      |
+| Send chat messages         | ✓    | ✓         | ✓      |
+| See chat messages          | ✓    | ✓         | ✓      |
+| Control playback           | ✓    | ✓         | ✗      |
+| Switch strudel context     | ✓    | ✓         | ✗      |
+| End session                | ✓    | ✗         | ✗      |
 
 ---
 
@@ -528,5 +745,17 @@ Response to client `ping`.
 | --------- | ------------ |
 | Anonymous | 50           |
 | Free      | 100          |
-| Pro       | 1000         |
+| PAYG      | 1000         |
 | BYOK      | Unlimited    |
+
+---
+
+## Auto-Save Behavior
+
+1. **Real-time sync:** `code_update` broadcasts changes to other clients instantly but does NOT write to database.
+
+2. **Periodic save:** Frontend should send `auto_save` periodically (e.g., every 30 seconds of inactivity).
+
+3. **Disconnect save:** Server automatically saves the last known code when a client with write permissions disconnects.
+
+4. **Strudel save:** When user explicitly saves a strudel via REST API, code + conversation history are persisted to the strudel.

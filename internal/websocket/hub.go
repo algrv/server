@@ -28,6 +28,13 @@ func (h *Hub) RegisterHandler(messageType string, handler MessageHandler) {
 	h.handlers[messageType] = handler
 }
 
+// sets callback to be called when a client disconnects
+func (h *Hub) OnClientDisconnect(callback func(client *Client)) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	h.onClientDisconnect = callback
+}
+
 // starts the hub's main loop
 func (h *Hub) Run() {
 	h.running = true
@@ -87,12 +94,18 @@ func (h *Hub) registerClient(client *Client) {
 		})
 	}
 
+	// filter conversation history for viewers (they don't see AI conversation)
+	conversationHistory := client.InitialConversationHistory
+	if client.Role == "viewer" {
+		conversationHistory = []SessionStateMessage{}
+	}
+
 	// send session_state to connecting client
 	sessionStateMsg, err := NewMessage(TypeSessionState, client.SessionID, client.UserID, SessionStatePayload{
 		Code:                client.InitialCode,
 		YourRole:            client.Role,
 		Participants:        participants,
-		ConversationHistory: client.InitialConversationHistory,
+		ConversationHistory: conversationHistory,
 		ChatHistory:         client.InitialChatHistory,
 	})
 	if err == nil {
@@ -118,54 +131,67 @@ func (h *Hub) registerClient(client *Client) {
 // removes a client from the hub
 func (h *Hub) unregisterClient(client *Client) {
 	h.mu.Lock()
-	defer h.mu.Unlock()
+
+	// capture callback reference under lock
+	callback := h.onClientDisconnect
 
 	sessionClients, exists := h.sessions[client.SessionID]
 	if !exists {
+		h.mu.Unlock()
 		return
 	}
 
-	if _, exists := sessionClients[client.ID]; exists {
-		delete(sessionClients, client.ID)
-		client.Close()
+	if _, exists := sessionClients[client.ID]; !exists {
+		h.mu.Unlock()
+		return
+	}
 
-		if client.UserID != "" {
-			h.userConnections[client.UserID]--
+	delete(sessionClients, client.ID)
+	client.Close()
 
-			if h.userConnections[client.UserID] <= 0 {
-				delete(h.userConnections, client.UserID)
-			}
+	if client.UserID != "" {
+		h.userConnections[client.UserID]--
+
+		if h.userConnections[client.UserID] <= 0 {
+			delete(h.userConnections, client.UserID)
 		}
+	}
 
-		if client.IPAddress != "" {
-			h.ipConnections[client.IPAddress]--
+	if client.IPAddress != "" {
+		h.ipConnections[client.IPAddress]--
 
-			if h.ipConnections[client.IPAddress] <= 0 {
-				delete(h.ipConnections, client.IPAddress)
-			}
+		if h.ipConnections[client.IPAddress] <= 0 {
+			delete(h.ipConnections, client.IPAddress)
 		}
+	}
 
-		logger.Info("client unregistered",
-			"client_id", client.ID,
+	logger.Info("client unregistered",
+		"client_id", client.ID,
+		"session_id", client.SessionID,
+	)
+
+	if len(sessionClients) == 0 {
+		delete(h.sessions, client.SessionID)
+		delete(h.sessionSequences, client.SessionID)
+
+		logger.Info("session has no more clients, removed",
 			"session_id", client.SessionID,
 		)
-
-		if len(sessionClients) == 0 {
-			delete(h.sessions, client.SessionID)
-			delete(h.sessionSequences, client.SessionID)
-
-			logger.Info("session has no more clients, removed",
-				"session_id", client.SessionID,
-			)
-		} else {
-			userLeftMsg, err := NewMessage(TypeUserLeft, client.SessionID, client.UserID, UserLeftPayload{
-				UserID:      client.UserID,
-				DisplayName: client.DisplayName,
-			})
-			if err == nil {
-				h.broadcastToSession(client.SessionID, userLeftMsg, "")
-			}
+	} else {
+		userLeftMsg, err := NewMessage(TypeUserLeft, client.SessionID, client.UserID, UserLeftPayload{
+			UserID:      client.UserID,
+			DisplayName: client.DisplayName,
+		})
+		if err == nil {
+			h.broadcastToSession(client.SessionID, userLeftMsg, "")
 		}
+	}
+
+	h.mu.Unlock()
+
+	// call disconnect callback outside lock (may do DB operations)
+	if callback != nil {
+		callback(client)
 	}
 }
 

@@ -100,6 +100,7 @@ func (c *Client) ReadPump() {
 // writes messages from the hub to the webSocket connection for sending to the client
 func (c *Client) WritePump() {
 	ticker := time.NewTicker(pingPeriod)
+
 	defer func() {
 		ticker.Stop()
 		c.conn.Close() //nolint:errcheck,gosec // G104: defer cleanup
@@ -250,6 +251,34 @@ func (c *Client) CanWrite() bool {
 	return c.Role == "host" || c.Role == "co-author"
 }
 
+// sets the last known code (thread-safe)
+func (c *Client) SetLastCode(code string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.LastCode = code
+}
+
+// gets the last known code (thread-safe)
+func (c *Client) GetLastCode() string {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.LastCode
+}
+
+// sets the current strudel ID (thread-safe)
+func (c *Client) SetCurrentStrudelID(strudelID *string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.CurrentStrudelID = strudelID
+}
+
+// gets the current strudel ID (thread-safe)
+func (c *Client) GetCurrentStrudelID() *string {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.CurrentStrudelID
+}
+
 // checks if the client can send a code update
 func (c *Client) checkCodeUpdateRateLimit() bool {
 	c.mu.Lock()
@@ -358,10 +387,7 @@ func (c *Client) GetAgentRateLimitStatus() *RateLimit {
 		}
 	}
 
-	remaining := limit - validCount
-	if remaining < 0 {
-		remaining = 0
-	}
+	remaining := max(limit-validCount, 0)
 
 	// calculate seconds until oldest request expires (resets quota)
 	resetSeconds := 60
