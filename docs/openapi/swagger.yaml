@@ -482,7 +482,7 @@ host: algorave.ai
 info:
   contact:
     name: API Support
-    url: https://github.com/algoraveai/server
+    url: https://github.com/algrv/server
   description: |-
     AI-powered Strudel code generation and collaborative live coding platform
 

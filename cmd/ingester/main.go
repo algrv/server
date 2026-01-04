@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/algoraveai/server/internal/config"
-	"github.com/algoraveai/server/internal/logger"
+	"github.com/algrv/server/internal/config"
+	"github.com/algrv/server/internal/logger"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 

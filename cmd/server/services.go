@@ -6,13 +6,13 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/algoraveai/server/internal/agent"
-	"github.com/algoraveai/server/internal/config"
-	"github.com/algoraveai/server/internal/llm"
-	"github.com/algoraveai/server/internal/logger"
-	"github.com/algoraveai/server/internal/retriever"
-	"github.com/algoraveai/server/internal/storage"
-	"github.com/algoraveai/server/internal/strudel"
+	"github.com/algrv/server/internal/agent"
+	"github.com/algrv/server/internal/config"
+	"github.com/algrv/server/internal/llm"
+	"github.com/algrv/server/internal/logger"
+	"github.com/algrv/server/internal/retriever"
+	"github.com/algrv/server/internal/storage"
+	"github.com/algrv/server/internal/strudel"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 

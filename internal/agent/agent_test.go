@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/algoraveai/server/internal/llm"
-	"github.com/algoraveai/server/internal/retriever"
+	"github.com/algrv/server/internal/llm"
+	"github.com/algrv/server/internal/retriever"
 )
 
 // implements llm.LLM for testing

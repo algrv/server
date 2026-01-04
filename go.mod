@@ -1,4 +1,4 @@
-module github.com/algoraveai/server
+module github.com/algrv/server
 
 go 1.24.0
 

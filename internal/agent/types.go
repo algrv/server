@@ -3,9 +3,9 @@ package agent
 import (
 	"context"
 
-	"github.com/algoraveai/server/internal/llm"
-	"github.com/algoraveai/server/internal/retriever"
-	"github.com/algoraveai/server/internal/strudel"
+	"github.com/algrv/server/internal/llm"
+	"github.com/algrv/server/internal/retriever"
+	"github.com/algrv/server/internal/strudel"
 )
 
 // interface for document and example retrieval

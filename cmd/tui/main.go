@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/algoraveai/server/internal/tui"
+	"github.com/algrv/server/internal/tui"
 	tea "github.com/charmbracelet/bubbletea"
 )
 

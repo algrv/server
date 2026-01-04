@@ -5,11 +5,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/algoraveai/server/algorave/sessions"
-	"github.com/algoraveai/server/algorave/users"
-	"github.com/algoraveai/server/internal/agent"
-	"github.com/algoraveai/server/internal/llm"
-	"github.com/algoraveai/server/internal/logger"
+	"github.com/algrv/server/algorave/sessions"
+	"github.com/algrv/server/algorave/users"
+	"github.com/algrv/server/internal/agent"
+	"github.com/algrv/server/internal/llm"
+	"github.com/algrv/server/internal/logger"
 )
 
 const dbTimeout = 10 * time.Second

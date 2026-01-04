@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/algoraveai/server/algorave/strudels"
-	"github.com/algoraveai/server/internal/auth"
-	"github.com/algoraveai/server/internal/errors"
+	"github.com/algrv/server/algorave/strudels"
+	"github.com/algrv/server/internal/auth"
+	"github.com/algrv/server/internal/errors"
 	"github.com/gin-gonic/gin"
 )
 

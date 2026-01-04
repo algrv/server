@@ -3,7 +3,7 @@ package websocket
 import (
 	"time"
 
-	"github.com/algoraveai/server/internal/logger"
+	"github.com/algrv/server/internal/logger"
 )
 
 func NewHub() *Hub {

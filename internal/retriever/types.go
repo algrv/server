@@ -1,7 +1,7 @@
 package retriever
 
 import (
-	"github.com/algoraveai/server/internal/llm"
+	"github.com/algrv/server/internal/llm"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 

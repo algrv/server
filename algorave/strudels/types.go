@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/algoraveai/server/internal/agent"
+	"github.com/algrv/server/internal/agent"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 

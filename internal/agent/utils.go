@@ -8,8 +8,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/algoraveai/server/internal/llm"
-	"github.com/algoraveai/server/internal/strudel"
+	"github.com/algrv/server/internal/llm"
+	"github.com/algrv/server/internal/strudel"
 )
 
 var (

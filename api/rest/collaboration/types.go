@@ -3,7 +3,7 @@ package collaboration
 import (
 	"time"
 
-	"github.com/algoraveai/server/algorave/sessions"
+	"github.com/algrv/server/algorave/sessions"
 )
 
 // allows ending WebSocket sessions

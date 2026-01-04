@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/algoraveai/server/internal/llm"
-	"github.com/algoraveai/server/internal/logger"
+	"github.com/algrv/server/internal/llm"
+	"github.com/algrv/server/internal/logger"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/pgvector/pgvector-go"
 )

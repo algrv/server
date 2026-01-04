@@ -1,6 +1,6 @@
 package strudels
 
-import "github.com/algoraveai/server/algorave/strudels"
+import "github.com/algrv/server/algorave/strudels"
 
 // StrudelsListResponse wraps a list of strudels
 type StrudelsListResponse struct {

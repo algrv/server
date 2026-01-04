@@ -11,7 +11,7 @@ const docTemplate = `{
         "title": "{{.Title}}",
         "contact": {
             "name": "API Support",
-            "url": "https://github.com/algoraveai/server"
+            "url": "https://github.com/algrv/server"
         },
         "license": {
             "name": "GPL-3.0",

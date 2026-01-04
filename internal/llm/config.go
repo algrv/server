@@ -5,7 +5,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/algoraveai/server/internal/config"
+	"github.com/algrv/server/internal/config"
 )
 
 func loadConfig() (*Config, error) {

@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/algoraveai/server/algorave/users"
-	"github.com/algoraveai/server/internal/errors"
-	"github.com/algoraveai/server/internal/logger"
+	"github.com/algrv/server/algorave/users"
+	"github.com/algrv/server/internal/errors"
+	"github.com/algrv/server/internal/logger"
 	"github.com/gorilla/websocket"
 )
 

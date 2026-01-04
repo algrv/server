@@ -1,8 +1,8 @@
 package admin
 
 import (
-	"github.com/algoraveai/server/algorave/strudels"
-	"github.com/algoraveai/server/internal/auth"
+	"github.com/algrv/server/algorave/strudels"
+	"github.com/algrv/server/internal/auth"
 	"github.com/gin-gonic/gin"
 )
 

@@ -6,10 +6,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/algoraveai/server/algorave/sessions"
-	"github.com/algoraveai/server/internal/auth"
-	"github.com/algoraveai/server/internal/errors"
-	"github.com/algoraveai/server/internal/logger"
+	"github.com/algrv/server/algorave/sessions"
+	"github.com/algrv/server/internal/auth"
+	"github.com/algrv/server/internal/errors"
+	"github.com/algrv/server/internal/logger"
 )
 
 // CreateSessionHandler godoc

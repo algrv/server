@@ -1,13 +1,13 @@
 package main
 
 import (
-	"github.com/algoraveai/server/api/rest/admin"
-	"github.com/algoraveai/server/api/rest/auth"
-	"github.com/algoraveai/server/api/rest/collaboration"
-	"github.com/algoraveai/server/api/rest/health"
-	"github.com/algoraveai/server/api/rest/strudels"
-	"github.com/algoraveai/server/api/rest/users"
-	"github.com/algoraveai/server/api/websocket"
+	"github.com/algrv/server/api/rest/admin"
+	"github.com/algrv/server/api/rest/auth"
+	"github.com/algrv/server/api/rest/collaboration"
+	"github.com/algrv/server/api/rest/health"
+	"github.com/algrv/server/api/rest/strudels"
+	"github.com/algrv/server/api/rest/users"
+	"github.com/algrv/server/api/websocket"
 	"github.com/gin-gonic/gin"
 )
 

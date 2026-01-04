@@ -9,9 +9,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/algoraveai/server/internal/auth"
-	"github.com/algoraveai/server/internal/config"
-	"github.com/algoraveai/server/internal/logger"
+	"github.com/algrv/server/internal/auth"
+	"github.com/algrv/server/internal/config"
+	"github.com/algrv/server/internal/logger"
 )
 
 // @title Algorave API
@@ -26,7 +26,7 @@ import (
 // @description - Save and share Strudel patterns
 
 // @contact.name API Support
-// @contact.url https://github.com/algoraveai/server
+// @contact.url https://github.com/algrv/server
 
 // @license.name GPL-3.0
 // @license.url https://www.gnu.org/licenses/gpl-3.0.html
