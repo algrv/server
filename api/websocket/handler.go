@@ -249,8 +249,11 @@ func WebSocketHandler(hub *ws.Hub, sessionRepo sessions.Repository, userRepo *us
 				case sessions.MessageTypeUserPrompt, sessions.MessageTypeAIResponse:
 					// llm conversation messages
 					conversationHistory = append(conversationHistory, ws.SessionStateMessage{
-						Role:    msg.Role,
-						Content: msg.Content,
+						ID:           msg.ID,
+						Role:         msg.Role,
+						Content:      msg.Content,
+						IsActionable: msg.IsActionable,
+						Timestamp:    msg.CreatedAt.UnixMilli(),
 					})
 				case sessions.MessageTypeChat:
 					// chat messages

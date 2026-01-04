@@ -134,11 +134,18 @@ func (r *repository) GetUserSessions(ctx context.Context, userID string, activeO
 	return sessions, nil
 }
 
-// lists all discoverable active sessions
-func (r *repository) ListDiscoverableSessions(ctx context.Context, limit int) ([]*Session, error) {
-	rows, err := r.db.Query(ctx, queryListDiscoverableSessions, limit)
+// lists all discoverable active sessions with pagination
+func (r *repository) ListDiscoverableSessions(ctx context.Context, limit, offset int) ([]*Session, int, error) {
+	// get total count first
+	var total int
+
+	if err := r.db.QueryRow(ctx, queryCountDiscoverableSessions).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
+	rows, err := r.db.Query(ctx, queryListDiscoverableSessions, limit, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	defer rows.Close()
@@ -158,16 +165,16 @@ func (r *repository) ListDiscoverableSessions(ctx context.Context, limit int) ([
 			&s.LastActivity,
 		)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		sessions = append(sessions, &s)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return sessions, nil
+	return sessions, total, nil
 }
 
 // sets the discoverable flag for a session
@@ -562,6 +569,7 @@ func (r *repository) GetMessages(ctx context.Context, sessionID string, limit in
 			&m.Role,
 			&m.MessageType,
 			&m.Content,
+			&m.IsActionable,
 			&m.DisplayName,
 			&m.AvatarURL,
 			&m.CreatedAt,
@@ -584,6 +592,7 @@ func (r *repository) CreateMessage(
 	sessionID string,
 	userID *string,
 	role, messageType, content string,
+	isActionable bool,
 	displayName, avatarURL *string,
 ) (*Message, error) {
 	var message Message
@@ -596,6 +605,7 @@ func (r *repository) CreateMessage(
 		role,
 		messageType,
 		content,
+		isActionable,
 		displayName,
 		avatarURL,
 	).Scan(
@@ -605,6 +615,7 @@ func (r *repository) CreateMessage(
 		&message.Role,
 		&message.MessageType,
 		&message.Content,
+		&message.IsActionable,
 		&message.DisplayName,
 		&message.AvatarURL,
 		&message.CreatedAt,
@@ -620,7 +631,9 @@ func (r *repository) CreateMessage(
 // adds a message to the session and returns it
 func (r *repository) AddMessage(
 	ctx context.Context,
-	sessionID, userID, role, messageType, content, displayName, avatarURL string,
+	sessionID, userID, role, messageType, content string,
+	isActionable bool,
+	displayName, avatarURL string,
 ) (*Message, error) {
 	// convert empty strings to nil pointers
 	var userIDPtr *string
@@ -647,6 +660,7 @@ func (r *repository) AddMessage(
 		role,
 		messageType,
 		content,
+		isActionable,
 		displayNamePtr,
 		avatarURLPtr,
 	).Scan(
@@ -656,6 +670,7 @@ func (r *repository) AddMessage(
 		&message.Role,
 		&message.MessageType,
 		&message.Content,
+		&message.IsActionable,
 		&message.DisplayName,
 		&message.AvatarURL,
 		&message.CreatedAt,

@@ -41,7 +41,13 @@ const (
 		FROM sessions
 		WHERE is_discoverable = true AND is_active = true
 		ORDER BY last_activity DESC
-		LIMIT $1
+		LIMIT $1 OFFSET $2
+	`
+
+	queryCountDiscoverableSessions = `
+		SELECT COUNT(*)
+		FROM sessions
+		WHERE is_discoverable = true AND is_active = true
 	`
 
 	queryUpdateSessionCode = `
@@ -169,7 +175,7 @@ const (
 
 	// message queries
 	queryGetMessages = `
-		SELECT id, session_id, user_id, role, message_type, content, display_name, avatar_url, created_at
+		SELECT id, session_id, user_id, role, message_type, content, is_actionable, display_name, avatar_url, created_at
 		FROM session_messages
 		WHERE session_id = $1
 		ORDER BY created_at DESC
@@ -177,9 +183,9 @@ const (
 	`
 
 	queryCreateMessage = `
-		INSERT INTO session_messages (session_id, user_id, role, message_type, content, display_name, avatar_url)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-		RETURNING id, session_id, user_id, role, message_type, content, display_name, avatar_url, created_at
+		INSERT INTO session_messages (session_id, user_id, role, message_type, content, is_actionable, display_name, avatar_url)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		RETURNING id, session_id, user_id, role, message_type, content, is_actionable, display_name, avatar_url, created_at
 	`
 
 	queryUpdateLastActivity = `

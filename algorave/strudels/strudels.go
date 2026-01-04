@@ -68,13 +68,20 @@ func (r *Repository) Create(
 	return &strudel, nil
 }
 
-func (r *Repository) List(ctx context.Context, userID string) ([]Strudel, error) {
-	rows, err := r.db.Query(ctx, queryList, userID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
+func (r *Repository) List(ctx context.Context, userID string, limit, offset int) ([]Strudel, int, error) {
+	// get total count first
 
+	var total int
+	if err := r.db.QueryRow(ctx, queryCountByUser, userID).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
+	rows, err := r.db.Query(ctx, queryList, userID, limit, offset)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	defer rows.Close()
 	var strudels []Strudel
 
 	for rows.Next() {
@@ -94,22 +101,28 @@ func (r *Repository) List(ctx context.Context, userID string) ([]Strudel, error)
 			&s.UpdatedAt,
 		)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		strudels = append(strudels, s)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return strudels, nil
+	return strudels, total, nil
 }
 
-func (r *Repository) ListPublic(ctx context.Context, limit int) ([]Strudel, error) {
-	rows, err := r.db.Query(ctx, queryListPublic, limit)
+func (r *Repository) ListPublic(ctx context.Context, limit, offset int) ([]Strudel, int, error) {
+	// Get total count first
+	var total int
+	if err := r.db.QueryRow(ctx, queryCountPublic).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
+	rows, err := r.db.Query(ctx, queryListPublic, limit, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	defer rows.Close()
@@ -132,17 +145,17 @@ func (r *Repository) ListPublic(ctx context.Context, limit int) ([]Strudel, erro
 			&s.UpdatedAt,
 		)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 
 		strudels = append(strudels, s)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return strudels, nil
+	return strudels, total, nil
 }
 
 func (r *Repository) GetPublic(ctx context.Context, strudelID string) (*Strudel, error) {

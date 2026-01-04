@@ -184,8 +184,11 @@ type SessionStatePayload struct {
 
 // represents a message in the conversation history
 type SessionStateMessage struct {
-	Role    string `json:"role"` // user, assistant
-	Content string `json:"content"`
+	ID           string `json:"id"`
+	Role         string `json:"role"` // user, assistant
+	Content      string `json:"content"`
+	IsActionable bool   `json:"is_actionable"`
+	Timestamp    int64  `json:"timestamp"` // Unix milliseconds
 }
 
 // represents a chat message in the chat history

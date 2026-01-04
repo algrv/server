@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/algrv/server/algorave/sessions"
+	"github.com/algrv/server/api/rest/pagination"
 	"github.com/algrv/server/internal/auth"
 	"github.com/algrv/server/internal/errors"
 	"github.com/algrv/server/internal/logger"
@@ -805,27 +806,20 @@ func RevokeInviteTokenHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 
 // ListLiveSessionsHandler godoc
 // @Summary List live sessions
-// @Description Get all discoverable active sessions (public endpoint, no auth required)
+// @Description Get all discoverable active sessions with pagination (public endpoint, no auth required)
 // @Tags sessions
 // @Produce json
-// @Param limit query int false "Max sessions to return (max 100)" default(50)
+// @Param limit query int false "Items per page (max 100)" default(20)
+// @Param offset query int false "Number of items to skip" default(0)
 // @Success 200 {object} LiveSessionsListResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /api/v1/sessions/live [get]
 func ListLiveSessionsHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		limit := 50
+		limit, offset := parsePaginationParams(c)
+		params := pagination.DefaultParams(limit, offset, 20, 100)
 
-		if limitStr := c.Query("limit"); limitStr != "" {
-			var parsedLimit int
-			if _, err := fmt.Sscanf(limitStr, "%d", &parsedLimit); err == nil {
-				if parsedLimit > 0 && parsedLimit <= 100 {
-					limit = parsedLimit
-				}
-			}
-		}
-
-		liveSessions, err := sessionRepo.ListDiscoverableSessions(c.Request.Context(), limit)
+		liveSessions, total, err := sessionRepo.ListDiscoverableSessions(c.Request.Context(), params.Limit, params.Offset)
 		if err != nil {
 			errors.InternalError(c, "failed to retrieve live sessions", err)
 			return
@@ -850,7 +844,10 @@ func ListLiveSessionsHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 			})
 		}
 
-		c.JSON(http.StatusOK, LiveSessionsListResponse{Sessions: responses})
+		c.JSON(http.StatusOK, LiveSessionsListResponse{
+			Sessions:   responses,
+			Pagination: pagination.NewMeta(params, total),
+		})
 	}
 }
 
@@ -919,4 +916,18 @@ func SetDiscoverableHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 			LastActivity:   session.LastActivity,
 		})
 	}
+}
+
+func parsePaginationParams(c *gin.Context) (limit, offset int) {
+	if limitStr := c.Query("limit"); limitStr != "" {
+		if _, err := fmt.Sscanf(limitStr, "%d", &limit); err != nil {
+			limit = 0
+		}
+	}
+	if offsetStr := c.Query("offset"); offsetStr != "" {
+		if _, err := fmt.Sscanf(offsetStr, "%d", &offset); err != nil {
+			offset = 0
+		}
+	}
+	return limit, offset
 }

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/algrv/server/algorave/strudels"
+	"github.com/algrv/server/api/rest/pagination"
 	"github.com/algrv/server/internal/auth"
 	"github.com/algrv/server/internal/errors"
 	"github.com/gin-gonic/gin"
@@ -49,9 +50,11 @@ func CreateStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 
 // ListStrudelsHandler godoc
 // @Summary List user's strudels
-// @Description Get all strudels owned by the authenticated user
+// @Description Get strudels owned by the authenticated user with pagination
 // @Tags strudels
 // @Produce json
+// @Param limit query int false "Items per page (max 100)" default(20)
+// @Param offset query int false "Number of items to skip" default(0)
 // @Success 200 {object} StrudelsListResponse
 // @Failure 401 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
@@ -65,13 +68,19 @@ func ListStrudelsHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 			return
 		}
 
-		strudelsList, err := strudelRepo.List(c.Request.Context(), userID)
+		limit, offset := parsePaginationParams(c)
+		params := pagination.DefaultParams(limit, offset, 20, 100)
+
+		strudelsList, total, err := strudelRepo.List(c.Request.Context(), userID, params.Limit, params.Offset)
 		if err != nil {
 			errors.InternalError(c, "failed to list strudels", err)
 			return
 		}
 
-		c.JSON(http.StatusOK, StrudelsListResponse{Strudels: strudelsList})
+		c.JSON(http.StatusOK, StrudelsListResponse{
+			Strudels:   strudelsList,
+			Pagination: pagination.NewMeta(params, total),
+		})
 	}
 }
 
@@ -191,30 +200,29 @@ func DeleteStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 
 // ListPublicStrudelsHandler godoc
 // @Summary List public strudels
-// @Description Get publicly shared strudels from all users
+// @Description Get publicly shared strudels from all users with pagination
 // @Tags strudels
 // @Produce json
-// @Param limit query int false "Limit results (max 100)" default(50)
+// @Param limit query int false "Items per page (max 100)" default(20)
+// @Param offset query int false "Number of items to skip" default(0)
 // @Success 200 {object} StrudelsListResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /api/v1/public/strudels [get]
 func ListPublicStrudelsHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		limit := 50
+		limit, offset := parsePaginationParams(c)
+		params := pagination.DefaultParams(limit, offset, 20, 100)
 
-		if l, ok := c.GetQuery("limit"); ok {
-			if parsedLimit, err := parseInt(l); err == nil && parsedLimit > 0 && parsedLimit <= 100 {
-				limit = parsedLimit
-			}
-		}
-
-		strudelsList, err := strudelRepo.ListPublic(c.Request.Context(), limit)
+		strudelsList, total, err := strudelRepo.ListPublic(c.Request.Context(), params.Limit, params.Offset)
 		if err != nil {
 			errors.InternalError(c, "failed to list public strudels", err)
 			return
 		}
 
-		c.JSON(http.StatusOK, StrudelsListResponse{Strudels: strudelsList})
+		c.JSON(http.StatusOK, StrudelsListResponse{
+			Strudels:   strudelsList,
+			Pagination: pagination.NewMeta(params, total),
+		})
 	}
 }
 
@@ -252,4 +260,18 @@ func parseInt(s string) (int, error) {
 	_, err := fmt.Sscanf(s, "%d", &i)
 
 	return i, err
+}
+
+func parsePaginationParams(c *gin.Context) (limit, offset int) {
+	if l, ok := c.GetQuery("limit"); ok {
+		if parsedLimit, err := parseInt(l); err == nil {
+			limit = parsedLimit
+		}
+	}
+	if o, ok := c.GetQuery("offset"); ok {
+		if parsedOffset, err := parseInt(o); err == nil {
+			offset = parsedOffset
+		}
+	}
+	return limit, offset
 }

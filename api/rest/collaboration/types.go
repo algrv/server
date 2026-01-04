@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/algrv/server/algorave/sessions"
+	"github.com/algrv/server/api/rest/pagination"
 )
 
 // allows ending WebSocket sessions
@@ -134,7 +135,8 @@ type LiveSessionResponse struct {
 	LastActivity     time.Time `json:"last_activity"`
 }
 
-// LiveSessionsListResponse wraps a list of live sessions
+// LiveSessionsListResponse wraps a list of live sessions with pagination
 type LiveSessionsListResponse struct {
-	Sessions []LiveSessionResponse `json:"sessions"`
+	Sessions   []LiveSessionResponse `json:"sessions"`
+	Pagination pagination.Meta       `json:"pagination"`
 }

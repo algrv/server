@@ -14,6 +14,13 @@ const (
 		FROM user_strudels
 		WHERE user_id = $1
 		ORDER BY created_at DESC
+		LIMIT $2 OFFSET $3
+	`
+
+	queryCountByUser = `
+		SELECT COUNT(*)
+		FROM user_strudels
+		WHERE user_id = $1
 	`
 
 	queryListPublic = `
@@ -21,7 +28,13 @@ const (
 		FROM user_strudels
 		WHERE is_public = true
 		ORDER BY created_at DESC
-		LIMIT $1
+		LIMIT $1 OFFSET $2
+	`
+
+	queryCountPublic = `
+		SELECT COUNT(*)
+		FROM user_strudels
+		WHERE is_public = true
 	`
 
 	queryGetPublic = `
