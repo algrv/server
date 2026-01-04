@@ -15,3 +15,8 @@ type StrudelsListResponse struct {
 type MessageResponse struct {
 	Message string `json:"message"`
 }
+
+// TagsListResponse wraps a list of unique tags
+type TagsListResponse struct {
+	Tags []string `json:"tags"`
+}

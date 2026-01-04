@@ -12,6 +12,7 @@ func RegisterRoutes(router *gin.RouterGroup, strudelRepo *strudels.Repository) {
 	{
 		strudelsGroup.GET("", ListStrudelsHandler(strudelRepo))
 		strudelsGroup.POST("", CreateStrudelHandler(strudelRepo))
+		strudelsGroup.GET("/tags", ListUserTagsHandler(strudelRepo))
 		strudelsGroup.GET("/:id", GetStrudelHandler(strudelRepo))
 		strudelsGroup.PUT("/:id", UpdateStrudelHandler(strudelRepo))
 		strudelsGroup.DELETE("/:id", DeleteStrudelHandler(strudelRepo))
@@ -19,5 +20,6 @@ func RegisterRoutes(router *gin.RouterGroup, strudelRepo *strudels.Repository) {
 
 	// public strudels (no auth required)
 	router.GET("/public/strudels", ListPublicStrudelsHandler(strudelRepo))
+	router.GET("/public/strudels/tags", ListPublicTagsHandler(strudelRepo))
 	router.GET("/public/strudels/:id", GetPublicStrudelHandler(strudelRepo))
 }

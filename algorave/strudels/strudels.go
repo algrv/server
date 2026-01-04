@@ -3,6 +3,7 @@ package strudels
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -68,15 +69,42 @@ func (r *Repository) Create(
 	return &strudel, nil
 }
 
-func (r *Repository) List(ctx context.Context, userID string, limit, offset int) ([]Strudel, int, error) {
+func (r *Repository) List(ctx context.Context, userID string, limit, offset int, filter ListFilter) ([]Strudel, int, error) {
+	// build dynamic query with filters
+	baseWhere := "WHERE user_id = $1"
+	args := []interface{}{userID}
+	argIndex := 2
+
+	if filter.Search != "" {
+		baseWhere += fmt.Sprintf(" AND (title ILIKE $%d OR description ILIKE $%d)", argIndex, argIndex)
+		args = append(args, "%"+filter.Search+"%")
+		argIndex++
+	}
+
+	if len(filter.Tags) > 0 {
+		baseWhere += fmt.Sprintf(" AND tags && $%d", argIndex)
+		args = append(args, filter.Tags)
+		argIndex++
+	}
+
 	// get total count first
 	var total int
-
-	if err := r.db.QueryRow(ctx, queryCountByUser, userID).Scan(&total); err != nil {
+	countQuery := "SELECT COUNT(*) FROM user_strudels " + baseWhere
+	if err := r.db.QueryRow(ctx, countQuery, args...).Scan(&total); err != nil {
 		return nil, 0, err
 	}
 
-	rows, err := r.db.Query(ctx, queryList, userID, limit, offset)
+	// build list query
+	listQuery := fmt.Sprintf(`
+		SELECT id, user_id, title, code, is_public, use_in_training, description, tags, categories, conversation_history, created_at, updated_at
+		FROM user_strudels
+		%s
+		ORDER BY created_at DESC
+		LIMIT $%d OFFSET $%d
+	`, baseWhere, argIndex, argIndex+1)
+	args = append(args, limit, offset)
+
+	rows, err := r.db.Query(ctx, listQuery, args...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -113,15 +141,43 @@ func (r *Repository) List(ctx context.Context, userID string, limit, offset int)
 	return strudels, total, nil
 }
 
-func (r *Repository) ListPublic(ctx context.Context, limit, offset int) ([]Strudel, int, error) {
+func (r *Repository) ListPublic(ctx context.Context, limit, offset int, filter ListFilter) ([]Strudel, int, error) {
+	// build dynamic query with filters
+	baseWhere := "WHERE is_public = true"
+	args := []interface{}{}
+	argIndex := 1
+
+	if filter.Search != "" {
+		baseWhere += fmt.Sprintf(" AND (title ILIKE $%d OR description ILIKE $%d)", argIndex, argIndex)
+		args = append(args, "%"+filter.Search+"%")
+		argIndex++
+	}
+
+	if len(filter.Tags) > 0 {
+		baseWhere += fmt.Sprintf(" AND tags && $%d", argIndex)
+		args = append(args, filter.Tags)
+		argIndex++
+	}
+
 	// get total count first
 	var total int
+	countQuery := "SELECT COUNT(*) FROM user_strudels " + baseWhere
 
-	if err := r.db.QueryRow(ctx, queryCountPublic).Scan(&total); err != nil {
+	if err := r.db.QueryRow(ctx, countQuery, args...).Scan(&total); err != nil {
 		return nil, 0, err
 	}
 
-	rows, err := r.db.Query(ctx, queryListPublic, limit, offset)
+	// build list query
+	listQuery := fmt.Sprintf(`
+		SELECT id, user_id, title, code, is_public, use_in_training, description, tags, categories, conversation_history, created_at, updated_at
+		FROM user_strudels
+		%s
+		ORDER BY created_at DESC
+		LIMIT $%d OFFSET $%d
+	`, baseWhere, argIndex, argIndex+1)
+	args = append(args, limit, offset)
+
+	rows, err := r.db.Query(ctx, listQuery, args...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -357,4 +413,52 @@ func (r *Repository) AdminSetUseInTraining(ctx context.Context, strudelID string
 	}
 
 	return &strudel, nil
+}
+
+// ListPublicTags returns all unique tags from public strudels
+func (r *Repository) ListPublicTags(ctx context.Context) ([]string, error) {
+	rows, err := r.db.Query(ctx, queryListPublicTags)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tags []string
+	for rows.Next() {
+		var tag string
+		if err := rows.Scan(&tag); err != nil {
+			return nil, err
+		}
+		tags = append(tags, tag)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return tags, nil
+}
+
+// ListUserTags returns all unique tags from a user's strudels
+func (r *Repository) ListUserTags(ctx context.Context, userID string) ([]string, error) {
+	rows, err := r.db.Query(ctx, queryListUserTags, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tags []string
+	for rows.Next() {
+		var tag string
+		if err := rows.Scan(&tag); err != nil {
+			return nil, err
+		}
+		tags = append(tags, tag)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return tags, nil
 }

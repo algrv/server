@@ -3,6 +3,7 @@ package strudels
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/algrv/server/algorave/strudels"
 	"github.com/algrv/server/api/rest/pagination"
@@ -50,11 +51,13 @@ func CreateStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 
 // ListStrudelsHandler godoc
 // @Summary List user's strudels
-// @Description Get strudels owned by the authenticated user with pagination
+// @Description Get strudels owned by the authenticated user with pagination, search, and filtering
 // @Tags strudels
 // @Produce json
 // @Param limit query int false "Items per page (max 100)" default(20)
 // @Param offset query int false "Number of items to skip" default(0)
+// @Param search query string false "Search in title and description"
+// @Param tags query []string false "Filter by tags (comma-separated)"
 // @Success 200 {object} StrudelsListResponse
 // @Failure 401 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
@@ -70,8 +73,9 @@ func ListStrudelsHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 
 		limit, offset := parsePaginationParams(c)
 		params := pagination.DefaultParams(limit, offset, 20, 100)
+		filter := parseFilterParams(c)
 
-		strudelsList, total, err := strudelRepo.List(c.Request.Context(), userID, params.Limit, params.Offset)
+		strudelsList, total, err := strudelRepo.List(c.Request.Context(), userID, params.Limit, params.Offset, filter)
 		if err != nil {
 			errors.InternalError(c, "failed to list strudels", err)
 			return
@@ -200,11 +204,13 @@ func DeleteStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 
 // ListPublicStrudelsHandler godoc
 // @Summary List public strudels
-// @Description Get publicly shared strudels from all users with pagination
+// @Description Get publicly shared strudels from all users with pagination, search, and filtering
 // @Tags strudels
 // @Produce json
 // @Param limit query int false "Items per page (max 100)" default(20)
 // @Param offset query int false "Number of items to skip" default(0)
+// @Param search query string false "Search in title and description"
+// @Param tags query []string false "Filter by tags (comma-separated)"
 // @Success 200 {object} StrudelsListResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /api/v1/public/strudels [get]
@@ -212,8 +218,9 @@ func ListPublicStrudelsHandler(strudelRepo *strudels.Repository) gin.HandlerFunc
 	return func(c *gin.Context) {
 		limit, offset := parsePaginationParams(c)
 		params := pagination.DefaultParams(limit, offset, 20, 100)
+		filter := parseFilterParams(c)
 
-		strudelsList, total, err := strudelRepo.ListPublic(c.Request.Context(), params.Limit, params.Offset)
+		strudelsList, total, err := strudelRepo.ListPublic(c.Request.Context(), params.Limit, params.Offset, filter)
 		if err != nil {
 			errors.InternalError(c, "failed to list public strudels", err)
 			return
@@ -255,6 +262,62 @@ func GetPublicStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 	}
 }
 
+// ListPublicTagsHandler godoc
+// @Summary List public tags
+// @Description Get all unique tags from public strudels
+// @Tags strudels
+// @Produce json
+// @Success 200 {object} TagsListResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /api/v1/public/strudels/tags [get]
+func ListPublicTagsHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		tags, err := strudelRepo.ListPublicTags(c.Request.Context())
+		if err != nil {
+			errors.InternalError(c, "failed to list tags", err)
+			return
+		}
+
+		if tags == nil {
+			tags = []string{}
+		}
+
+		c.JSON(http.StatusOK, TagsListResponse{Tags: tags})
+	}
+}
+
+// ListUserTagsHandler godoc
+// @Summary List user's tags
+// @Description Get all unique tags from the authenticated user's strudels
+// @Tags strudels
+// @Produce json
+// @Success 200 {object} TagsListResponse
+// @Failure 401 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /api/v1/strudels/tags [get]
+// @Security BearerAuth
+func ListUserTagsHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID, exists := auth.GetUserID(c)
+		if !exists {
+			errors.Unauthorized(c, "")
+			return
+		}
+
+		tags, err := strudelRepo.ListUserTags(c.Request.Context(), userID)
+		if err != nil {
+			errors.InternalError(c, "failed to list tags", err)
+			return
+		}
+
+		if tags == nil {
+			tags = []string{}
+		}
+
+		c.JSON(http.StatusOK, TagsListResponse{Tags: tags})
+	}
+}
+
 func parseInt(s string) (int, error) {
 	var i int
 	_, err := fmt.Sscanf(s, "%d", &i)
@@ -274,4 +337,23 @@ func parsePaginationParams(c *gin.Context) (limit, offset int) {
 		}
 	}
 	return limit, offset
+}
+
+func parseFilterParams(c *gin.Context) strudels.ListFilter {
+	filter := strudels.ListFilter{}
+
+	if search, ok := c.GetQuery("search"); ok {
+		filter.Search = search
+	}
+
+	if tagsStr, ok := c.GetQuery("tags"); ok && tagsStr != "" {
+		filter.Tags = strings.Split(tagsStr, ",")
+
+		// trim whitespace from each tag
+		for i, tag := range filter.Tags {
+			filter.Tags[i] = strings.TrimSpace(tag)
+		}
+	}
+
+	return filter
 }

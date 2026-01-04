@@ -76,3 +76,8 @@ type UpdateStrudelRequest struct {
 	Categories          []string            `json:"categories,omitempty" binding:"max=10,dive,max=50"`
 	ConversationHistory ConversationHistory `json:"conversation_history,omitempty" binding:"max=100"`
 }
+
+type ListFilter struct {
+	Search string   // search in title and description
+	Tags   []string // filter by tags (any match)
+}

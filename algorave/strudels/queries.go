@@ -98,4 +98,18 @@ const (
 		FROM user_strudels
 		WHERE id = $1
 	`
+
+	queryListPublicTags = `
+		SELECT DISTINCT unnest(tags) as tag
+		FROM user_strudels
+		WHERE is_public = true AND array_length(tags, 1) > 0
+		ORDER BY tag
+	`
+
+	queryListUserTags = `
+		SELECT DISTINCT unnest(tags) as tag
+		FROM user_strudels
+		WHERE user_id = $1 AND array_length(tags, 1) > 0
+		ORDER BY tag
+	`
 )
