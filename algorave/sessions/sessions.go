@@ -562,6 +562,8 @@ func (r *repository) GetMessages(ctx context.Context, sessionID string, limit in
 			&m.Role,
 			&m.MessageType,
 			&m.Content,
+			&m.DisplayName,
+			&m.AvatarURL,
 			&m.CreatedAt,
 		)
 		if err != nil {
@@ -582,6 +584,7 @@ func (r *repository) CreateMessage(
 	sessionID string,
 	userID *string,
 	role, messageType, content string,
+	displayName, avatarURL *string,
 ) (*Message, error) {
 	var message Message
 
@@ -593,6 +596,8 @@ func (r *repository) CreateMessage(
 		role,
 		messageType,
 		content,
+		displayName,
+		avatarURL,
 	).Scan(
 		&message.ID,
 		&message.SessionID,
@@ -600,6 +605,8 @@ func (r *repository) CreateMessage(
 		&message.Role,
 		&message.MessageType,
 		&message.Content,
+		&message.DisplayName,
+		&message.AvatarURL,
 		&message.CreatedAt,
 	)
 
@@ -613,13 +620,22 @@ func (r *repository) CreateMessage(
 // adds a message to the session and returns it
 func (r *repository) AddMessage(
 	ctx context.Context,
-	sessionID, userID, role, messageType, content string,
+	sessionID, userID, role, messageType, content, displayName, avatarURL string,
 ) (*Message, error) {
-	// convert empty userID string to nil pointer
+	// convert empty strings to nil pointers
 	var userIDPtr *string
-
 	if userID != "" {
 		userIDPtr = &userID
+	}
+
+	var displayNamePtr *string
+	if displayName != "" {
+		displayNamePtr = &displayName
+	}
+
+	var avatarURLPtr *string
+	if avatarURL != "" {
+		avatarURLPtr = &avatarURL
 	}
 
 	var message Message
@@ -631,6 +647,8 @@ func (r *repository) AddMessage(
 		role,
 		messageType,
 		content,
+		displayNamePtr,
+		avatarURLPtr,
 	).Scan(
 		&message.ID,
 		&message.SessionID,
@@ -638,6 +656,8 @@ func (r *repository) AddMessage(
 		&message.Role,
 		&message.MessageType,
 		&message.Content,
+		&message.DisplayName,
+		&message.AvatarURL,
 		&message.CreatedAt,
 	)
 

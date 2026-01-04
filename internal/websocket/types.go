@@ -174,9 +174,25 @@ type ServerShutdownPayload struct {
 
 // contains session info sent to connecting client
 type SessionStatePayload struct {
-	Code         string                    `json:"code"`
-	YourRole     string                    `json:"your_role"`
-	Participants []SessionStateParticipant `json:"participants"`
+	Code                string                    `json:"code"`
+	YourRole            string                    `json:"your_role"`
+	Participants        []SessionStateParticipant `json:"participants"`
+	ConversationHistory []SessionStateMessage     `json:"conversation_history"`
+	ChatHistory         []SessionStateChatMessage `json:"chat_history"`
+}
+
+// represents a message in the conversation history
+type SessionStateMessage struct {
+	Role    string `json:"role"`    // user, assistant
+	Content string `json:"content"`
+}
+
+// represents a chat message in the chat history
+type SessionStateChatMessage struct {
+	DisplayName string `json:"display_name"`
+	AvatarURL   string `json:"avatar_url,omitempty"`
+	Content     string `json:"content"`
+	Timestamp   int64  `json:"timestamp"` // Unix milliseconds
 }
 
 // represents a participant in session_state
@@ -229,6 +245,12 @@ type Client struct {
 
 	// initial code to send on connect (for joining existing sessions)
 	InitialCode string
+
+	// initial conversation history to send on connect
+	InitialConversationHistory []SessionStateMessage
+
+	// initial chat history to send on connect
+	InitialChatHistory []SessionStateChatMessage
 
 	// webSocket connection
 	conn *websocket.Conn

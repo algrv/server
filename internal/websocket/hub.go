@@ -89,9 +89,11 @@ func (h *Hub) registerClient(client *Client) {
 
 	// send session_state to connecting client
 	sessionStateMsg, err := NewMessage(TypeSessionState, client.SessionID, client.UserID, SessionStatePayload{
-		Code:         client.InitialCode,
-		YourRole:     client.Role,
-		Participants: participants,
+		Code:                client.InitialCode,
+		YourRole:            client.Role,
+		Participants:        participants,
+		ConversationHistory: client.InitialConversationHistory,
+		ChatHistory:         client.InitialChatHistory,
 	})
 	if err == nil {
 		if sendErr := client.Send(sessionStateMsg); sendErr != nil {

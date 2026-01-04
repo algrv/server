@@ -233,7 +233,46 @@ func WebSocketHandler(hub *ws.Hub, sessionRepo sessions.Repository, userRepo *us
 
 		isAuthenticated := userID != ""
 		initialCode := session.Code
-		client := ws.NewClient(clientID, params.SessionID, userID, displayName, role, tier, ipAddress, initialCode, isAuthenticated, conn, hub)
+
+		// fetch conversation history and chat history for the session
+		var conversationHistory []ws.SessionStateMessage
+		var chatHistory []ws.SessionStateChatMessage
+		messages, err := sessionRepo.GetMessages(ctx, params.SessionID, 50)
+		if err != nil {
+			logger.Warn("failed to fetch conversation history",
+				"session_id", params.SessionID,
+				"error", err,
+			)
+		} else {
+			for _, msg := range messages {
+				switch msg.MessageType {
+				case sessions.MessageTypeUserPrompt, sessions.MessageTypeAIResponse:
+					// llm conversation messages
+					conversationHistory = append(conversationHistory, ws.SessionStateMessage{
+						Role:    msg.Role,
+						Content: msg.Content,
+					})
+				case sessions.MessageTypeChat:
+					// chat messages
+					displayName := ""
+					if msg.DisplayName != nil {
+						displayName = *msg.DisplayName
+					}
+					avatarURL := ""
+					if msg.AvatarURL != nil {
+						avatarURL = *msg.AvatarURL
+					}
+					chatHistory = append(chatHistory, ws.SessionStateChatMessage{
+						DisplayName: displayName,
+						AvatarURL:   avatarURL,
+						Content:     msg.Content,
+						Timestamp:   msg.CreatedAt.UnixMilli(),
+					})
+				}
+			}
+		}
+
+		client := ws.NewClient(clientID, params.SessionID, userID, displayName, role, tier, ipAddress, initialCode, conversationHistory, chatHistory, isAuthenticated, conn, hub)
 
 		// add participant to session (authenticated or anonymous)
 		// note: anonymous hosts are not added to participants table as they're already tracked via the session itself

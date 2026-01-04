@@ -219,7 +219,7 @@ func GenerateHandler(agentClient *agent.Agent, sessionRepo sessions.Repository, 
 
 		// save messages to session history
 		if payload.UserQuery != "" {
-			_, err := sessionRepo.AddMessage(ctx, client.SessionID, client.UserID, "user", sessions.MessageTypeUserPrompt, payload.UserQuery)
+			_, err := sessionRepo.AddMessage(ctx, client.SessionID, client.UserID, "user", sessions.MessageTypeUserPrompt, payload.UserQuery, client.DisplayName, "")
 			if err != nil {
 				logger.ErrorErr(err, "failed to save user message",
 					"client_id", client.ID,
@@ -229,7 +229,7 @@ func GenerateHandler(agentClient *agent.Agent, sessionRepo sessions.Repository, 
 		}
 
 		if response.Code != "" {
-			_, err := sessionRepo.AddMessage(ctx, client.SessionID, "", "assistant", sessions.MessageTypeAIResponse, response.Code)
+			_, err := sessionRepo.AddMessage(ctx, client.SessionID, "", "assistant", sessions.MessageTypeAIResponse, response.Code, "Assistant", "")
 			if err != nil {
 				logger.ErrorErr(err, "failed to save assistant message",
 					"client_id", client.ID,
@@ -404,7 +404,7 @@ func ChatHandler(sessionRepo sessions.Repository) MessageHandler {
 		ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 		defer cancel()
 
-		_, err := sessionRepo.AddMessage(ctx, client.SessionID, client.UserID, "user", sessions.MessageTypeChat, trimmedMessage)
+		_, err := sessionRepo.AddMessage(ctx, client.SessionID, client.UserID, "user", sessions.MessageTypeChat, trimmedMessage, client.DisplayName, "")
 		if err != nil {
 			logger.ErrorErr(err, "failed to save chat message",
 				"client_id", client.ID,
