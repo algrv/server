@@ -13,7 +13,7 @@
         },
         "version": "1.0"
     },
-    "host": "algorave.ai",
+    "host": "algorave.dev",
     "paths": {
         "/api/v1/admin/strudels/{id}": {
             "get": {

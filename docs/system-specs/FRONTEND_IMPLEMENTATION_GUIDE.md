@@ -41,7 +41,7 @@ Use REST for **authenticated CRUD operations only**.
 Use WebSocket for **real-time session state and collaboration**.
 
 ```
-wss://algorave.ai/ws?session_id={uuid}&token={jwt}&display_name={name}
+wss://algorave.dev/ws?session_id={uuid}&token={jwt}&display_name={name}
 ```
 
 | Parameter             | Required | Description                                    |
@@ -104,7 +104,7 @@ wss://algorave.ai/ws?session_id={uuid}&token={jwt}&display_name={name}
 ### Joining via Invite Link
 
 ```
-URL format: https://algorave.ai/join?invite={invite_token}
+URL format: https://algorave.dev/join?invite={invite_token}
 
 1. Parse invite_token from URL
 

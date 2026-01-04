@@ -478,7 +478,7 @@ definitions:
       updated_at:
         type: string
     type: object
-host: algorave.ai
+host: algorave.dev
 info:
   contact:
     name: API Support
