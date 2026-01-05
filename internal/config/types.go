@@ -4,6 +4,7 @@ type Config struct {
 	OpenAIKey          string
 	AnthropicKey       string
 	SupabaseConnString string
+	RedisURL           string
 	Environment        string
 }
 

@@ -53,9 +53,6 @@ const (
 	// is sent when host ends the session
 	TypeSessionEnded = "session_ended"
 
-	// is sent by client to persist code to database
-	TypeAutoSave = "auto_save"
-
 	// is sent by client to switch strudel context without reconnecting
 	TypeSwitchStrudel = "switch_strudel"
 )
@@ -229,11 +226,6 @@ type SessionEndedPayload struct {
 	Reason string `json:"reason,omitempty"`
 }
 
-// contains code to persist to database
-type AutoSavePayload struct {
-	Code string `json:"code"`
-}
-
 // contains strudel context switch information
 type SwitchStrudelPayload struct {
 	StrudelID           *string               `json:"strudel_id"`                     // null for scratch/anonymous
@@ -269,9 +261,6 @@ type Client struct {
 
 	// initial code to send on connect (for joining existing sessions)
 	InitialCode string
-
-	// last known code (updated on each code_update, used for save on disconnect)
-	LastCode string
 
 	// current strudel ID (nil for scratch/anonymous context)
 	CurrentStrudelID *string

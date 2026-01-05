@@ -104,27 +104,6 @@ Update the shared code editor. Requires `host` or `co-author` role.
 
 ---
 
-### `auto_save`
-
-Persist code to database. Requires `host` or `co-author` role. Use this periodically (e.g., every 30 seconds) or before important actions.
-
-```json
-{
-  "type": "auto_save",
-  "payload": {
-    "code": "sound(\"bd sd\").fast(2)"
-  }
-}
-```
-
-| Field  | Type   | Required | Description                     |
-| ------ | ------ | -------- | ------------------------------- |
-| `code` | string | Yes      | Full editor content (max 100KB) |
-
-**Note:** Code is also automatically saved when a client with write permissions disconnects.
-
----
-
 ### `switch_strudel`
 
 Switch strudel context without reconnecting. Requires `host` or `co-author` role.
@@ -752,10 +731,18 @@ Response to client `ping`.
 
 ## Auto-Save Behavior
 
-1. **Real-time sync:** `code_update` broadcasts changes to other clients instantly but does NOT write to database.
+The server automatically saves code to the session - **no explicit save message needed from clients**.
 
-2. **Periodic save:** Frontend should send `auto_save` periodically (e.g., every 30 seconds of inactivity).
+**Server auto-saves on:**
 
-3. **Disconnect save:** Server automatically saves the last known code when a client with write permissions disconnects.
+| Event | What Happens |
+|-------|--------------|
+| First `code_update` after connect/switch | Saves immediately to ensure session has something |
+| `play` received | Saves before broadcasting (user is about to hear their code) |
+| `switch_strudel` received | Saves current code before switching to new context |
+| `agent_response` with code | Saves the generated code |
+| Client disconnect | Saves `LastCode` (best effort fallback) |
 
-4. **Strudel save:** When user explicitly saves a strudel via REST API, code + conversation history are persisted to the strudel.
+**Frontend just sends `code_update`** - server handles persistence automatically.
+
+**Strudel save:** Separate from auto_save. When user explicitly saves a strudel via REST API, code + conversation history are persisted to the strudel table.

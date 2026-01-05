@@ -251,20 +251,6 @@ func (c *Client) CanWrite() bool {
 	return c.Role == "host" || c.Role == "co-author"
 }
 
-// sets the last known code (thread-safe)
-func (c *Client) SetLastCode(code string) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.LastCode = code
-}
-
-// gets the last known code (thread-safe)
-func (c *Client) GetLastCode() string {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	return c.LastCode
-}
-
 // sets the current strudel ID (thread-safe)
 func (c *Client) SetCurrentStrudelID(strudelID *string) {
 	c.mu.Lock()

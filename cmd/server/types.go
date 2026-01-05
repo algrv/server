@@ -5,6 +5,7 @@ import (
 	"github.com/algrv/server/algorave/strudels"
 	"github.com/algrv/server/algorave/users"
 	"github.com/algrv/server/internal/agent"
+	"github.com/algrv/server/internal/buffer"
 	"github.com/algrv/server/internal/config"
 	"github.com/algrv/server/internal/llm"
 	"github.com/algrv/server/internal/retriever"
@@ -25,6 +26,8 @@ type Server struct {
 	services    *Services
 	hub         *ws.Hub
 	router      *gin.Engine
+	buffer      *buffer.SessionBuffer
+	flusher     *buffer.Flusher
 }
 
 // holds all external service clients (LLM, storage, retriever, agent)

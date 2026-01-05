@@ -16,6 +16,7 @@ func LoadEnvironmentVariables() (*Config, error) {
 	openaiKey := os.Getenv("OPENAI_API_KEY")
 	anthropicKey := os.Getenv("ANTHROPIC_API_KEY")
 	supabaseConnStr := os.Getenv("SUPABASE_CONNECTION_STRING")
+	redisURL := os.Getenv("REDIS_URL")
 	jwtSecret := os.Getenv("JWT_SECRET")
 	environment := os.Getenv("ENVIRONMENT")
 
@@ -31,6 +32,10 @@ func LoadEnvironmentVariables() (*Config, error) {
 		return nil, fmt.Errorf("SUPABASE_CONNECTION_STRING environment variable is required")
 	}
 
+	if redisURL == "" {
+		return nil, fmt.Errorf("REDIS_URL environment variable is required")
+	}
+
 	if jwtSecret == "" {
 		return nil, fmt.Errorf("JWT_SECRET environment variable is required")
 	}
@@ -43,6 +48,7 @@ func LoadEnvironmentVariables() (*Config, error) {
 		OpenAIKey:          openaiKey,
 		AnthropicKey:       anthropicKey,
 		SupabaseConnString: supabaseConnStr,
+		RedisURL:           redisURL,
 		Environment:        environment,
 	}, nil
 }

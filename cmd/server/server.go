@@ -8,12 +8,18 @@ import (
 	"github.com/algrv/server/algorave/sessions"
 	"github.com/algrv/server/algorave/strudels"
 	"github.com/algrv/server/algorave/users"
+	"github.com/algrv/server/internal/buffer"
 	"github.com/algrv/server/internal/config"
 	"github.com/algrv/server/internal/logger"
 	ws "github.com/algrv/server/internal/websocket"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+)
+
+const (
+	// how often the flusher writes buffered data to Postgres
+	bufferFlushInterval = 5 * time.Second
 )
 
 // creates and configures a new server instance with all dependencies
@@ -50,46 +56,54 @@ func NewServer(cfg *config.Config) (*Server, error) {
 
 	userRepo := users.NewRepository(db)
 	strudelRepo := strudels.NewRepository(db)
-	sessionRepo := sessions.NewRepository(db)
+	postgresSessionRepo := sessions.NewRepository(db)
+
+	// initialize Redis buffer for WebSocket write operations
+	sessionBuffer, err := buffer.NewSessionBuffer(cfg.RedisURL, bufferFlushInterval)
+	if err != nil {
+		db.Close()
+		return nil, fmt.Errorf("failed to initialize redis buffer: %w", err)
+	}
+
+	// wrap session repo with buffering layer (writes go to Redis, reads go to Postgres)
+	sessionRepo := buffer.NewBufferedRepository(postgresSessionRepo, sessionBuffer)
+
+	// create flusher to periodically persist buffered data to Postgres
+	flusher := buffer.NewFlusher(sessionBuffer, postgresSessionRepo, bufferFlushInterval)
 
 	services, err := InitializeServices(cfg, db)
 	if err != nil {
+		sessionBuffer.Close() //nolint:errcheck,gosec // best-effort cleanup on init failure
 		db.Close()
 		return nil, fmt.Errorf("failed to initialize services: %w", err)
 	}
 
 	hub := ws.NewHub()
 
-	// register websocket message handlers
-	hub.RegisterHandler(ws.TypeCodeUpdate, ws.CodeUpdateHandler())
-	hub.RegisterHandler(ws.TypeAutoSave, ws.AutoSaveHandler(sessionRepo))
+	// register websocket message handlers (handlers use sessionRepo interface, unaware of Redis)
+	hub.RegisterHandler(ws.TypeCodeUpdate, ws.CodeUpdateHandler(sessionRepo))
 	hub.RegisterHandler(ws.TypeAgentRequest, ws.GenerateHandler(services.Agent, sessionRepo, userRepo))
 	hub.RegisterHandler(ws.TypeChatMessage, ws.ChatHandler(sessionRepo))
 	hub.RegisterHandler(ws.TypePlay, ws.PlayHandler())
 	hub.RegisterHandler(ws.TypeStop, ws.StopHandler())
-	hub.RegisterHandler(ws.TypeSwitchStrudel, ws.SwitchStrudelHandler(strudelRepo))
+	hub.RegisterHandler(ws.TypeSwitchStrudel, ws.SwitchStrudelHandler(flusher, strudelRepo))
 
-	// save code on client disconnect
+	// flush buffer on client disconnect
 	hub.OnClientDisconnect(func(client *ws.Client) {
 		if !client.CanWrite() {
-			return
-		}
-
-		lastCode := client.GetLastCode()
-		if lastCode == "" {
 			return
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
-		if err := sessionRepo.UpdateSessionCode(ctx, client.SessionID, lastCode); err != nil {
-			logger.ErrorErr(err, "failed to save code on disconnect",
+		if err := flusher.FlushSession(ctx, client.SessionID); err != nil {
+			logger.ErrorErr(err, "failed to flush buffer on disconnect",
 				"client_id", client.ID,
 				"session_id", client.SessionID,
 			)
 		} else {
-			logger.Debug("code saved on disconnect",
+			logger.Debug("buffer flushed on disconnect",
 				"client_id", client.ID,
 				"session_id", client.SessionID,
 			)
@@ -107,6 +121,8 @@ func NewServer(cfg *config.Config) (*Server, error) {
 		services:    services,
 		hub:         hub,
 		router:      router,
+		buffer:      sessionBuffer,
+		flusher:     flusher,
 	}
 
 	RegisterRoutes(router, server)

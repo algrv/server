@@ -83,6 +83,9 @@ func main() {
 	// start websocket hub
 	go srv.hub.Run()
 
+	// start buffer flusher (Redis → Postgres)
+	srv.flusher.Start()
+
 	// wait for interrupt signal for graceful shutdown
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
@@ -92,6 +95,9 @@ func main() {
 
 	// notify websocket clients and close connections first
 	srv.hub.Shutdown()
+
+	// stop flusher (flushes remaining data before stopping)
+	srv.flusher.Stop()
 
 	// graceful shutdown with 10 second timeout
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -105,6 +111,9 @@ func main() {
 	if srv.services.Validator != nil {
 		srv.services.Validator.Close() //nolint:errcheck,gosec // best-effort cleanup on shutdown
 	}
+
+	// close Redis connection
+	srv.buffer.Close() //nolint:errcheck,gosec // best-effort cleanup on shutdown
 
 	// close database connection
 	srv.db.Close()

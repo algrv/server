@@ -10,14 +10,15 @@ import (
 	"github.com/algrv/server/algorave/strudels"
 	"github.com/algrv/server/algorave/users"
 	"github.com/algrv/server/internal/agent"
+	"github.com/algrv/server/internal/buffer"
 	"github.com/algrv/server/internal/llm"
 	"github.com/algrv/server/internal/logger"
 )
 
 const dbTimeout = 10 * time.Second
 
-// handles code update messages (broadcast only, no DB write)
-func CodeUpdateHandler() MessageHandler {
+// handles code update messages
+func CodeUpdateHandler(sessionRepo sessions.Repository) MessageHandler {
 	return func(hub *Hub, client *Client, msg *Message) error {
 		// check rate limit
 		if !client.checkCodeUpdateRateLimit() {
@@ -45,8 +46,17 @@ func CodeUpdateHandler() MessageHandler {
 			return ErrCodeTooLarge
 		}
 
-		// track latest code for save on disconnect
-		client.SetLastCode(payload.Code)
+		// save code (goes to redis buffer via BufferedRepository)
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		if err := sessionRepo.UpdateSessionCode(ctx, client.SessionID, payload.Code); err != nil {
+			logger.ErrorErr(err, "failed to save code",
+				"client_id", client.ID,
+				"session_id", client.SessionID,
+			)
+			// don't fail the request, broadcast still happens
+		}
 
 		// add display name to payload
 		payload.DisplayName = client.DisplayName
@@ -63,11 +73,6 @@ func CodeUpdateHandler() MessageHandler {
 
 		// broadcast to all other clients in the session
 		hub.BroadcastToSession(client.SessionID, broadcastMsg, client.ID)
-		logger.Info("code updated",
-			"client_id", client.ID,
-			"session_id", client.SessionID,
-			"display_name", client.DisplayName,
-		)
 
 		return nil
 	}
@@ -130,7 +135,7 @@ func GenerateHandler(agentClient *agent.Agent, sessionRepo sessions.Repository, 
 			}
 		}
 
-		// broadcast the user's prompt to writers only (sanitized - no private data)
+		// broadcast the user's prompt to writers only
 		broadcastPayload := AgentRequestPayload{
 			UserQuery:   payload.UserQuery,
 			DisplayName: client.DisplayName,
@@ -216,7 +221,7 @@ func GenerateHandler(agentClient *agent.Agent, sessionRepo sessions.Repository, 
 			// don't fail the request if logging fails
 		}
 
-		// save messages to session history
+		// save messages (goes to redis buffer via BufferedRepository)
 		if payload.UserQuery != "" {
 			_, err := sessionRepo.AddMessage(ctx, client.SessionID, client.UserID, "user", sessions.MessageTypeUserPrompt, payload.UserQuery, false, false, client.DisplayName, "")
 			if err != nil {
@@ -237,10 +242,10 @@ func GenerateHandler(agentClient *agent.Agent, sessionRepo sessions.Repository, 
 			}
 		}
 
-		// update session code if generation was successful and is a code response
+		// save session code if generation was successful and is a code response
 		if response.IsCodeResponse && response.Code != "" {
 			if err := sessionRepo.UpdateSessionCode(ctx, client.SessionID, response.Code); err != nil {
-				logger.ErrorErr(err, "failed to update session code",
+				logger.ErrorErr(err, "failed to save session code",
 					"client_id", client.ID,
 					"session_id", client.SessionID,
 				)
@@ -271,14 +276,6 @@ func GenerateHandler(agentClient *agent.Agent, sessionRepo sessions.Repository, 
 
 		// send response to writers only (host and co-authors)
 		hub.BroadcastToWriters(client.SessionID, responseMsg, "")
-
-		// update last activity
-		if err := sessionRepo.UpdateLastActivity(ctx, client.SessionID); err != nil {
-			logger.ErrorErr(err, "failed to update last activity",
-				"client_id", client.ID,
-				"session_id", client.SessionID,
-			)
-		}
 
 		logger.Info("code generated",
 			"client_id", client.ID,
@@ -400,8 +397,8 @@ func ChatHandler(sessionRepo sessions.Repository) MessageHandler {
 			return ErrCodeTooLarge
 		}
 
-		// save to database
-		ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
+		// save message (goes to redis buffer via BufferedRepository)
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
 		_, err := sessionRepo.AddMessage(ctx, client.SessionID, client.UserID, "user", sessions.MessageTypeChat, trimmedMessage, false, false, client.DisplayName, "")
@@ -410,9 +407,7 @@ func ChatHandler(sessionRepo sessions.Repository) MessageHandler {
 				"client_id", client.ID,
 				"session_id", client.SessionID,
 			)
-
-			client.SendError("server_error", "failed to save message", err.Error())
-			return err
+			// don't fail - broadcast is more important for real-time chat
 		}
 
 		// add display name to payload
@@ -432,69 +427,12 @@ func ChatHandler(sessionRepo sessions.Repository) MessageHandler {
 		// broadcast to all clients in the session (including sender)
 		hub.BroadcastToSession(client.SessionID, broadcastMsg, "")
 
-		// update last activity
-		if err := sessionRepo.UpdateLastActivity(ctx, client.SessionID); err != nil {
-			logger.ErrorErr(err, "failed to update last activity",
-				"client_id", client.ID,
-				"session_id", client.SessionID,
-			)
-		}
-
-		logger.Info("chat message sent",
-			"client_id", client.ID,
-			"session_id", client.SessionID,
-			"display_name", client.DisplayName,
-		)
-
-		return nil
-	}
-}
-
-// handles auto-save messages to persist code to database
-func AutoSaveHandler(sessionRepo sessions.Repository) MessageHandler {
-	return func(_ *Hub, client *Client, msg *Message) error {
-		// check if client has write permissions
-		if !client.CanWrite() {
-			return ErrReadOnly
-		}
-
-		// parse payload
-		var payload AutoSavePayload
-		if err := msg.UnmarshalPayload(&payload); err != nil {
-			client.SendError("validation_error", "failed to parse auto save", err.Error())
-			return err
-		}
-
-		// validate code size
-		codeSize := len([]byte(payload.Code))
-		if codeSize > maxCodeSize {
-			client.SendError("bad_request", "code exceeds maximum size. maximum 100 KB allowed.", "")
-			return ErrCodeTooLarge
-		}
-
-		// persist to database
-		ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
-		defer cancel()
-
-		if err := sessionRepo.UpdateSessionCode(ctx, client.SessionID, payload.Code); err != nil {
-			logger.ErrorErr(err, "failed to auto-save session code",
-				"client_id", client.ID,
-				"session_id", client.SessionID,
-			)
-			return err
-		}
-
-		logger.Debug("code auto-saved",
-			"client_id", client.ID,
-			"session_id", client.SessionID,
-		)
-
 		return nil
 	}
 }
 
 // handles switch strudel messages to change context without reconnecting
-func SwitchStrudelHandler(strudelRepo *strudels.Repository) MessageHandler {
+func SwitchStrudelHandler(flusher *buffer.Flusher, strudelRepo *strudels.Repository) MessageHandler {
 	return func(_ *Hub, client *Client, msg *Message) error {
 		// check if client has write permissions
 		if !client.CanWrite() {
@@ -511,6 +449,15 @@ func SwitchStrudelHandler(strudelRepo *strudels.Repository) MessageHandler {
 
 		ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 		defer cancel()
+
+		// flush buffer before switching context
+		if err := flusher.FlushSession(ctx, client.SessionID); err != nil {
+			logger.ErrorErr(err, "failed to flush buffer before strudel switch",
+				"client_id", client.ID,
+				"session_id", client.SessionID,
+			)
+			// continue with switch anyway
+		}
 
 		var code string
 		var conversationHistory []SessionStateMessage
@@ -555,7 +502,6 @@ func SwitchStrudelHandler(strudelRepo *strudels.Repository) MessageHandler {
 
 		// update client's current strudel context
 		client.SetCurrentStrudelID(payload.StrudelID)
-		client.SetLastCode(code)
 
 		// send session_state with the context (only to requesting client)
 		sessionStateMsg, err := NewMessage(TypeSessionState, client.SessionID, client.UserID, SessionStatePayload{
