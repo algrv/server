@@ -319,7 +319,7 @@ func (r *Repository) Delete(ctx context.Context, strudelID, userID string) error
 	return nil
 }
 
-// ListTrainableWithoutEmbedding returns strudels that are trainable but don't have embeddings yet
+// returns strudels that are trainable but don't have embeddings yet
 func (r *Repository) ListTrainableWithoutEmbedding(ctx context.Context, limit int) ([]Strudel, error) {
 	rows, err := r.db.Query(ctx, queryListTrainableWithoutEmbedding, limit)
 	if err != nil {
@@ -357,13 +357,13 @@ func (r *Repository) ListTrainableWithoutEmbedding(ctx context.Context, limit in
 	return strudels, nil
 }
 
-// UpdateEmbedding sets the embedding vector for a strudel
+// sets the embedding vector for a strudel
 func (r *Repository) UpdateEmbedding(ctx context.Context, strudelID string, embedding []float32) error {
 	_, err := r.db.Exec(ctx, queryUpdateEmbedding, embedding, strudelID)
 	return err
 }
 
-// AdminGetStrudel gets any strudel by ID (admin only, no user check)
+// gets any strudel by ID (admin only, no user check)
 func (r *Repository) AdminGetStrudel(ctx context.Context, strudelID string) (*Strudel, error) {
 	var strudel Strudel
 
@@ -389,7 +389,7 @@ func (r *Repository) AdminGetStrudel(ctx context.Context, strudelID string) (*St
 	return &strudel, nil
 }
 
-// AdminSetUseInTraining sets the use_in_training flag (admin only)
+// sets the use_in_training flag (admin only)
 func (r *Repository) AdminSetUseInTraining(ctx context.Context, strudelID string, useInTraining bool) (*Strudel, error) {
 	var strudel Strudel
 
@@ -415,7 +415,7 @@ func (r *Repository) AdminSetUseInTraining(ctx context.Context, strudelID string
 	return &strudel, nil
 }
 
-// ListPublicTags returns all unique tags from public strudels
+// returns all unique tags from public strudels
 func (r *Repository) ListPublicTags(ctx context.Context) ([]string, error) {
 	rows, err := r.db.Query(ctx, queryListPublicTags)
 	if err != nil {
@@ -439,7 +439,7 @@ func (r *Repository) ListPublicTags(ctx context.Context) ([]string, error) {
 	return tags, nil
 }
 
-// ListUserTags returns all unique tags from a user's strudels
+// returns all unique tags from a user's strudels
 func (r *Repository) ListUserTags(ctx context.Context, userID string) ([]string, error) {
 	rows, err := r.db.Query(ctx, queryListUserTags, userID)
 	if err != nil {
@@ -463,7 +463,7 @@ func (r *Repository) ListUserTags(ctx context.Context, userID string) ([]string,
 	return tags, nil
 }
 
-// AddStrudelMessage adds an AI conversation message to a strudel
+// adds an AI conversation message to a strudel
 func (r *Repository) AddStrudelMessage(ctx context.Context, req *AddStrudelMessageRequest) (*StrudelMessage, error) {
 	var msg StrudelMessage
 	var displayName *string
@@ -480,6 +480,7 @@ func (r *Repository) AddStrudelMessage(ctx context.Context, req *AddStrudelMessa
 		req.Content,
 		req.IsActionable,
 		req.IsCodeResponse,
+		req.ClarifyingQuestions,
 		displayName,
 	).Scan(
 		&msg.ID,
@@ -489,6 +490,7 @@ func (r *Repository) AddStrudelMessage(ctx context.Context, req *AddStrudelMessa
 		&msg.Content,
 		&msg.IsActionable,
 		&msg.IsCodeResponse,
+		&msg.ClarifyingQuestions,
 		&msg.DisplayName,
 		&msg.CreatedAt,
 	)
@@ -500,15 +502,16 @@ func (r *Repository) AddStrudelMessage(ctx context.Context, req *AddStrudelMessa
 	return &msg, nil
 }
 
-// GetStrudelMessages retrieves AI conversation messages for a strudel
+// retrieves AI conversation messages for a strudel
 func (r *Repository) GetStrudelMessages(ctx context.Context, strudelID string, limit int) ([]*StrudelMessage, error) {
 	rows, err := r.db.Query(ctx, queryGetStrudelMessages, strudelID, limit)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 
+	defer rows.Close()
 	var messages []*StrudelMessage
+
 	for rows.Next() {
 		var msg StrudelMessage
 		err := rows.Scan(
@@ -519,12 +522,14 @@ func (r *Repository) GetStrudelMessages(ctx context.Context, strudelID string, l
 			&msg.Content,
 			&msg.IsActionable,
 			&msg.IsCodeResponse,
+			&msg.ClarifyingQuestions,
 			&msg.DisplayName,
 			&msg.CreatedAt,
 		)
 		if err != nil {
 			return nil, err
 		}
+
 		messages = append(messages, &msg)
 	}
 

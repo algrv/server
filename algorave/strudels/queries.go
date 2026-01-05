@@ -87,13 +87,13 @@ const (
 
 	// strudel_messages queries (AI conversation history for saved strudels)
 	queryAddStrudelMessage = `
-		INSERT INTO strudel_messages (strudel_id, user_id, role, content, is_actionable, is_code_response, display_name)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-		RETURNING id, strudel_id, user_id, role, content, is_actionable, is_code_response, display_name, created_at
+		INSERT INTO strudel_messages (strudel_id, user_id, role, content, is_actionable, is_code_response, clarifying_questions, display_name)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		RETURNING id, strudel_id, user_id, role, content, is_actionable, is_code_response, clarifying_questions, display_name, created_at
 	`
 
 	queryGetStrudelMessages = `
-		SELECT id, strudel_id, user_id, role, content, is_actionable, is_code_response, display_name, created_at
+		SELECT id, strudel_id, user_id, role, content, is_actionable, is_code_response, clarifying_questions, display_name, created_at
 		FROM strudel_messages
 		WHERE strudel_id = $1
 		ORDER BY created_at DESC

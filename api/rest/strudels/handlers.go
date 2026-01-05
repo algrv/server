@@ -94,7 +94,7 @@ func ListStrudelsHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 // @Tags strudels
 // @Produce json
 // @Param id path string true "Strudel ID (UUID)"
-// @Success 200 {object} strudels.Strudel
+// @Success 200 {object} StrudelDetailResponse
 // @Failure 400 {object} errors.ErrorResponse
 // @Failure 401 {object} errors.ErrorResponse
 // @Failure 404 {object} errors.ErrorResponse
@@ -119,7 +119,40 @@ func GetStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, strudel)
+		// fetch full conversation history from strudel_messages
+		messages, err := strudelRepo.GetStrudelMessages(c.Request.Context(), strudelID, 100)
+		if err != nil {
+			// non-fatal, return strudel with empty conversation
+			messages = []*strudels.StrudelMessage{}
+		}
+
+		// convert to DTO (reverse order since DB returns DESC)
+		conversationHistory := make([]ConversationMessageDTO, len(messages))
+		for i, msg := range messages {
+			conversationHistory[len(messages)-1-i] = ConversationMessageDTO{
+				ID:                  msg.ID,
+				Role:                msg.Role,
+				Content:             msg.Content,
+				IsActionable:        msg.IsActionable,
+				IsCodeResponse:      msg.IsCodeResponse,
+				ClarifyingQuestions: msg.ClarifyingQuestions,
+				CreatedAt:           msg.CreatedAt,
+			}
+		}
+
+		c.JSON(http.StatusOK, StrudelDetailResponse{
+			ID:                  strudel.ID,
+			UserID:              strudel.UserID,
+			Title:               strudel.Title,
+			Code:                strudel.Code,
+			IsPublic:            strudel.IsPublic,
+			Description:         strudel.Description,
+			Tags:                strudel.Tags,
+			Categories:          strudel.Categories,
+			ConversationHistory: conversationHistory,
+			CreatedAt:           strudel.CreatedAt,
+			UpdatedAt:           strudel.UpdatedAt,
+		})
 	}
 }
 

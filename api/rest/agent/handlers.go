@@ -114,14 +114,15 @@ func GenerateHandler(agentClient *agentcore.Agent, _ llm.LLM, strudelRepo *strud
 				log.Printf("failed to persist user message for strudel %s: %v", req.StrudelID, err)
 			}
 
-			// save assistant response (only if there's code content)
-			if resp.Code != "" && resp.IsCodeResponse {
+			hasContent := resp.Code != "" || len(resp.ClarifyingQuestions) > 0
+			if hasContent {
 				if _, err := strudelRepo.AddStrudelMessage(ctx, &strudels.AddStrudelMessageRequest{
-					StrudelID:      req.StrudelID,
-					Role:           "assistant",
-					Content:        resp.Code,
-					IsActionable:   resp.IsActionable,
-					IsCodeResponse: resp.IsCodeResponse,
+					StrudelID:           req.StrudelID,
+					Role:                "assistant",
+					Content:             resp.Code,
+					IsActionable:        resp.IsActionable,
+					IsCodeResponse:      resp.IsCodeResponse,
+					ClarifyingQuestions: resp.ClarifyingQuestions,
 				}); err != nil {
 					log.Printf("failed to persist assistant message for strudel %s: %v", req.StrudelID, err)
 				}
