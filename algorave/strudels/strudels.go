@@ -479,18 +479,19 @@ func (r *Repository) AddStrudelMessage(ctx context.Context, req *AddStrudelMessa
 		displayName = &req.DisplayName
 	}
 
-	// marshal clarifying questions to JSON for JSONB storage
-	var clarifyingQuestionsJSON []byte
-	var err error
+	// marshal clarifying questions to JSON string for JSONB storage
+	var clarifyingQuestionsJSON *string
 	if len(req.ClarifyingQuestions) > 0 {
-		clarifyingQuestionsJSON, err = json.Marshal(req.ClarifyingQuestions)
+		jsonBytes, err := json.Marshal(req.ClarifyingQuestions)
 		if err != nil {
 			return nil, err
 		}
+		jsonStr := string(jsonBytes)
+		clarifyingQuestionsJSON = &jsonStr
 	}
 
 	var returnedClarifyingQuestionsJSON []byte
-	err = r.db.QueryRow(
+	err := r.db.QueryRow(
 		ctx,
 		queryAddStrudelMessage,
 		req.StrudelID,
