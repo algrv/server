@@ -462,3 +462,75 @@ func (r *Repository) ListUserTags(ctx context.Context, userID string) ([]string,
 
 	return tags, nil
 }
+
+// AddStrudelMessage adds an AI conversation message to a strudel
+func (r *Repository) AddStrudelMessage(ctx context.Context, req *AddStrudelMessageRequest) (*StrudelMessage, error) {
+	var msg StrudelMessage
+	var displayName *string
+	if req.DisplayName != "" {
+		displayName = &req.DisplayName
+	}
+
+	err := r.db.QueryRow(
+		ctx,
+		queryAddStrudelMessage,
+		req.StrudelID,
+		req.UserID,
+		req.Role,
+		req.Content,
+		req.IsActionable,
+		req.IsCodeResponse,
+		displayName,
+	).Scan(
+		&msg.ID,
+		&msg.StrudelID,
+		&msg.UserID,
+		&msg.Role,
+		&msg.Content,
+		&msg.IsActionable,
+		&msg.IsCodeResponse,
+		&msg.DisplayName,
+		&msg.CreatedAt,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &msg, nil
+}
+
+// GetStrudelMessages retrieves AI conversation messages for a strudel
+func (r *Repository) GetStrudelMessages(ctx context.Context, strudelID string, limit int) ([]*StrudelMessage, error) {
+	rows, err := r.db.Query(ctx, queryGetStrudelMessages, strudelID, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var messages []*StrudelMessage
+	for rows.Next() {
+		var msg StrudelMessage
+		err := rows.Scan(
+			&msg.ID,
+			&msg.StrudelID,
+			&msg.UserID,
+			&msg.Role,
+			&msg.Content,
+			&msg.IsActionable,
+			&msg.IsCodeResponse,
+			&msg.DisplayName,
+			&msg.CreatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		messages = append(messages, &msg)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return messages, nil
+}

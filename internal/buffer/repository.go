@@ -35,41 +35,32 @@ func (r *BufferedRepository) UpdateSessionCode(ctx context.Context, sessionID, c
 	return nil
 }
 
-// buffers to Redis instead of direct Postgres write
-func (r *BufferedRepository) AddMessage(
+// buffers chat message to Redis instead of direct Postgres write
+func (r *BufferedRepository) AddChatMessage(
 	ctx context.Context,
-	sessionID, userID, role, messageType, content string,
-	isActionable, isCodeResponse bool,
-	displayName, avatarURL string,
+	sessionID, userID, content, displayName, avatarURL string,
 ) (*sessions.Message, error) {
-	msg := &BufferedMessage{
-		SessionID:      sessionID,
-		UserID:         userID,
-		Role:           role,
-		MessageType:    messageType,
-		Content:        content,
-		IsActionable:   isActionable,
-		IsCodeResponse: isCodeResponse,
-		DisplayName:    displayName,
-		AvatarURL:      avatarURL,
-		CreatedAt:      time.Now(),
+	msg := &BufferedChatMessage{
+		SessionID:   sessionID,
+		UserID:      userID,
+		Content:     content,
+		DisplayName: displayName,
+		AvatarURL:   avatarURL,
+		CreatedAt:   time.Now(),
 	}
 
-	if err := r.buffer.AddMessage(ctx, msg); err != nil {
-		logger.ErrorErr(err, "failed to buffer message", "session_id", sessionID)
+	if err := r.buffer.AddChatMessage(ctx, msg); err != nil {
+		logger.ErrorErr(err, "failed to buffer chat message", "session_id", sessionID)
 		// fall back to direct DB write
-		return r.db.AddMessage(ctx, sessionID, userID, role, messageType, content, isActionable, isCodeResponse, displayName, avatarURL)
+		return r.db.AddChatMessage(ctx, sessionID, userID, content, displayName, avatarURL)
 	}
 
 	// return a placeholder message (real one will be created on flush)
 	return &sessions.Message{
-		SessionID:      sessionID,
-		Role:           role,
-		MessageType:    messageType,
-		Content:        content,
-		IsActionable:   isActionable,
-		IsCodeResponse: isCodeResponse,
-		CreatedAt:      msg.CreatedAt,
+		SessionID: sessionID,
+		Role:      "user",
+		Content:   content,
+		CreatedAt: msg.CreatedAt,
 	}, nil
 }
 
@@ -165,18 +156,19 @@ func (r *BufferedRepository) RevokeInviteToken(ctx context.Context, tokenID stri
 	return r.db.RevokeInviteToken(ctx, tokenID)
 }
 
-func (r *BufferedRepository) GetMessages(ctx context.Context, sessionID string, limit int) ([]*sessions.Message, error) {
+// GetChatMessages retrieves chat messages for a session
+func (r *BufferedRepository) GetChatMessages(ctx context.Context, sessionID string, limit int) ([]*sessions.Message, error) {
 	// get messages from Postgres
-	dbMessages, err := r.db.GetMessages(ctx, sessionID, limit)
+	dbMessages, err := r.db.GetChatMessages(ctx, sessionID, limit)
 	if err != nil {
 		return nil, err
 	}
 
 	// get unflushed messages from Redis buffer
-	bufferedMsgs, err := r.buffer.GetBufferedMessages(ctx, sessionID)
+	bufferedMsgs, err := r.buffer.GetBufferedChatMessages(ctx, sessionID)
 	if err != nil {
 		// log but don't fail - Postgres messages are still valid
-		logger.Warn("failed to get buffered messages", "session_id", sessionID, "error", err)
+		logger.Warn("failed to get buffered chat messages", "session_id", sessionID, "error", err)
 		return dbMessages, nil
 	}
 
@@ -187,13 +179,10 @@ func (r *BufferedRepository) GetMessages(ctx context.Context, sessionID string, 
 	// convert buffered messages to session messages
 	for _, bm := range bufferedMsgs {
 		msg := &sessions.Message{
-			SessionID:      bm.SessionID,
-			Role:           bm.Role,
-			MessageType:    bm.MessageType,
-			Content:        bm.Content,
-			IsActionable:   bm.IsActionable,
-			IsCodeResponse: bm.IsCodeResponse,
-			CreatedAt:      bm.CreatedAt,
+			SessionID: bm.SessionID,
+			Role:      "user",
+			Content:   bm.Content,
+			CreatedAt: bm.CreatedAt,
 		}
 		if bm.DisplayName != "" {
 			msg.DisplayName = &bm.DisplayName
@@ -205,17 +194,6 @@ func (r *BufferedRepository) GetMessages(ctx context.Context, sessionID string, 
 	}
 
 	return dbMessages, nil
-}
-
-func (r *BufferedRepository) CreateMessage(
-	ctx context.Context,
-	sessionID string,
-	userID *string,
-	role, messageType, content string,
-	isActionable, isCodeResponse bool,
-	displayName, avatarURL *string,
-) (*sessions.Message, error) {
-	return r.db.CreateMessage(ctx, sessionID, userID, role, messageType, content, isActionable, isCodeResponse, displayName, avatarURL)
 }
 
 func (r *BufferedRepository) UpdateLastActivity(ctx context.Context, sessionID string) error {

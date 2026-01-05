@@ -120,32 +120,27 @@ func (f *Flusher) flushMessages(ctx context.Context) {
 	logger.Debug("flushing messages for sessions", "count", len(sessionIDs))
 
 	for _, sessionID := range sessionIDs {
-		messages, err := f.buffer.FlushMessages(ctx, sessionID)
+		messages, err := f.buffer.FlushChatMessages(ctx, sessionID)
 		if err != nil {
 			logger.ErrorErr(err, "failed to flush messages from buffer", "session_id", sessionID)
 			continue
 		}
 
 		for _, msg := range messages {
-			_, err := f.sessionRepo.AddMessage(
+			_, err := f.sessionRepo.AddChatMessage(
 				ctx,
 				msg.SessionID,
 				msg.UserID,
-				msg.Role,
-				msg.MessageType,
 				msg.Content,
-				msg.IsActionable,
-				msg.IsCodeResponse,
 				msg.DisplayName,
 				msg.AvatarURL,
 			)
 			if err != nil {
-				logger.ErrorErr(err, "failed to persist message to postgres",
+				logger.ErrorErr(err, "failed to persist chat message to postgres",
 					"session_id", msg.SessionID,
-					"message_type", msg.MessageType,
 				)
 				// re-add failed message to buffer
-				f.buffer.AddMessage(ctx, &msg) //nolint:errcheck,gosec // best-effort retry
+				f.buffer.AddChatMessage(ctx, &msg) //nolint:errcheck,gosec // best-effort retry
 			}
 		}
 	}
@@ -165,27 +160,23 @@ func (f *Flusher) FlushSession(ctx context.Context, sessionID string) error {
 		}
 	}
 
-	// flush messages
-	messages, err := f.buffer.FlushMessages(ctx, sessionID)
+	// flush chat messages
+	messages, err := f.buffer.FlushChatMessages(ctx, sessionID)
 	if err != nil {
 		return err
 	}
 
 	for _, msg := range messages {
-		_, err := f.sessionRepo.AddMessage(
+		_, err := f.sessionRepo.AddChatMessage(
 			ctx,
 			msg.SessionID,
 			msg.UserID,
-			msg.Role,
-			msg.MessageType,
 			msg.Content,
-			msg.IsActionable,
-			msg.IsCodeResponse,
 			msg.DisplayName,
 			msg.AvatarURL,
 		)
 		if err != nil {
-			logger.ErrorErr(err, "failed to persist message on session flush",
+			logger.ErrorErr(err, "failed to persist chat message on session flush",
 				"session_id", msg.SessionID,
 			)
 		}

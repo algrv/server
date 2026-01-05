@@ -8,29 +8,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/algrv/server/internal/errors"
-	"github.com/algrv/server/internal/llm"
 	"github.com/algrv/server/internal/logger"
 )
-
-func createBYOKGenerator(provider, apiKey string) (llm.TextGenerator, error) {
-	switch provider {
-	case "openai":
-		return llm.NewOpenAIGenerator(llm.OpenAIConfig{
-			APIKey: apiKey,
-			Model:  "gpt-4o",
-		}), nil
-	case "claude":
-		return llm.NewAnthropicTransformer(llm.AnthropicConfig{
-			APIKey:      apiKey,
-			Model:       "claude-sonnet-4-20250514",
-			MaxTokens:   4096,
-			Temperature: 0.7,
-		}), nil
-	default:
-		return nil, errors.ErrUnsupportedProvider(provider)
-	}
-}
 
 func getAllowedWebSocketOrigins() []string {
 	if envOrigins := os.Getenv("ALLOWED_ORIGINS"); envOrigins != "" {

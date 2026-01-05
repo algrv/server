@@ -82,11 +82,9 @@ func NewServer(cfg *config.Config) (*Server, error) {
 
 	// register websocket message handlers (handlers use sessionRepo interface, unaware of Redis)
 	hub.RegisterHandler(ws.TypeCodeUpdate, ws.CodeUpdateHandler(sessionRepo))
-	hub.RegisterHandler(ws.TypeAgentRequest, ws.GenerateHandler(services.Agent, sessionRepo, userRepo))
 	hub.RegisterHandler(ws.TypeChatMessage, ws.ChatHandler(sessionRepo))
 	hub.RegisterHandler(ws.TypePlay, ws.PlayHandler())
 	hub.RegisterHandler(ws.TypeStop, ws.StopHandler())
-	hub.RegisterHandler(ws.TypeSwitchStrudel, ws.SwitchStrudelHandler(flusher, strudelRepo, sessionRepo))
 
 	// flush buffer on client disconnect
 	hub.OnClientDisconnect(func(client *ws.Client) {

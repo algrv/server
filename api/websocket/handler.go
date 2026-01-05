@@ -9,7 +9,6 @@ import (
 	"github.com/gorilla/websocket"
 
 	"github.com/algrv/server/algorave/sessions"
-	"github.com/algrv/server/algorave/users"
 	"github.com/algrv/server/internal/auth"
 	"github.com/algrv/server/internal/errors"
 	"github.com/algrv/server/internal/logger"
@@ -24,7 +23,7 @@ var upgrader = websocket.Upgrader{
 
 // handles WebSocket connections for real-time collaboration.
 // see docs/websocket/API.md for usage documentation.
-func WebSocketHandler(hub *ws.Hub, sessionRepo sessions.Repository, userRepo *users.Repository) gin.HandlerFunc {
+func WebSocketHandler(hub *ws.Hub, sessionRepo sessions.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var params ConnectParams
 		if err := c.ShouldBindQuery(&params); err != nil {
@@ -40,7 +39,6 @@ func WebSocketHandler(hub *ws.Hub, sessionRepo sessions.Repository, userRepo *us
 		var userID string
 		var displayName string
 		var role string
-		var tier string
 
 		// case 1: No session_id provided - create new anonymous session
 		if params.SessionID == "" {
@@ -79,14 +77,6 @@ func WebSocketHandler(hub *ws.Hub, sessionRepo sessions.Repository, userRepo *us
 							}
 						}
 					}
-
-					// look up user's subscription tier for rate limiting
-					user, err := userRepo.FindByID(ctx, userID)
-					if err == nil && user != nil {
-						tier = user.Tier
-					} else {
-						tier = "free"
-					}
 				}
 			}
 
@@ -100,7 +90,6 @@ func WebSocketHandler(hub *ws.Hub, sessionRepo sessions.Repository, userRepo *us
 
 				session = newSession
 				role = "host" // anonymous user is "host" of their own session
-				tier = "free"
 
 				if params.DisplayName != "" {
 					displayName = params.DisplayName
@@ -142,19 +131,6 @@ func WebSocketHandler(hub *ws.Hub, sessionRepo sessions.Repository, userRepo *us
 						role = "viewer"
 						displayName = "Viewer"
 					}
-
-					user, err := userRepo.FindByID(ctx, userID)
-					if err == nil && user != nil {
-						tier = user.Tier
-					} else {
-						tier = "free"
-						if err != nil {
-							logger.Warn("failed to look up user tier",
-								"user_id", userID,
-								"error", err,
-							)
-						}
-					}
 				}
 			}
 
@@ -177,7 +153,6 @@ func WebSocketHandler(hub *ws.Hub, sessionRepo sessions.Repository, userRepo *us
 				}
 
 				role = inviteToken.Role
-				tier = "free"
 
 				if params.DisplayName != "" {
 					displayName = params.DisplayName
@@ -234,53 +209,34 @@ func WebSocketHandler(hub *ws.Hub, sessionRepo sessions.Repository, userRepo *us
 		isAuthenticated := userID != ""
 		initialCode := session.Code
 
-		// fetch conversation history and chat history for the session
-		var conversationHistory []ws.SessionStateMessage
+		// fetch chat history for the session (chat is session-scoped)
 		var chatHistory []ws.SessionStateChatMessage
-		messages, err := sessionRepo.GetMessages(ctx, params.SessionID, 50)
+		messages, err := sessionRepo.GetChatMessages(ctx, params.SessionID, 50)
 		if err != nil {
-			logger.Warn("failed to fetch conversation history",
+			logger.Warn("failed to fetch chat history",
 				"session_id", params.SessionID,
 				"error", err,
 			)
 		} else {
 			for _, msg := range messages {
-				switch msg.MessageType {
-				case sessions.MessageTypeUserPrompt, sessions.MessageTypeAIResponse:
-					// llm conversation messages
-					msgDisplayName := ""
-					if msg.DisplayName != nil {
-						msgDisplayName = *msg.DisplayName
-					}
-					conversationHistory = append(conversationHistory, ws.SessionStateMessage{
-						ID:             msg.ID,
-						Role:           msg.Role,
-						Content:        msg.Content,
-						IsCodeResponse: msg.IsCodeResponse,
-						DisplayName:    msgDisplayName,
-						Timestamp:      msg.CreatedAt.UnixMilli(),
-					})
-				case sessions.MessageTypeChat:
-					// chat messages
-					displayName := ""
-					if msg.DisplayName != nil {
-						displayName = *msg.DisplayName
-					}
-					avatarURL := ""
-					if msg.AvatarURL != nil {
-						avatarURL = *msg.AvatarURL
-					}
-					chatHistory = append(chatHistory, ws.SessionStateChatMessage{
-						DisplayName: displayName,
-						AvatarURL:   avatarURL,
-						Content:     msg.Content,
-						Timestamp:   msg.CreatedAt.UnixMilli(),
-					})
+				msgDisplayName := ""
+				if msg.DisplayName != nil {
+					msgDisplayName = *msg.DisplayName
 				}
+				avatarURL := ""
+				if msg.AvatarURL != nil {
+					avatarURL = *msg.AvatarURL
+				}
+				chatHistory = append(chatHistory, ws.SessionStateChatMessage{
+					DisplayName: msgDisplayName,
+					AvatarURL:   avatarURL,
+					Content:     msg.Content,
+					Timestamp:   msg.CreatedAt.UnixMilli(),
+				})
 			}
 		}
 
-		client := ws.NewClient(clientID, params.SessionID, userID, displayName, role, tier, ipAddress, initialCode, conversationHistory, chatHistory, isAuthenticated, conn, hub)
+		client := ws.NewClient(clientID, params.SessionID, userID, displayName, role, ipAddress, initialCode, chatHistory, isAuthenticated, conn, hub)
 
 		// add participant to session (authenticated or anonymous)
 		// note: anonymous hosts are not added to participants table as they're already tracked via the session itself
@@ -312,7 +268,6 @@ func WebSocketHandler(hub *ws.Hub, sessionRepo sessions.Repository, userRepo *us
 			"client_id", clientID,
 			"session_id", params.SessionID,
 			"role", role,
-			"tier", tier,
 			"user_id", userID,
 			"ip", ipAddress,
 		)

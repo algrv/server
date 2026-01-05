@@ -81,3 +81,27 @@ type ListFilter struct {
 	Search string   // search in title and description
 	Tags   []string // filter by tags (any match)
 }
+
+// StrudelMessage represents an AI conversation message for a saved strudel
+type StrudelMessage struct {
+	ID             string    `json:"id"`
+	StrudelID      string    `json:"strudel_id"`
+	UserID         *string   `json:"user_id,omitempty"`
+	Role           string    `json:"role"` // user, assistant
+	Content        string    `json:"content"`
+	IsActionable   bool      `json:"is_actionable"`
+	IsCodeResponse bool      `json:"is_code_response"`
+	DisplayName    *string   `json:"display_name,omitempty"`
+	CreatedAt      time.Time `json:"created_at"`
+}
+
+// AddStrudelMessageRequest contains data for adding a strudel message
+type AddStrudelMessageRequest struct {
+	StrudelID      string
+	UserID         *string
+	Role           string
+	Content        string
+	IsActionable   bool
+	IsCodeResponse bool
+	DisplayName    string
+}
