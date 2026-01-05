@@ -29,7 +29,7 @@ const (
 // @Failure 400 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /api/v1/agent/generate [post]
-func GenerateHandler(agentClient *agentcore.Agent, platformLLM llm.LLM) gin.HandlerFunc {
+func GenerateHandler(agentClient *agentcore.Agent, _ llm.LLM) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req GenerateRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
