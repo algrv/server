@@ -90,7 +90,7 @@ func (r *BufferedRepository) GetSession(ctx context.Context, sessionID string) (
 	}
 
 	// check Redis for fresher code (may not have been flushed yet)
-	if code, _ := r.buffer.GetCode(ctx, sessionID); code != "" {
+	if code, err := r.buffer.GetCode(ctx, sessionID); err == nil && code != "" {
 		session.Code = code
 	}
 
