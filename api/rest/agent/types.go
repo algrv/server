@@ -5,9 +5,9 @@ type GenerateRequest struct {
 	UserQuery           string    `json:"user_query" binding:"required"`
 	EditorState         string    `json:"editor_state"`
 	ConversationHistory []Message `json:"conversation_history"`
-	Provider            string    `json:"provider,omitempty"`            // "anthropic" or "openai"
-	ProviderAPIKey      string    `json:"provider_api_key,omitempty"`    // BYOK key
-	StrudelID           string    `json:"strudel_id,omitempty"`          // optional: for persisting conversation
+	Provider            string    `json:"provider,omitempty"`         // "anthropic" or "openai"
+	ProviderAPIKey      string    `json:"provider_api_key,omitempty"` // BYOK key
+	StrudelID           string    `json:"strudel_id,omitempty"`       // optional: for persisting conversation
 }
 
 // conversation message
