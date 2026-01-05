@@ -1,9 +1,7 @@
 package tui
 
 import (
-	"context"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 
@@ -66,20 +64,13 @@ func NewEditor() *EditorModel {
 		height:              physicalHeight,
 		ready:               true,
 		shouldScrollBottom:  false,
-		wsClient:            NewWSClient(),
-		wsConnected:         false,
-		wsError:             nil,
+		agentClient:         NewAgentClient(),
 	}
 }
 
 // returns the initial command to run when the editor starts
 func (m *EditorModel) Init() tea.Cmd {
-	// connect to WebSocket when editor initializes
-	log.Println("[editor] Init() called")
-	return tea.Batch(
-		m.spinner.Tick,
-		m.wsClient.ConnectCmd(),
-	)
+	return m.spinner.Tick
 }
 
 func (m *EditorModel) Update(msg tea.Msg) (*EditorModel, tea.Cmd) {
@@ -89,42 +80,10 @@ func (m *EditorModel) Update(msg tea.Msg) (*EditorModel, tea.Cmd) {
 	)
 
 	switch msg := msg.(type) {
-	case WSConnectedMsg:
-		m.wsConnected = true
-		m.wsError = nil
-		return m, nil
-
-	case WSConnectErrorMsg:
-		m.wsConnected = false
-		m.wsError = msg.err
-		return m, nil
-
-	case WSDisconnectedMsg:
-		m.wsConnected = false
-		// try reconnecting automatically
-		return m, tea.Batch(
-			m.spinner.Tick,
-			m.wsClient.ConnectCmd(),
-		)
-
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+s", "enter":
 			if m.isFetching {
-				return m, nil
-			}
-
-			// retry connection if there's a connection error
-			if m.wsError != nil {
-				m.wsError = nil
-				return m, tea.Batch(
-					m.spinner.Tick,
-					m.wsClient.ConnectCmd(),
-				)
-			}
-
-			// wait for connection if not connected
-			if !m.wsConnected {
 				return m, nil
 			}
 
@@ -143,10 +102,10 @@ func (m *EditorModel) Update(msg tea.Msg) (*EditorModel, tea.Cmd) {
 					}
 				}
 
-				// send to agent using persistent connection
+				// send to agent using REST API
 				return m, tea.Batch(
 					m.spinner.Tick,
-					m.sendToAgentCmd(query, currentCode, m.conversationHistory),
+					m.agentClient.GenerateCmd(query, currentCode, m.conversationHistory),
 				)
 			}
 
@@ -188,7 +147,7 @@ func (m *EditorModel) Update(msg tea.Msg) (*EditorModel, tea.Cmd) {
 	case AgentResponseMsg:
 		m.isFetching = false
 
-		// append both user query and assistant response to history
+		// append both user query and assistant response to history (for display)
 		m.conversationHistory = append(m.conversationHistory,
 			MessageModel{
 				Role:    "user",
@@ -259,8 +218,7 @@ func (m *EditorModel) Update(msg tea.Msg) (*EditorModel, tea.Cmd) {
 		return m, nil
 
 	case spinner.TickMsg:
-		// keep spinner ticking during connection or fetching
-		if m.isFetching || (!m.wsConnected && m.wsError == nil) {
+		if m.isFetching {
 			m.spinner, cmd = m.spinner.Update(msg)
 			return m, cmd
 		}
@@ -311,21 +269,7 @@ func (m *EditorModel) View() string {
 	b.WriteString("\n")
 
 	// input prompt
-	if m.wsError != nil {
-		errorMsg := lipgloss.NewStyle().
-			Foreground(colorRed).
-			Italic(true).
-			Render(fmt.Sprintf("connection error: %v (press enter to retry)", m.wsError))
-		b.WriteString(errorMsg)
-		b.WriteString("\n\n")
-	} else if !m.wsConnected {
-		connectingMsg := lipgloss.NewStyle().
-			Foreground(colorYellow).
-			Italic(true).
-			Render(m.spinner.View() + " connecting...")
-		b.WriteString(connectingMsg)
-		b.WriteString("\n\n")
-	} else if m.isFetching {
+	if m.isFetching {
 		fetchingMsg := lipgloss.NewStyle().
 			Foreground(colorGray).
 			Italic(true).
@@ -497,19 +441,4 @@ func (m *EditorModel) GetCode() string {
 		}
 	}
 	return ""
-}
-
-// creates a command to send a request via the persistent webSocket connection
-func (m *EditorModel) sendToAgentCmd(userQuery, editorState string, conversationHistory []MessageModel) tea.Cmd {
-	return func() tea.Msg {
-		ctx, cancel := context.WithTimeout(context.Background(), agentRequestTimeout)
-		defer cancel()
-
-		resp, err := m.wsClient.SendAgentRequest(ctx, userQuery, editorState, conversationHistory)
-		if err != nil {
-			return AgentErrorMsg{userQuery: userQuery, err: err}
-		}
-
-		return *resp
-	}
 }
