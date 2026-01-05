@@ -4,49 +4,33 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/algrv/server/algorave/users"
 	"github.com/algrv/server/internal/errors"
 	"github.com/algrv/server/internal/logger"
 	"github.com/gorilla/websocket"
 )
 
-// creates a new webSocket client connection
-func NewClient(id, sessionID, userID, displayName, role, tier, ipAddress, initialCode string, initialConversationHistory []SessionStateMessage, initialChatHistory []SessionStateChatMessage, isAuthenticated bool, conn *websocket.Conn, hub *Hub) *Client {
+// creates a new websocket client connection
+func NewClient(id, sessionID, userID, displayName, role, ipAddress, initialCode string, initialChatHistory []SessionStateChatMessage, isAuthenticated bool, conn *websocket.Conn, hub *Hub) *Client {
 	return &Client{
-		ID:                         id,
-		SessionID:                  sessionID,
-		UserID:                     userID,
-		DisplayName:                displayName,
-		Role:                       role,
-		Tier:                       tier,
-		IsAuthenticated:            isAuthenticated,
-		IPAddress:                  ipAddress,
-		InitialCode:                initialCode,
-		InitialConversationHistory: initialConversationHistory,
-		InitialChatHistory:         initialChatHistory,
-		conn:                       conn,
-		hub:                        hub,
-		send:                       make(chan []byte, 256),
-		closed:                     false,
-		codeUpdateTimestamps:       make([]time.Time, 0, maxCodeUpdatesPerSecond),
-		agentRequestTimestamps:     make([]time.Time, 0, maxAgentRequestsPerMinute),
-		chatMessageTimestamps:      make([]time.Time, 0, maxChatMessagesPerMinute),
+		ID:                    id,
+		SessionID:             sessionID,
+		UserID:                userID,
+		DisplayName:           displayName,
+		Role:                  role,
+		IsAuthenticated:       isAuthenticated,
+		IPAddress:             ipAddress,
+		InitialCode:           initialCode,
+		InitialChatHistory:    initialChatHistory,
+		conn:                  conn,
+		hub:                   hub,
+		send:                  make(chan []byte, 256),
+		closed:                false,
+		codeUpdateTimestamps:  make([]time.Time, 0, maxCodeUpdatesPerSecond),
+		chatMessageTimestamps: make([]time.Time, 0, maxChatMessagesPerMinute),
 	}
 }
 
-// returns the per-minute agent request limit based on user tier
-func (c *Client) getAgentRequestLimit() int {
-	switch c.Tier {
-	case "payg":
-		return users.MinuteLimitPAYG
-	case "byok":
-		return users.MinuteLimitBYOK
-	default:
-		return users.MinuteLimitDefault
-	}
-}
-
-// reads messages from the webSocket connection to the hub for processing
+// reads messages from the websocket connection to the hub for processing
 func (c *Client) ReadPump() {
 	defer func() {
 		c.hub.Unregister <- c
@@ -97,7 +81,7 @@ func (c *Client) ReadPump() {
 	}
 }
 
-// writes messages from the hub to the webSocket connection for sending to the client
+// writes messages from the hub to the websocket connection for sending to the client
 func (c *Client) WritePump() {
 	ticker := time.NewTicker(pingPeriod)
 
@@ -124,7 +108,7 @@ func (c *Client) WritePump() {
 
 			w.Write(message) //nolint:errcheck,gosec // G104: websocket write
 
-			// add queued messages to the current webSocket message
+			// add queued messages to the current websocket message
 			n := len(c.send)
 
 			for range n {
@@ -257,20 +241,6 @@ func (c *Client) CanWrite() bool {
 	return c.Role == "host" || c.Role == "co-author"
 }
 
-// sets the current strudel ID (thread-safe)
-func (c *Client) SetCurrentStrudelID(strudelID *string) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.CurrentStrudelID = strudelID
-}
-
-// gets the current strudel ID (thread-safe)
-func (c *Client) GetCurrentStrudelID() *string {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	return c.CurrentStrudelID
-}
-
 // checks if the client can send a code update
 func (c *Client) checkCodeUpdateRateLimit() bool {
 	c.mu.Lock()
@@ -300,35 +270,6 @@ func (c *Client) checkCodeUpdateRateLimit() bool {
 	return true
 }
 
-// checks if the client can send an agent request (tier-based limits)
-func (c *Client) checkAgentRequestRateLimit() bool {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-
-	limit := c.getAgentRequestLimit()
-	now := time.Now()
-	oneMinuteAgo := now.Add(-1 * time.Minute)
-
-	// remove timestamps older than 1 minute
-	validTimestamps := make([]time.Time, 0, limit)
-	for _, ts := range c.agentRequestTimestamps {
-		if ts.After(oneMinuteAgo) {
-			validTimestamps = append(validTimestamps, ts)
-		}
-	}
-
-	c.agentRequestTimestamps = validTimestamps
-
-	// check if we've exceeded the limit
-	if len(c.agentRequestTimestamps) >= limit {
-		return false
-	}
-
-	// add current timestamp
-	c.agentRequestTimestamps = append(c.agentRequestTimestamps, now)
-	return true
-}
-
 // checks if the client can send a chat message
 func (c *Client) checkChatRateLimit() bool {
 	c.mu.Lock()
@@ -355,44 +296,4 @@ func (c *Client) checkChatRateLimit() bool {
 	// add current timestamp
 	c.chatMessageTimestamps = append(c.chatMessageTimestamps, now)
 	return true
-}
-
-// returns current rate limit status for agent requests
-func (c *Client) GetAgentRateLimitStatus() *RateLimit {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-
-	limit := c.getAgentRequestLimit()
-	now := time.Now()
-	oneMinuteAgo := now.Add(-1 * time.Minute)
-
-	// count valid timestamps
-	validCount := 0
-	var oldestTimestamp time.Time
-
-	for _, ts := range c.agentRequestTimestamps {
-		if ts.After(oneMinuteAgo) {
-			validCount++
-			if oldestTimestamp.IsZero() || ts.Before(oldestTimestamp) {
-				oldestTimestamp = ts
-			}
-		}
-	}
-
-	remaining := max(limit-validCount, 0)
-
-	// calculate seconds until oldest request expires (resets quota)
-	resetSeconds := 60
-	if !oldestTimestamp.IsZero() {
-		resetSeconds = int(oldestTimestamp.Add(time.Minute).Sub(now).Seconds())
-		if resetSeconds < 0 {
-			resetSeconds = 0
-		}
-	}
-
-	return &RateLimit{
-		RequestsRemaining: remaining,
-		RequestsLimit:     limit,
-		ResetSeconds:      resetSeconds,
-	}
 }

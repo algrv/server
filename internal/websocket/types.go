@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-// message type constants for webSocket communication
+// message type constants for websocket communication
 const (
 	// is sent when a user updates the code
 	TypeCodeUpdate = "code_update"
@@ -19,12 +19,6 @@ const (
 
 	// is sent when a user leaves the session
 	TypeUserLeft = "user_left"
-
-	// is sent when a user requests code generation
-	TypeAgentRequest = "agent_request"
-
-	// is sent when the agent completes code generation
-	TypeAgentResponse = "agent_response"
 
 	// is sent when a user sends a chat message
 	TypeChatMessage = "chat_message"
@@ -52,9 +46,6 @@ const (
 
 	// is sent when host ends the session
 	TypeSessionEnded = "session_ended"
-
-	// is sent by client to switch strudel context without reconnecting
-	TypeSwitchStrudel = "switch_strudel"
 )
 
 // client connection constants
@@ -72,9 +63,8 @@ const (
 	maxMessageSize = 512 * 1024 // 512 KB
 
 	// rate limiting constants
-	maxCodeUpdatesPerSecond   = 10 // maximum code updates per second
-	maxAgentRequestsPerMinute = 10 // maximum agent requests per minute
-	maxChatMessagesPerMinute  = 20 // maximum chat messages per minute
+	maxCodeUpdatesPerSecond  = 10 // maximum code updates per second
+	maxChatMessagesPerMinute = 20 // maximum chat messages per minute
 
 	// content size limits
 	maxCodeSize        = 100 * 1024 // 100 KB maximum code size
@@ -133,41 +123,6 @@ type UserLeftPayload struct {
 	DisplayName string `json:"display_name"`
 }
 
-// contains a code generation request
-type AgentRequestPayload struct {
-	UserQuery           string `json:"user_query"`
-	RequestID           string `json:"request_id"`             // correlation ID for request/response matching
-	EditorState         string `json:"editor_state,omitempty"` // private, not broadcasted
-	ConversationHistory []struct {
-		Role        string `json:"role"`
-		Content     string `json:"content"`
-		DisplayName string `json:"display_name,omitempty"`
-	} `json:"conversation_history,omitempty"` // private, not broadcasted
-	ProviderAPIKey string `json:"provider_api_key,omitempty"` // private, not broadcasted
-	Provider       string `json:"provider,omitempty"`         // private, not broadcasted
-	DisplayName    string `json:"display_name,omitempty"`     // added by server for broadcasting
-}
-
-// contains the agent's code generation response
-type AgentResponsePayload struct {
-	Code                string     `json:"code,omitempty"`
-	DocsRetrieved       int        `json:"docs_retrieved"`
-	ExamplesRetrieved   int        `json:"examples_retrieved"`
-	Model               string     `json:"model"`
-	IsActionable        bool       `json:"is_actionable"`
-	IsCodeResponse      bool       `json:"is_code_response"` // editor should update if true
-	ClarifyingQuestions []string   `json:"clarifying_questions,omitempty"`
-	RateLimit           *RateLimit `json:"rate_limit,omitempty"`
-	RequestID           *string    `json:"request_id,omitempty"` // echoed from request for correlation
-}
-
-// contains rate limit status for the client
-type RateLimit struct {
-	RequestsRemaining int `json:"requests_remaining"`
-	RequestsLimit     int `json:"requests_limit"`
-	ResetSeconds      int `json:"reset_seconds"`
-}
-
 // contains a chat message from a user
 type ChatMessagePayload struct {
 	Message     string `json:"message"`
@@ -181,22 +136,10 @@ type ServerShutdownPayload struct {
 
 // contains session info sent to connecting client
 type SessionStatePayload struct {
-	Code                string                    `json:"code"`
-	YourRole            string                    `json:"your_role"`
-	Participants        []SessionStateParticipant `json:"participants"`
-	ConversationHistory []SessionStateMessage     `json:"conversation_history"`
-	ChatHistory         []SessionStateChatMessage `json:"chat_history"`
-	RequestID           *string                   `json:"request_id,omitempty"` // echoed from switch_strudel, null for initial/reconnect
-}
-
-// represents a message in the conversation history
-type SessionStateMessage struct {
-	ID             string `json:"id"`
-	Role           string `json:"role"` // user, assistant
-	Content        string `json:"content"`
-	IsCodeResponse bool   `json:"is_code_response"`
-	DisplayName    string `json:"display_name,omitempty"`
-	Timestamp      int64  `json:"timestamp"` // Unix milliseconds
+	Code         string                    `json:"code"`
+	YourRole     string                    `json:"your_role"`
+	Participants []SessionStateParticipant `json:"participants"`
+	ChatHistory  []SessionStateChatMessage `json:"chat_history"`
 }
 
 // represents a chat message in the chat history
@@ -229,15 +172,7 @@ type SessionEndedPayload struct {
 	Reason string `json:"reason,omitempty"`
 }
 
-// contains strudel context switch information
-type SwitchStrudelPayload struct {
-	StrudelID           *string               `json:"strudel_id"`                     // null for scratch/anonymous
-	RequestID           string                `json:"request_id"`                     // correlation ID for request/response matching
-	Code                string                `json:"code,omitempty"`                 // only for restore from localStorage
-	ConversationHistory []SessionStateMessage `json:"conversation_history,omitempty"` // only for restore from localStorage
-}
-
-// represents a WebSocket client connection
+// represents a websocket client connection
 type Client struct {
 	// unique identifier for this client
 	ID string
@@ -254,9 +189,6 @@ type Client struct {
 	// role in the session (host, co-author, viewer)
 	Role string
 
-	// subscription tier (free, pro, byok) - used for rate limiting
-	Tier string
-
 	// whether this client has an authenticated user account
 	IsAuthenticated bool
 
@@ -266,16 +198,10 @@ type Client struct {
 	// initial code to send on connect (for joining existing sessions)
 	InitialCode string
 
-	// current strudel ID (nil for scratch/anonymous context)
-	CurrentStrudelID *string
-
-	// initial conversation history to send on connect
-	InitialConversationHistory []SessionStateMessage
-
 	// initial chat history to send on connect
 	InitialChatHistory []SessionStateChatMessage
 
-	// webSocket connection
+	// websocket connection
 	conn *websocket.Conn
 
 	// hub reference for message broadcasting
@@ -292,9 +218,6 @@ type Client struct {
 
 	// rate limiting: code update timestamps (sliding window)
 	codeUpdateTimestamps []time.Time
-
-	// rate limiting: agent request timestamps (sliding window)
-	agentRequestTimestamps []time.Time
 
 	// rate limiting: chat message timestamps (sliding window)
 	chatMessageTimestamps []time.Time

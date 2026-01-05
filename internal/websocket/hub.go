@@ -94,19 +94,12 @@ func (h *Hub) registerClient(client *Client) {
 		})
 	}
 
-	// filter conversation history for viewers (they don't see AI conversation)
-	conversationHistory := client.InitialConversationHistory
-	if client.Role == "viewer" {
-		conversationHistory = []SessionStateMessage{}
-	}
-
 	// send session_state to connecting client
 	sessionStateMsg, err := NewMessage(TypeSessionState, client.SessionID, client.UserID, SessionStatePayload{
-		Code:                client.InitialCode,
-		YourRole:            client.Role,
-		Participants:        participants,
-		ConversationHistory: conversationHistory,
-		ChatHistory:         client.InitialChatHistory,
+		Code:         client.InitialCode,
+		YourRole:     client.Role,
+		Participants: participants,
+		ChatHistory:  client.InitialChatHistory,
 	})
 	if err == nil {
 		if sendErr := client.Send(sessionStateMsg); sendErr != nil {

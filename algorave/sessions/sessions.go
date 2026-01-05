@@ -551,8 +551,8 @@ func (r *repository) RevokeInviteToken(ctx context.Context, tokenID string) erro
 }
 
 // retrieves chat messages for a session
-func (r *repository) GetMessages(ctx context.Context, sessionID string, limit int) ([]*Message, error) {
-	rows, err := r.db.Query(ctx, queryGetMessages, sessionID, limit)
+func (r *repository) GetChatMessages(ctx context.Context, sessionID string, limit int) ([]*Message, error) {
+	rows, err := r.db.Query(ctx, queryGetChatMessages, sessionID, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -567,10 +567,7 @@ func (r *repository) GetMessages(ctx context.Context, sessionID string, limit in
 			&m.SessionID,
 			&m.UserID,
 			&m.Role,
-			&m.MessageType,
 			&m.Content,
-			&m.IsActionable,
-			&m.IsCodeResponse,
 			&m.DisplayName,
 			&m.AvatarURL,
 			&m.CreatedAt,
@@ -588,55 +585,10 @@ func (r *repository) GetMessages(ctx context.Context, sessionID string, limit in
 	return messages, nil
 }
 
-func (r *repository) CreateMessage(
+// adds a chat message to the session
+func (r *repository) AddChatMessage(
 	ctx context.Context,
-	sessionID string,
-	userID *string,
-	role, messageType, content string,
-	isActionable, isCodeResponse bool,
-	displayName, avatarURL *string,
-) (*Message, error) {
-	var message Message
-
-	err := r.db.QueryRow(
-		ctx,
-		queryCreateMessage,
-		sessionID,
-		userID,
-		role,
-		messageType,
-		content,
-		isActionable,
-		isCodeResponse,
-		displayName,
-		avatarURL,
-	).Scan(
-		&message.ID,
-		&message.SessionID,
-		&message.UserID,
-		&message.Role,
-		&message.MessageType,
-		&message.Content,
-		&message.IsActionable,
-		&message.IsCodeResponse,
-		&message.DisplayName,
-		&message.AvatarURL,
-		&message.CreatedAt,
-	)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &message, nil
-}
-
-// adds a message to the session and returns it
-func (r *repository) AddMessage(
-	ctx context.Context,
-	sessionID, userID, role, messageType, content string,
-	isActionable, isCodeResponse bool,
-	displayName, avatarURL string,
+	sessionID, userID, content, displayName, avatarURL string,
 ) (*Message, error) {
 	// convert empty strings to nil pointers
 	var userIDPtr *string
@@ -657,14 +609,10 @@ func (r *repository) AddMessage(
 	var message Message
 	err := r.db.QueryRow(
 		ctx,
-		queryCreateMessage,
+		queryAddChatMessage,
 		sessionID,
 		userIDPtr,
-		role,
-		messageType,
 		content,
-		isActionable,
-		isCodeResponse,
 		displayNamePtr,
 		avatarURLPtr,
 	).Scan(
@@ -672,10 +620,7 @@ func (r *repository) AddMessage(
 		&message.SessionID,
 		&message.UserID,
 		&message.Role,
-		&message.MessageType,
 		&message.Content,
-		&message.IsActionable,
-		&message.IsCodeResponse,
 		&message.DisplayName,
 		&message.AvatarURL,
 		&message.CreatedAt,

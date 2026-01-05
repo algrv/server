@@ -525,7 +525,7 @@ func LeaveSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 
 // GetSessionMessagesHandler godoc
 // @Summary Get session chat messages
-// @Description Retrieve chat messages from a session
+// @Description Retrieve chat messages from a session (AI conversations are strudel-scoped and fetched separately)
 // @Tags sessions
 // @Produce json
 // @Param id path string true "Session ID (UUID)"
@@ -554,7 +554,8 @@ func GetSessionMessagesHandler(sessionRepo sessions.Repository) gin.HandlerFunc 
 			}
 		}
 
-		messages, err := sessionRepo.GetMessages(c.Request.Context(), sessionID, limit)
+		// get chat messages (AI conversations are strudel-scoped and not returned here)
+		messages, err := sessionRepo.GetChatMessages(c.Request.Context(), sessionID, limit)
 		if err != nil {
 			errors.InternalError(c, "failed to retrieve messages", err)
 			return

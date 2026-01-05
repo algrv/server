@@ -26,6 +26,6 @@ func RegisterRoutes(router *gin.Engine, server *Server) {
 		collaboration.RegisterRoutes(v1, server.sessionRepo, server.hub)
 		users.RegisterRoutes(v1, server.db)
 		admin.RegisterRoutes(v1, server.strudelRepo)
-		websocket.RegisterRoutes(v1, server.hub, server.sessionRepo, server.userRepo)
+		websocket.RegisterRoutes(v1, server.hub, server.sessionRepo)
 	}
 }

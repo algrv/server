@@ -84,8 +84,8 @@ func (b *SessionBuffer) GetCode(ctx context.Context, sessionID string) (string, 
 	return code, nil
 }
 
-// appends a message to the session's message buffer
-func (b *SessionBuffer) AddMessage(ctx context.Context, msg *BufferedMessage) error {
+// appends a chat message to the session's message buffer
+func (b *SessionBuffer) AddChatMessage(ctx context.Context, msg *BufferedChatMessage) error {
 	msgJSON, err := json.Marshal(msg)
 	if err != nil {
 		return fmt.Errorf("failed to marshal message: %w", err)
@@ -140,9 +140,8 @@ func (b *SessionBuffer) FlushCode(ctx context.Context, sessionID string) (string
 	return code, nil
 }
 
-// retrieves messages for a session WITHOUT clearing them
-// use this for reads that need to see unflushed messages
-func (b *SessionBuffer) GetBufferedMessages(ctx context.Context, sessionID string) ([]BufferedMessage, error) {
+// retrieves chat messages for a session WITHOUT clearing them
+func (b *SessionBuffer) GetBufferedChatMessages(ctx context.Context, sessionID string) ([]BufferedChatMessage, error) {
 	msgKey := fmt.Sprintf(keySessionMessages, sessionID)
 
 	msgJSONs, err := b.client.LRange(ctx, msgKey, 0, -1).Result()
@@ -154,9 +153,9 @@ func (b *SessionBuffer) GetBufferedMessages(ctx context.Context, sessionID strin
 		return nil, nil
 	}
 
-	messages := make([]BufferedMessage, 0, len(msgJSONs))
+	messages := make([]BufferedChatMessage, 0, len(msgJSONs))
 	for _, msgJSON := range msgJSONs {
-		var msg BufferedMessage
+		var msg BufferedChatMessage
 		if err := json.Unmarshal([]byte(msgJSON), &msg); err != nil {
 			logger.ErrorErr(err, "failed to unmarshal buffered message", "session_id", sessionID)
 			continue
@@ -167,9 +166,9 @@ func (b *SessionBuffer) GetBufferedMessages(ctx context.Context, sessionID strin
 	return messages, nil
 }
 
-// retrieves and clears all messages for a session
+// retrieves and clears all chat messages for a session
 // returns the messages and removes the session from dirty set
-func (b *SessionBuffer) FlushMessages(ctx context.Context, sessionID string) ([]BufferedMessage, error) {
+func (b *SessionBuffer) FlushChatMessages(ctx context.Context, sessionID string) ([]BufferedChatMessage, error) {
 	msgKey := fmt.Sprintf(keySessionMessages, sessionID)
 
 	// get all messages
@@ -184,9 +183,9 @@ func (b *SessionBuffer) FlushMessages(ctx context.Context, sessionID string) ([]
 	}
 
 	// parse messages
-	messages := make([]BufferedMessage, 0, len(msgJSONs))
+	messages := make([]BufferedChatMessage, 0, len(msgJSONs))
 	for _, msgJSON := range msgJSONs {
-		var msg BufferedMessage
+		var msg BufferedChatMessage
 		if err := json.Unmarshal([]byte(msgJSON), &msg); err != nil {
 			logger.ErrorErr(err, "failed to unmarshal buffered message", "session_id", sessionID)
 			continue
