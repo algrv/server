@@ -99,3 +99,74 @@ func (s *Service) GetRecentAttributions(ctx context.Context, userID string, limi
 
 	return attributions, rows.Err()
 }
+
+// gets stats for a specific strudel
+func (s *Service) GetStrudelStats(ctx context.Context, strudelID string) (*StrudelStats, error) {
+	var stats StrudelStats
+
+	err := s.db.QueryRow(ctx, queryGetStrudelStats, strudelID).Scan(
+		&stats.TotalUses,
+		&stats.UniqueUsers,
+		&stats.LastUsedAt,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &stats, nil
+}
+
+// gets recent uses of a specific strudel (unique target strudels)
+func (s *Service) GetStrudelRecentUses(ctx context.Context, strudelID string, limit int) ([]StrudelUse, error) {
+	rows, err := s.db.Query(ctx, queryGetStrudelRecentUses, strudelID, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+	var uses []StrudelUse
+
+	for rows.Next() {
+		var u StrudelUse
+		err := rows.Scan(
+			&u.ID,
+			&u.TargetStrudelID,
+			&u.TargetStrudelTitle,
+			&u.RequestingUserID,
+			&u.RequestingDisplayName,
+			&u.SimilarityScore,
+			&u.CreatedAt,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		uses = append(uses, u)
+	}
+
+	return uses, rows.Err()
+}
+
+// gets full stats response for a strudel
+func (s *Service) GetStrudelStatsResponse(ctx context.Context, strudelID string) (*StrudelStatsResponse, error) {
+	stats, err := s.GetStrudelStats(ctx, strudelID)
+	if err != nil {
+		return nil, err
+	}
+
+	uses, err := s.GetStrudelRecentUses(ctx, strudelID, 5)
+	if err != nil {
+		return nil, err
+	}
+
+	if uses == nil {
+		uses = []StrudelUse{}
+	}
+
+	return &StrudelStatsResponse{
+		Stats:      *stats,
+		RecentUses: uses,
+	}, nil
+}

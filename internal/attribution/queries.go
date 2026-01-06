@@ -32,4 +32,33 @@ const (
 		ORDER BY ra.created_at DESC
 		LIMIT $2
 	`
+
+	// per-strudel queries
+	queryGetStrudelStats = `
+		SELECT
+			COUNT(*) as total_uses,
+			COUNT(DISTINCT ra.requesting_user_id) as unique_users,
+			MAX(ra.created_at) as last_used_at
+		FROM rag_attributions ra
+		WHERE ra.source_strudel_id = $1
+	`
+
+	queryGetStrudelRecentUses = `
+		SELECT DISTINCT ON (target.id)
+			ra.id,
+			ra.target_strudel_id,
+			target.title as target_strudel_title,
+			ra.requesting_user_id,
+			u.display_name as requesting_display_name,
+			ra.similarity_score,
+			ra.created_at
+		FROM rag_attributions ra
+		LEFT JOIN user_strudels target ON ra.target_strudel_id = target.id
+		LEFT JOIN users u ON ra.requesting_user_id = u.id
+		WHERE ra.source_strudel_id = $1
+			AND ra.target_strudel_id IS NOT NULL
+			AND target.is_public = true
+		ORDER BY target.id, ra.created_at DESC
+		LIMIT $2
+	`
 )

@@ -24,7 +24,7 @@ func RegisterRoutes(router *gin.Engine, server *Server) {
 		v1.GET("/ping", health.PingHandler)
 
 		auth.RegisterRoutes(v1, server.userRepo)
-		strudels.RegisterRoutes(v1, server.strudelRepo)
+		strudels.RegisterRoutes(v1, server.strudelRepo, server.services.Attribution)
 		collaboration.RegisterRoutes(v1, server.sessionRepo, server.hub)
 		users.RegisterRoutes(v1, server.db)
 		admin.RegisterRoutes(v1, server.strudelRepo)

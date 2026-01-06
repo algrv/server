@@ -7,6 +7,7 @@ import (
 
 	"github.com/algrv/server/algorave/strudels"
 	"github.com/algrv/server/api/rest/pagination"
+	"github.com/algrv/server/internal/attribution"
 	"github.com/algrv/server/internal/auth"
 	"github.com/algrv/server/internal/errors"
 	"github.com/gin-gonic/gin"
@@ -389,4 +390,40 @@ func parseFilterParams(c *gin.Context) strudels.ListFilter {
 	}
 
 	return filter
+}
+
+// GetStrudelStatsHandler godoc
+// @Summary Get strudel usage stats
+// @Description Get attribution stats for a public strudel (how many times it was used as RAG context)
+// @Tags strudels
+// @Produce json
+// @Param id path string true "Strudel ID (UUID)"
+// @Success 200 {object} attribution.StrudelStatsResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /api/v1/public/strudels/{id}/stats [get]
+func GetStrudelStatsHandler(strudelRepo *strudels.Repository, attrService *attribution.Service) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		strudelID := c.Param("id")
+
+		if !errors.IsValidUUID(strudelID) {
+			errors.BadRequest(c, "invalid strudel ID format", nil)
+			return
+		}
+
+		// verify strudel exists and is public
+		_, err := strudelRepo.GetPublic(c.Request.Context(), strudelID)
+		if err != nil {
+			errors.NotFound(c, "strudel")
+			return
+		}
+
+		stats, err := attrService.GetStrudelStatsResponse(c.Request.Context(), strudelID)
+		if err != nil {
+			errors.InternalError(c, "failed to get strudel stats", err)
+			return
+		}
+
+		c.JSON(http.StatusOK, stats)
+	}
 }

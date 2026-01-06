@@ -2,11 +2,12 @@ package strudels
 
 import (
 	"github.com/algrv/server/algorave/strudels"
+	"github.com/algrv/server/internal/attribution"
 	"github.com/algrv/server/internal/auth"
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterRoutes(router *gin.RouterGroup, strudelRepo *strudels.Repository) {
+func RegisterRoutes(router *gin.RouterGroup, strudelRepo *strudels.Repository, attrService *attribution.Service) {
 	strudelsGroup := router.Group("/strudels")
 	strudelsGroup.Use(auth.AuthMiddleware())
 	{
@@ -22,4 +23,5 @@ func RegisterRoutes(router *gin.RouterGroup, strudelRepo *strudels.Repository) {
 	router.GET("/public/strudels", ListPublicStrudelsHandler(strudelRepo))
 	router.GET("/public/strudels/tags", ListPublicTagsHandler(strudelRepo))
 	router.GET("/public/strudels/:id", GetPublicStrudelHandler(strudelRepo))
+	router.GET("/public/strudels/:id/stats", GetStrudelStatsHandler(strudelRepo, attrService))
 }
