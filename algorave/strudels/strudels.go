@@ -56,6 +56,7 @@ func (r *Repository) Create(
 		req.IsPublic,
 		req.AllowTraining,
 		aiContributionScore,
+		req.ForkedFrom,
 		req.Description,
 		tags,
 		categories,
@@ -69,6 +70,7 @@ func (r *Repository) Create(
 		&strudel.AllowTraining,
 		&strudel.UseInTraining,
 		&strudel.AIContributionScore,
+		&strudel.ForkedFrom,
 		&strudel.Description,
 		&strudel.Tags,
 		&strudel.Categories,
@@ -111,7 +113,7 @@ func (r *Repository) List(ctx context.Context, userID string, limit, offset int,
 
 	// build list query
 	listQuery := fmt.Sprintf(`
-		SELECT id, user_id, title, code, is_public, allow_training, use_in_training, ai_contribution_score, description, tags, categories, conversation_history, created_at, updated_at
+		SELECT id, user_id, title, code, is_public, allow_training, use_in_training, ai_contribution_score, forked_from, description, tags, categories, conversation_history, created_at, updated_at
 		FROM user_strudels
 		%s
 		ORDER BY created_at DESC
@@ -138,6 +140,7 @@ func (r *Repository) List(ctx context.Context, userID string, limit, offset int,
 			&s.AllowTraining,
 			&s.UseInTraining,
 			&s.AIContributionScore,
+			&s.ForkedFrom,
 			&s.Description,
 			&s.Tags,
 			&s.Categories,
@@ -186,7 +189,7 @@ func (r *Repository) ListPublic(ctx context.Context, limit, offset int, filter L
 
 	// build list query
 	listQuery := fmt.Sprintf(`
-		SELECT id, user_id, title, code, is_public, allow_training, use_in_training, ai_contribution_score, description, tags, categories, conversation_history, created_at, updated_at
+		SELECT id, user_id, title, code, is_public, allow_training, use_in_training, ai_contribution_score, forked_from, description, tags, categories, conversation_history, created_at, updated_at
 		FROM user_strudels
 		%s
 		ORDER BY created_at DESC
@@ -213,6 +216,7 @@ func (r *Repository) ListPublic(ctx context.Context, limit, offset int, filter L
 			&s.AllowTraining,
 			&s.UseInTraining,
 			&s.AIContributionScore,
+			&s.ForkedFrom,
 			&s.Description,
 			&s.Tags,
 			&s.Categories,
@@ -246,6 +250,7 @@ func (r *Repository) GetPublic(ctx context.Context, strudelID string) (*Strudel,
 		&strudel.AllowTraining,
 		&strudel.UseInTraining,
 		&strudel.AIContributionScore,
+		&strudel.ForkedFrom,
 		&strudel.Description,
 		&strudel.Tags,
 		&strudel.Categories,
@@ -273,6 +278,7 @@ func (r *Repository) Get(ctx context.Context, strudelID, userID string) (*Strude
 		&strudel.AllowTraining,
 		&strudel.UseInTraining,
 		&strudel.AIContributionScore,
+		&strudel.ForkedFrom,
 		&strudel.Description,
 		&strudel.Tags,
 		&strudel.Categories,
@@ -331,6 +337,7 @@ func (r *Repository) Update(
 		&strudel.AllowTraining,
 		&strudel.UseInTraining,
 		&strudel.AIContributionScore,
+		&strudel.ForkedFrom,
 		&strudel.Description,
 		&strudel.Tags,
 		&strudel.Categories,
@@ -381,6 +388,7 @@ func (r *Repository) ListTrainableWithoutEmbedding(ctx context.Context, limit in
 			&s.AllowTraining,
 			&s.UseInTraining,
 			&s.AIContributionScore,
+			&s.ForkedFrom,
 			&s.Description,
 			&s.Tags,
 			&s.Categories,
@@ -420,6 +428,7 @@ func (r *Repository) AdminGetStrudel(ctx context.Context, strudelID string) (*St
 		&strudel.AllowTraining,
 		&strudel.UseInTraining,
 		&strudel.AIContributionScore,
+		&strudel.ForkedFrom,
 		&strudel.Description,
 		&strudel.Tags,
 		&strudel.Categories,
@@ -448,6 +457,7 @@ func (r *Repository) AdminSetUseInTraining(ctx context.Context, strudelID string
 		&strudel.AllowTraining,
 		&strudel.UseInTraining,
 		&strudel.AIContributionScore,
+		&strudel.ForkedFrom,
 		&strudel.Description,
 		&strudel.Tags,
 		&strudel.Categories,

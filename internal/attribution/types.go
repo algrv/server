@@ -23,6 +23,7 @@ type StrudelStats struct {
 	TotalUses   int        `json:"total_uses"`
 	UniqueUsers int        `json:"unique_users"`
 	LastUsedAt  *time.Time `json:"last_used_at,omitempty"`
+	ForkCount   int        `json:"fork_count"`
 }
 
 type StrudelUse struct {

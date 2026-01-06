@@ -149,12 +149,29 @@ func (s *Service) GetStrudelRecentUses(ctx context.Context, strudelID string, li
 	return uses, rows.Err()
 }
 
+// gets fork count for a strudel
+func (s *Service) GetStrudelForkCount(ctx context.Context, strudelID string) (int, error) {
+	var count int
+	err := s.db.QueryRow(ctx, queryGetStrudelForkCount, strudelID).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
 // gets full stats response for a strudel
 func (s *Service) GetStrudelStatsResponse(ctx context.Context, strudelID string) (*StrudelStatsResponse, error) {
 	stats, err := s.GetStrudelStats(ctx, strudelID)
 	if err != nil {
 		return nil, err
 	}
+
+	// get fork count
+	forkCount, err := s.GetStrudelForkCount(ctx, strudelID)
+	if err != nil {
+		return nil, err
+	}
+	stats.ForkCount = forkCount
 
 	uses, err := s.GetStrudelRecentUses(ctx, strudelID, 5)
 	if err != nil {

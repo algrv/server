@@ -61,4 +61,8 @@ const (
 		ORDER BY target.id, ra.created_at DESC
 		LIMIT $2
 	`
+
+	queryGetStrudelForkCount = `
+		SELECT COUNT(*) FROM user_strudels WHERE forked_from = $1
+	`
 )

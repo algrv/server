@@ -22,6 +22,7 @@ type Strudel struct {
 	AllowTraining       bool                `json:"allow_training"`
 	UseInTraining       bool                `json:"-"` // admin-only, not exposed to users
 	AIContributionScore float64             `json:"ai_contribution_score"`
+	ForkedFrom          *string             `json:"forked_from,omitempty"`
 	Description         string              `json:"description,omitempty"`
 	Tags                []string            `json:"tags,omitempty"`
 	Categories          []string            `json:"categories,omitempty"`
@@ -64,6 +65,7 @@ type CreateStrudelRequest struct {
 	Code                string              `json:"code" binding:"required,max=1048576"` // 1MB limit
 	IsPublic            bool                `json:"is_public"`
 	AllowTraining       bool                `json:"allow_training"`
+	ForkedFrom          *string             `json:"forked_from,omitempty"`
 	Description         string              `json:"description,omitempty" binding:"max=2000"`
 	Tags                []string            `json:"tags,omitempty" binding:"max=20,dive,max=50"`       // max 20 tags, each max 50 chars
 	Categories          []string            `json:"categories,omitempty" binding:"max=10,dive,max=50"` // max 10 categories, each max 50 chars
