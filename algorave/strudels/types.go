@@ -21,7 +21,7 @@ type Strudel struct {
 	IsPublic            bool                `json:"is_public"`
 	AllowTraining       bool                `json:"allow_training"`
 	UseInTraining       bool                `json:"-"` // admin-only, not exposed to users
-	AIContributionScore float64             `json:"ai_contribution_score"`
+	AIAssistCount       int                 `json:"ai_assist_count"`
 	ForkedFrom          *string             `json:"forked_from,omitempty"`
 	Description         string              `json:"description,omitempty"`
 	Tags                []string            `json:"tags,omitempty"`

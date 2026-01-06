@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/algrv/server/internal/contribution"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -38,14 +37,13 @@ func (r *Repository) Create(
 		categories = []string{}
 	}
 
-	// calculate AI contribution score from conversation history
-	var aiCodeResponses []string
+	// count AI code responses from conversation history
+	aiAssistCount := 0
 	for _, msg := range req.ConversationHistory {
-		if msg.Role == "assistant" && msg.Content != "" {
-			aiCodeResponses = append(aiCodeResponses, msg.Content)
+		if msg.IsCodeResponse {
+			aiAssistCount++
 		}
 	}
-	aiContributionScore := contribution.Calculate(req.Code, aiCodeResponses)
 
 	err := r.db.QueryRow(
 		ctx,
@@ -55,7 +53,7 @@ func (r *Repository) Create(
 		req.Code,
 		req.IsPublic,
 		req.AllowTraining,
-		aiContributionScore,
+		aiAssistCount,
 		req.ForkedFrom,
 		req.Description,
 		tags,
@@ -69,7 +67,7 @@ func (r *Repository) Create(
 		&strudel.IsPublic,
 		&strudel.AllowTraining,
 		&strudel.UseInTraining,
-		&strudel.AIContributionScore,
+		&strudel.AIAssistCount,
 		&strudel.ForkedFrom,
 		&strudel.Description,
 		&strudel.Tags,
@@ -113,7 +111,7 @@ func (r *Repository) List(ctx context.Context, userID string, limit, offset int,
 
 	// build list query
 	listQuery := fmt.Sprintf(`
-		SELECT id, user_id, title, code, is_public, allow_training, use_in_training, ai_contribution_score, forked_from, description, tags, categories, conversation_history, created_at, updated_at
+		SELECT id, user_id, title, code, is_public, allow_training, use_in_training, ai_assist_count, forked_from, description, tags, categories, conversation_history, created_at, updated_at
 		FROM user_strudels
 		%s
 		ORDER BY created_at DESC
@@ -139,7 +137,7 @@ func (r *Repository) List(ctx context.Context, userID string, limit, offset int,
 			&s.IsPublic,
 			&s.AllowTraining,
 			&s.UseInTraining,
-			&s.AIContributionScore,
+			&s.AIAssistCount,
 			&s.ForkedFrom,
 			&s.Description,
 			&s.Tags,
@@ -189,7 +187,7 @@ func (r *Repository) ListPublic(ctx context.Context, limit, offset int, filter L
 
 	// build list query
 	listQuery := fmt.Sprintf(`
-		SELECT id, user_id, title, code, is_public, allow_training, use_in_training, ai_contribution_score, forked_from, description, tags, categories, conversation_history, created_at, updated_at
+		SELECT id, user_id, title, code, is_public, allow_training, use_in_training, ai_assist_count, forked_from, description, tags, categories, conversation_history, created_at, updated_at
 		FROM user_strudels
 		%s
 		ORDER BY created_at DESC
@@ -215,7 +213,7 @@ func (r *Repository) ListPublic(ctx context.Context, limit, offset int, filter L
 			&s.IsPublic,
 			&s.AllowTraining,
 			&s.UseInTraining,
-			&s.AIContributionScore,
+			&s.AIAssistCount,
 			&s.ForkedFrom,
 			&s.Description,
 			&s.Tags,
@@ -249,7 +247,7 @@ func (r *Repository) GetPublic(ctx context.Context, strudelID string) (*Strudel,
 		&strudel.IsPublic,
 		&strudel.AllowTraining,
 		&strudel.UseInTraining,
-		&strudel.AIContributionScore,
+		&strudel.AIAssistCount,
 		&strudel.ForkedFrom,
 		&strudel.Description,
 		&strudel.Tags,
@@ -277,7 +275,7 @@ func (r *Repository) Get(ctx context.Context, strudelID, userID string) (*Strude
 		&strudel.IsPublic,
 		&strudel.AllowTraining,
 		&strudel.UseInTraining,
-		&strudel.AIContributionScore,
+		&strudel.AIAssistCount,
 		&strudel.ForkedFrom,
 		&strudel.Description,
 		&strudel.Tags,
@@ -301,17 +299,16 @@ func (r *Repository) Update(
 ) (*Strudel, error) {
 	var strudel Strudel
 
-	// calculate AI contribution score if code and conversation history provided
-	var aiContributionScore *float64
-	if req.Code != nil && len(req.ConversationHistory) > 0 {
-		var aiCodeResponses []string
+	// count AI code responses if conversation history provided
+	var aiAssistCount *int
+	if len(req.ConversationHistory) > 0 {
+		count := 0
 		for _, msg := range req.ConversationHistory {
-			if msg.Role == "assistant" && msg.Content != "" {
-				aiCodeResponses = append(aiCodeResponses, msg.Content)
+			if msg.IsCodeResponse {
+				count++
 			}
 		}
-		score := contribution.Calculate(*req.Code, aiCodeResponses)
-		aiContributionScore = &score
+		aiAssistCount = &count
 	}
 
 	err := r.db.QueryRow(
@@ -321,7 +318,7 @@ func (r *Repository) Update(
 		req.Code,
 		req.IsPublic,
 		req.AllowTraining,
-		aiContributionScore,
+		aiAssistCount,
 		req.Description,
 		req.Tags,
 		req.Categories,
@@ -336,7 +333,7 @@ func (r *Repository) Update(
 		&strudel.IsPublic,
 		&strudel.AllowTraining,
 		&strudel.UseInTraining,
-		&strudel.AIContributionScore,
+		&strudel.AIAssistCount,
 		&strudel.ForkedFrom,
 		&strudel.Description,
 		&strudel.Tags,
@@ -387,7 +384,7 @@ func (r *Repository) ListTrainableWithoutEmbedding(ctx context.Context, limit in
 			&s.IsPublic,
 			&s.AllowTraining,
 			&s.UseInTraining,
-			&s.AIContributionScore,
+			&s.AIAssistCount,
 			&s.ForkedFrom,
 			&s.Description,
 			&s.Tags,
@@ -427,7 +424,7 @@ func (r *Repository) AdminGetStrudel(ctx context.Context, strudelID string) (*St
 		&strudel.IsPublic,
 		&strudel.AllowTraining,
 		&strudel.UseInTraining,
-		&strudel.AIContributionScore,
+		&strudel.AIAssistCount,
 		&strudel.ForkedFrom,
 		&strudel.Description,
 		&strudel.Tags,
@@ -456,7 +453,7 @@ func (r *Repository) AdminSetUseInTraining(ctx context.Context, strudelID string
 		&strudel.IsPublic,
 		&strudel.AllowTraining,
 		&strudel.UseInTraining,
-		&strudel.AIContributionScore,
+		&strudel.AIAssistCount,
 		&strudel.ForkedFrom,
 		&strudel.Description,
 		&strudel.Tags,
