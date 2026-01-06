@@ -88,7 +88,9 @@ func (s *Service) ListForUser(ctx context.Context, userID string, limit int, unr
 		}
 
 		if len(dataJSON) > 0 {
-			json.Unmarshal(dataJSON, &n.Data)
+			if err := json.Unmarshal(dataJSON, &n.Data); err != nil {
+				n.Data = nil // ignore malformed JSON
+			}
 		}
 
 		notifications = append(notifications, n)

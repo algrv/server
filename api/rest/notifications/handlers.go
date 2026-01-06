@@ -12,9 +12,15 @@ import (
 
 func ListHandler(svc *notifications.Service) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		userID, exists := c.Get("user_id")
+		userIDVal, exists := c.Get("user_id")
 		if !exists {
 			errors.Unauthorized(c, "authentication required")
+			return
+		}
+
+		userID, ok := userIDVal.(string)
+		if !ok {
+			errors.Unauthorized(c, "invalid user ID")
 			return
 		}
 
@@ -26,16 +32,19 @@ func ListHandler(svc *notifications.Service) gin.HandlerFunc {
 		}
 
 		unreadOnly := c.Query("unread") == "true"
-
-		notifs, err := svc.ListForUser(c.Request.Context(), userID.(string), limit, unreadOnly)
+		notifs, err := svc.ListForUser(c.Request.Context(), userID, limit, unreadOnly)
 		if err != nil {
 			errors.InternalError(c, "failed to fetch notifications", err)
 			return
 		}
 
-		unreadCount, _ := svc.GetUnreadCount(c.Request.Context(), userID.(string))
+		unreadCount, err := svc.GetUnreadCount(c.Request.Context(), userID)
+		if err != nil {
+			unreadCount = 0
+		}
 
 		response := make([]NotificationResponse, 0, len(notifs))
+
 		for _, n := range notifs {
 			response = append(response, NotificationResponse{
 				ID:        n.ID,
@@ -57,9 +66,14 @@ func ListHandler(svc *notifications.Service) gin.HandlerFunc {
 
 func MarkReadHandler(svc *notifications.Service) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		userID, exists := c.Get("user_id")
+		userIDVal, exists := c.Get("user_id")
 		if !exists {
 			errors.Unauthorized(c, "authentication required")
+			return
+		}
+		userID, ok := userIDVal.(string)
+		if !ok {
+			errors.Unauthorized(c, "invalid user ID")
 			return
 		}
 
@@ -69,7 +83,7 @@ func MarkReadHandler(svc *notifications.Service) gin.HandlerFunc {
 			return
 		}
 
-		if err := svc.MarkRead(c.Request.Context(), userID.(string), notificationID); err != nil {
+		if err := svc.MarkRead(c.Request.Context(), userID, notificationID); err != nil {
 			errors.InternalError(c, "failed to mark notification as read", err)
 			return
 		}
@@ -80,13 +94,19 @@ func MarkReadHandler(svc *notifications.Service) gin.HandlerFunc {
 
 func MarkAllReadHandler(svc *notifications.Service) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		userID, exists := c.Get("user_id")
+		userIDVal, exists := c.Get("user_id")
 		if !exists {
 			errors.Unauthorized(c, "authentication required")
 			return
 		}
 
-		if err := svc.MarkAllRead(c.Request.Context(), userID.(string)); err != nil {
+		userID, ok := userIDVal.(string)
+		if !ok {
+			errors.Unauthorized(c, "invalid user ID")
+			return
+		}
+
+		if err := svc.MarkAllRead(c.Request.Context(), userID); err != nil {
 			errors.InternalError(c, "failed to mark notifications as read", err)
 			return
 		}
@@ -97,13 +117,19 @@ func MarkAllReadHandler(svc *notifications.Service) gin.HandlerFunc {
 
 func UnreadCountHandler(svc *notifications.Service) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		userID, exists := c.Get("user_id")
+		userIDVal, exists := c.Get("user_id")
 		if !exists {
 			errors.Unauthorized(c, "authentication required")
 			return
 		}
 
-		count, err := svc.GetUnreadCount(c.Request.Context(), userID.(string))
+		userID, ok := userIDVal.(string)
+		if !ok {
+			errors.Unauthorized(c, "invalid user ID")
+			return
+		}
+
+		count, err := svc.GetUnreadCount(c.Request.Context(), userID)
 		if err != nil {
 			errors.InternalError(c, "failed to get unread count", err)
 			return

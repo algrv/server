@@ -45,14 +45,16 @@ func (r *Repository) Create(
 		}
 	}
 
-	// if forked, inherit allow_training restriction from parent
-	allowTraining := req.AllowTraining
+	// if forked, inherit most restrictive cc_signal from parent
+	ccSignal := req.CCSignal
 	if req.ForkedFrom != nil {
-		var parentAllowTraining bool
-		err := r.db.QueryRow(ctx, queryGetParentAllowTraining, *req.ForkedFrom).Scan(&parentAllowTraining)
-		if err == nil && !parentAllowTraining {
-			// parent doesn't allow training, so fork can't either
-			allowTraining = false
+		var parentSignal *CCSignal
+		err := r.db.QueryRow(ctx, queryGetParentCCSignal, *req.ForkedFrom).Scan(&parentSignal)
+		if err == nil && parentSignal != nil {
+			// if parent has a signal, child must be at least as restrictive
+			if ccSignal == nil || parentSignal.MoreRestrictiveThan(*ccSignal) {
+				ccSignal = parentSignal
+			}
 		}
 	}
 
@@ -63,7 +65,7 @@ func (r *Repository) Create(
 		req.Title,
 		req.Code,
 		req.IsPublic,
-		allowTraining,
+		ccSignal,
 		aiAssistCount,
 		req.ForkedFrom,
 		req.Description,
@@ -76,7 +78,7 @@ func (r *Repository) Create(
 		&strudel.Title,
 		&strudel.Code,
 		&strudel.IsPublic,
-		&strudel.AllowTraining,
+		&strudel.CCSignal,
 		&strudel.UseInTraining,
 		&strudel.AIAssistCount,
 		&strudel.ForkedFrom,
@@ -122,7 +124,7 @@ func (r *Repository) List(ctx context.Context, userID string, limit, offset int,
 
 	// build list query
 	listQuery := fmt.Sprintf(`
-		SELECT id, user_id, title, code, is_public, allow_training, use_in_training, ai_assist_count, forked_from, description, tags, categories, conversation_history, created_at, updated_at
+		SELECT id, user_id, title, code, is_public, cc_signal, use_in_training, ai_assist_count, forked_from, description, tags, categories, conversation_history, created_at, updated_at
 		FROM user_strudels
 		%s
 		ORDER BY created_at DESC
@@ -146,7 +148,7 @@ func (r *Repository) List(ctx context.Context, userID string, limit, offset int,
 			&s.Title,
 			&s.Code,
 			&s.IsPublic,
-			&s.AllowTraining,
+			&s.CCSignal,
 			&s.UseInTraining,
 			&s.AIAssistCount,
 			&s.ForkedFrom,
@@ -198,7 +200,7 @@ func (r *Repository) ListPublic(ctx context.Context, limit, offset int, filter L
 
 	// build list query
 	listQuery := fmt.Sprintf(`
-		SELECT id, user_id, title, code, is_public, allow_training, use_in_training, ai_assist_count, forked_from, description, tags, categories, conversation_history, created_at, updated_at
+		SELECT id, user_id, title, code, is_public, cc_signal, use_in_training, ai_assist_count, forked_from, description, tags, categories, conversation_history, created_at, updated_at
 		FROM user_strudels
 		%s
 		ORDER BY created_at DESC
@@ -222,7 +224,7 @@ func (r *Repository) ListPublic(ctx context.Context, limit, offset int, filter L
 			&s.Title,
 			&s.Code,
 			&s.IsPublic,
-			&s.AllowTraining,
+			&s.CCSignal,
 			&s.UseInTraining,
 			&s.AIAssistCount,
 			&s.ForkedFrom,
@@ -256,7 +258,7 @@ func (r *Repository) GetPublic(ctx context.Context, strudelID string) (*Strudel,
 		&strudel.Title,
 		&strudel.Code,
 		&strudel.IsPublic,
-		&strudel.AllowTraining,
+		&strudel.CCSignal,
 		&strudel.UseInTraining,
 		&strudel.AIAssistCount,
 		&strudel.ForkedFrom,
@@ -284,7 +286,7 @@ func (r *Repository) Get(ctx context.Context, strudelID, userID string) (*Strude
 		&strudel.Title,
 		&strudel.Code,
 		&strudel.IsPublic,
-		&strudel.AllowTraining,
+		&strudel.CCSignal,
 		&strudel.UseInTraining,
 		&strudel.AIAssistCount,
 		&strudel.ForkedFrom,
@@ -328,7 +330,7 @@ func (r *Repository) Update(
 		req.Title,
 		req.Code,
 		req.IsPublic,
-		req.AllowTraining,
+		req.CCSignal,
 		aiAssistCount,
 		req.Description,
 		req.Tags,
@@ -342,7 +344,7 @@ func (r *Repository) Update(
 		&strudel.Title,
 		&strudel.Code,
 		&strudel.IsPublic,
-		&strudel.AllowTraining,
+		&strudel.CCSignal,
 		&strudel.UseInTraining,
 		&strudel.AIAssistCount,
 		&strudel.ForkedFrom,
@@ -393,7 +395,7 @@ func (r *Repository) ListTrainableWithoutEmbedding(ctx context.Context, limit in
 			&s.Title,
 			&s.Code,
 			&s.IsPublic,
-			&s.AllowTraining,
+			&s.CCSignal,
 			&s.UseInTraining,
 			&s.AIAssistCount,
 			&s.ForkedFrom,
@@ -433,7 +435,7 @@ func (r *Repository) AdminGetStrudel(ctx context.Context, strudelID string) (*St
 		&strudel.Title,
 		&strudel.Code,
 		&strudel.IsPublic,
-		&strudel.AllowTraining,
+		&strudel.CCSignal,
 		&strudel.UseInTraining,
 		&strudel.AIAssistCount,
 		&strudel.ForkedFrom,
@@ -462,7 +464,7 @@ func (r *Repository) AdminSetUseInTraining(ctx context.Context, strudelID string
 		&strudel.Title,
 		&strudel.Code,
 		&strudel.IsPublic,
-		&strudel.AllowTraining,
+		&strudel.CCSignal,
 		&strudel.UseInTraining,
 		&strudel.AIAssistCount,
 		&strudel.ForkedFrom,
@@ -638,14 +640,14 @@ func (r *Repository) GetStrudelMessages(ctx context.Context, strudelID string, l
 	return messages, nil
 }
 
-// GetStrudelAllowTraining returns whether a strudel allows AI training
-func (r *Repository) GetStrudelAllowTraining(ctx context.Context, strudelID string) (bool, error) {
-	var allowTraining bool
-	err := r.db.QueryRow(ctx, queryGetParentAllowTraining, strudelID).Scan(&allowTraining)
+// GetStrudelCCSignal returns the CC Signal for a strudel
+func (r *Repository) GetStrudelCCSignal(ctx context.Context, strudelID string) (*CCSignal, error) {
+	var ccSignal *CCSignal
+	err := r.db.QueryRow(ctx, queryGetParentCCSignal, strudelID).Scan(&ccSignal)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
-	return allowTraining, nil
+	return ccSignal, nil
 }
 
 // GetStrudelForkedFrom returns the parent strudel ID if this is a fork

@@ -19,7 +19,7 @@ func New(db *pgxpool.Pool) *Service {
 // records that examples were used as RAG context
 // runs asynchronously to not block the agent response
 func (s *Service) RecordAttributions(
-	ctx context.Context,
+	_ context.Context,
 	examples []retriever.ExampleResult,
 	requestingUserID string,
 	targetStrudelID *string,

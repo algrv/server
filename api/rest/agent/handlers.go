@@ -41,11 +41,11 @@ func GenerateHandler(agentClient *agentcore.Agent, _ llm.LLM, strudelRepo *strud
 			return
 		}
 
-		// block AI for forks from strudels that don't allow training
+		// block AI for forks from strudels with 'no-ai' signal
 		// check client-provided forked_from_id (for drafts)
 		if req.ForkedFromID != "" {
-			parentAllowTraining, err := strudelRepo.GetStrudelAllowTraining(c.Request.Context(), req.ForkedFromID)
-			if err == nil && !parentAllowTraining {
+			parentCCSignal, err := strudelRepo.GetStrudelCCSignal(c.Request.Context(), req.ForkedFromID)
+			if err == nil && parentCCSignal != nil && *parentCCSignal == strudels.CCSignalNoAI {
 				errors.Forbidden(c, "AI assistant disabled - original author restricted AI use for this strudel")
 				return
 			}
@@ -55,8 +55,8 @@ func GenerateHandler(agentClient *agentcore.Agent, _ llm.LLM, strudelRepo *strud
 		if req.StrudelID != "" {
 			forkedFromID, err := strudelRepo.GetStrudelForkedFrom(c.Request.Context(), req.StrudelID)
 			if err == nil && forkedFromID != nil {
-				parentAllowTraining, err := strudelRepo.GetStrudelAllowTraining(c.Request.Context(), *forkedFromID)
-				if err == nil && !parentAllowTraining {
+				parentCCSignal, err := strudelRepo.GetStrudelCCSignal(c.Request.Context(), *forkedFromID)
+				if err == nil && parentCCSignal != nil && *parentCCSignal == strudels.CCSignalNoAI {
 					errors.Forbidden(c, "AI assistant disabled - original author restricted AI use for this strudel")
 					return
 				}
@@ -125,11 +125,16 @@ func GenerateHandler(agentClient *agentcore.Agent, _ llm.LLM, strudelRepo *strud
 		// record attributions if examples were used (runs async)
 		if attrService != nil && len(resp.Examples) > 0 {
 			userID, _ := c.Get("user_id")
-			userIDStr, _ := userID.(string)
+			userIDStr, ok := userID.(string)
+			if !ok {
+				userIDStr = ""
+			}
+
 			var targetStrudelID *string
 			if req.StrudelID != "" {
 				targetStrudelID = &req.StrudelID
 			}
+
 			attrService.RecordAttributions(c.Request.Context(), resp.Examples, userIDStr, targetStrudelID)
 		}
 

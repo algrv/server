@@ -9,6 +9,42 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+// CCSignal represents Creative Commons Signals for AI training consent
+type CCSignal string
+
+const (
+	CCSignalCredit    CCSignal = "cc-cr" // Credit: Allow AI use with attribution
+	CCSignalDirect    CCSignal = "cc-dc" // Credit + Direct: Attribution + financial/in-kind support
+	CCSignalEcosystem CCSignal = "cc-ec" // Credit + Ecosystem: Attribution + contribute to commons
+	CCSignalOpen      CCSignal = "cc-op" // Credit + Open: Attribution + keep derivatives open
+	CCSignalNoAI      CCSignal = "no-ai" // No AI: Explicitly opt-out of AI training
+)
+
+// signalRestrictiveness defines the restrictiveness order (higher = more restrictive)
+var signalRestrictiveness = map[CCSignal]int{
+	"":                0, // NULL - no preference
+	CCSignalCredit:    1,
+	CCSignalDirect:    2,
+	CCSignalEcosystem: 3,
+	CCSignalOpen:      4,
+	CCSignalNoAI:      5,
+}
+
+// MoreRestrictiveThan returns true if this signal is more restrictive than the other
+func (s CCSignal) MoreRestrictiveThan(other CCSignal) bool {
+	return signalRestrictiveness[s] > signalRestrictiveness[other]
+}
+
+// IsValid returns true if the signal is a valid CC Signal value
+func (s CCSignal) IsValid() bool {
+	switch s {
+	case CCSignalCredit, CCSignalDirect, CCSignalEcosystem, CCSignalOpen, CCSignalNoAI:
+		return true
+	default:
+		return false
+	}
+}
+
 type Repository struct {
 	db *pgxpool.Pool
 }
@@ -19,7 +55,7 @@ type Strudel struct {
 	Title               string              `json:"title"`
 	Code                string              `json:"code"`
 	IsPublic            bool                `json:"is_public"`
-	AllowTraining       bool                `json:"allow_training"`
+	CCSignal            *CCSignal           `json:"cc_signal,omitempty"`
 	UseInTraining       bool                `json:"-"` // admin-only, not exposed to users
 	AIAssistCount       int                 `json:"ai_assist_count"`
 	ForkedFrom          *string             `json:"forked_from,omitempty"`
@@ -64,7 +100,7 @@ type CreateStrudelRequest struct {
 	Title               string              `json:"title" binding:"required,max=200"`
 	Code                string              `json:"code" binding:"required,max=1048576"` // 1MB limit
 	IsPublic            bool                `json:"is_public"`
-	AllowTraining       bool                `json:"allow_training"`
+	CCSignal            *CCSignal           `json:"cc_signal,omitempty"`
 	ForkedFrom          *string             `json:"forked_from,omitempty"`
 	Description         string              `json:"description,omitempty" binding:"max=2000"`
 	Tags                []string            `json:"tags,omitempty" binding:"max=20,dive,max=50"`       // max 20 tags, each max 50 chars
@@ -76,7 +112,7 @@ type UpdateStrudelRequest struct {
 	Title               *string             `json:"title,omitempty" binding:"omitempty,max=200"`
 	Code                *string             `json:"code,omitempty" binding:"omitempty,max=1048576"` // 1MB limit
 	IsPublic            *bool               `json:"is_public,omitempty"`
-	AllowTraining       *bool               `json:"allow_training,omitempty"`
+	CCSignal            *CCSignal           `json:"cc_signal,omitempty"`
 	Description         *string             `json:"description,omitempty" binding:"omitempty,max=2000"`
 	Tags                []string            `json:"tags,omitempty" binding:"max=20,dive,max=50"`
 	Categories          []string            `json:"categories,omitempty" binding:"max=10,dive,max=50"`

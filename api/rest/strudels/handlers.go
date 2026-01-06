@@ -147,6 +147,7 @@ func GetStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 			Title:               strudel.Title,
 			Code:                strudel.Code,
 			IsPublic:            strudel.IsPublic,
+			CCSignal:            strudel.CCSignal,
 			Description:         strudel.Description,
 			Tags:                strudel.Tags,
 			Categories:          strudel.Categories,
