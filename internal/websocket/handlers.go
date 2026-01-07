@@ -95,6 +95,8 @@ func CodeUpdateHandler(sessionRepo sessions.Repository, sessionBuffer *buffer.Se
 						"source", payload.Source,
 						"delta_len", len(payload.Code)-len(previousCode),
 					)
+					// notify client that paste lock is active
+					sendPasteLockStatus(hub, client, true, "paste_detected")
 				}
 			}
 		} else {
@@ -110,6 +112,8 @@ func CodeUpdateHandler(sessionRepo sessions.Repository, sessionBuffer *buffer.Se
 						logger.Info("paste lock removed due to significant edits",
 							"session_id", client.SessionID,
 						)
+						// notify client that paste lock is lifted
+						sendPasteLockStatus(hub, client, false, "edits_sufficient")
 					}
 				} else {
 					// refresh TTL while still locked
@@ -284,6 +288,50 @@ func ChatHandler(sessionRepo sessions.Repository) MessageHandler {
 		// broadcast to all clients in the session (including sender)
 		hub.BroadcastToSession(client.SessionID, broadcastMsg, "")
 
+		return nil
+	}
+}
+
+// sendPasteLockStatus sends a paste lock status message to the client
+func sendPasteLockStatus(hub *Hub, client *Client, locked bool, reason string) {
+	payload := PasteLockChangedPayload{
+		Locked: locked,
+		Reason: reason,
+	}
+
+	msg, err := NewMessage(TypePasteLockChanged, client.SessionID, client.UserID, payload)
+	if err != nil {
+		logger.ErrorErr(err, "failed to create paste lock message",
+			"client_id", client.ID,
+			"session_id", client.SessionID,
+		)
+		return
+	}
+
+	// send only to the affected client (not broadcast)
+	if err := client.Send(msg); err != nil {
+		logger.ErrorErr(err, "failed to send paste lock message",
+			"client_id", client.ID,
+			"session_id", client.SessionID,
+		)
+	} else {
+		logger.Info("paste lock message sent",
+			"client_id", client.ID,
+			"session_id", client.SessionID,
+			"locked", locked,
+		)
+	}
+}
+
+// handles ping messages from clients (keep-alive)
+func PingHandler() MessageHandler {
+	return func(_ *Hub, client *Client, _ *Message) error {
+		// respond with pong
+		pongMsg, err := NewMessage(TypePong, client.SessionID, client.UserID, nil)
+		if err != nil {
+			return err
+		}
+		client.Send(pongMsg)
 		return nil
 	}
 }
