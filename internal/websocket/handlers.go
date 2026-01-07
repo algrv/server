@@ -96,6 +96,7 @@ func CodeUpdateHandler(sessionRepo sessions.Repository, sessionBuffer *buffer.Se
 					} else {
 						// check if this paste is from a no-ai strudel (permanent block)
 						reason := "paste_detected"
+
 						if strudelRepo != nil {
 							isNoAI, err := strudelRepo.PublicStrudelExistsWithCodeNoAI(ctx, payload.Code)
 							if err == nil && isNoAI {
