@@ -31,6 +31,8 @@ type StrudelDetailResponse struct {
 	Code                string                   `json:"code"`
 	IsPublic            bool                     `json:"is_public"`
 	CCSignal            *strudels.CCSignal       `json:"cc_signal,omitempty"`
+	ForkedFrom          *string                  `json:"forked_from,omitempty"`
+	ParentCCSignal      *strudels.CCSignal       `json:"parent_cc_signal,omitempty"`
 	Description         string                   `json:"description,omitempty"`
 	Tags                []string                 `json:"tags,omitempty"`
 	Categories          []string                 `json:"categories,omitempty"`

@@ -94,13 +94,27 @@ func CodeUpdateHandler(sessionRepo sessions.Repository, sessionBuffer *buffer.Se
 					if err := sessionBuffer.SetPasteLock(ctx, client.SessionID, payload.Code); err != nil {
 						logger.ErrorErr(err, "failed to set paste lock", "session_id", client.SessionID)
 					} else {
-						logger.Info("paste lock set",
-							"session_id", client.SessionID,
-							"source", payload.Source,
-							"delta_len", len(payload.Code)-len(previousCode),
-						)
+						// check if this paste is from a no-ai strudel (permanent block)
+						reason := "paste_detected"
+
+						if strudelRepo != nil {
+							isNoAI, err := strudelRepo.PublicStrudelExistsWithCodeNoAI(ctx, payload.Code)
+							if err == nil && isNoAI {
+								reason = "parent_no_ai"
+								logger.Info("paste lock set (parent has no-ai)",
+									"session_id", client.SessionID,
+									"source", payload.Source,
+								)
+							} else {
+								logger.Info("paste lock set",
+									"session_id", client.SessionID,
+									"source", payload.Source,
+									"delta_len", len(payload.Code)-len(previousCode),
+								)
+							}
+						}
 						// notify client that paste lock is active
-						sendPasteLockStatus(hub, client, true, "paste_detected")
+						sendPasteLockStatus(hub, client, true, reason)
 					}
 				}
 			}
