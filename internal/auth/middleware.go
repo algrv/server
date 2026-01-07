@@ -86,7 +86,7 @@ func OptionalAuthMiddleware() gin.HandlerFunc {
 // requires authenticated user with admin role
 func AdminAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// First check if user is authenticated
+		// first check if user is authenticated
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "authorization header required"})
@@ -109,7 +109,7 @@ func AdminAuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Check admin role
+		// check admin role
 		if !claims.IsAdmin {
 			c.JSON(http.StatusForbidden, gin.H{"error": "admin access required"})
 			c.Abort()

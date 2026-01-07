@@ -8,13 +8,16 @@ import (
 )
 
 func RegisterRoutes(router *gin.RouterGroup, strudelRepo *strudels.Repository, attrService *attribution.Service) {
+	// GET strudel by ID - allows owner OR public access (optional auth)
+	router.GET("/strudels/:id", auth.OptionalAuthMiddleware(), GetStrudelHandler(strudelRepo))
+
+	// authenticated strudel operations
 	strudelsGroup := router.Group("/strudels")
 	strudelsGroup.Use(auth.AuthMiddleware())
 	{
 		strudelsGroup.GET("", ListStrudelsHandler(strudelRepo))
 		strudelsGroup.POST("", CreateStrudelHandler(strudelRepo))
 		strudelsGroup.GET("/tags", ListUserTagsHandler(strudelRepo))
-		strudelsGroup.GET("/:id", GetStrudelHandler(strudelRepo))
 		strudelsGroup.PUT("/:id", UpdateStrudelHandler(strudelRepo))
 		strudelsGroup.DELETE("/:id", DeleteStrudelHandler(strudelRepo))
 	}
