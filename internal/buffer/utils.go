@@ -2,7 +2,7 @@ package buffer
 
 import "strings"
 
-// caps input strings to prevent excessive memory usage.
+// caps input strings to prevent excessive memory usage
 const MaxLevenshteinLength = 10000
 
 // calculates the edit distance between two strings.
@@ -156,11 +156,7 @@ func IsLargeDelta(previousCode, newCode string) bool {
 
 	// check line delta
 	newLines := strings.Count(newCode, "\n") - strings.Count(previousCode, "\n")
-	if newLines >= PasteLineThreshold {
-		return true
-	}
-
-	return false
+	return newLines >= PasteLineThreshold
 }
 
 // determines if edits are significant enough to unlock

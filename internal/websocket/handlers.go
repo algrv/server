@@ -89,7 +89,7 @@ func CodeUpdateHandler(sessionRepo sessions.Repository, sessionBuffer *buffer.Se
 			if shouldLock {
 				// only set lock if not already locked - preserve original baseline
 				// (prevents bypass via duplicate-then-remove)
-				alreadyLocked, _ := sessionBuffer.IsPasteLocked(ctx, client.SessionID)
+				alreadyLocked, _ := sessionBuffer.IsPasteLocked(ctx, client.SessionID) //nolint:errcheck // best-effort
 				if !alreadyLocked {
 					if err := sessionBuffer.SetPasteLock(ctx, client.SessionID, payload.Code); err != nil {
 						logger.ErrorErr(err, "failed to set paste lock", "session_id", client.SessionID)
@@ -122,7 +122,7 @@ func CodeUpdateHandler(sessionRepo sessions.Repository, sessionBuffer *buffer.Se
 					}
 				} else {
 					// refresh TTL while still locked
-					sessionBuffer.RefreshPasteLockTTL(ctx, client.SessionID) //nolint:errcheck // best-effort
+					sessionBuffer.RefreshPasteLockTTL(ctx, client.SessionID) //nolint:errcheck,gosec // best-effort
 				}
 			}
 		}
@@ -298,7 +298,7 @@ func ChatHandler(sessionRepo sessions.Repository) MessageHandler {
 }
 
 // sendPasteLockStatus sends a paste lock status message to the client
-func sendPasteLockStatus(hub *Hub, client *Client, locked bool, reason string) {
+func sendPasteLockStatus(_ *Hub, client *Client, locked bool, reason string) {
 	payload := PasteLockChangedPayload{
 		Locked: locked,
 		Reason: reason,
@@ -336,7 +336,7 @@ func PingHandler() MessageHandler {
 		if err != nil {
 			return err
 		}
-		client.Send(pongMsg)
+		client.Send(pongMsg) //nolint:errcheck,gosec // best-effort pong
 		return nil
 	}
 }
