@@ -43,23 +43,23 @@ const (
 	`
 )
 
-// PostgresFingerprintStore implements FingerprintStore using PostgreSQL
+// implements FingerprintStore using PostgreSQL
 type PostgresFingerprintStore struct {
 	db *pgxpool.Pool
 }
 
-// NewPostgresFingerprintStore creates a new PostgreSQL fingerprint store
+// creates a new PostgreSQL fingerprint store
 func NewPostgresFingerprintStore(db *pgxpool.Pool) *PostgresFingerprintStore {
 	return &PostgresFingerprintStore{db: db}
 }
 
-// Initialize creates the required tables if they don't exist
+// creates the required tables if they don't exist
 func (s *PostgresFingerprintStore) Initialize(ctx context.Context) error {
 	_, err := s.db.Exec(ctx, createTableSQL)
 	return err
 }
 
-// Store saves a fingerprint record
+// saves a fingerprint record
 func (s *PostgresFingerprintStore) Store(ctx context.Context, record *FingerprintRecord) error {
 	var ccSignal *string
 	if record.CCSignal != "" {
@@ -77,21 +77,22 @@ func (s *PostgresFingerprintStore) Store(ctx context.Context, record *Fingerprin
 	return err
 }
 
-// Delete removes a fingerprint record
+// removes a fingerprint record
 func (s *PostgresFingerprintStore) Delete(ctx context.Context, id string) error {
 	_, err := s.db.Exec(ctx, deleteSQL, id)
 	return err
 }
 
-// LoadAll loads all fingerprint records
+// loads all fingerprint records
 func (s *PostgresFingerprintStore) LoadAll(ctx context.Context) ([]*FingerprintRecord, error) {
 	rows, err := s.db.Query(ctx, loadAllSQL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load fingerprints: %w", err)
 	}
-	defer rows.Close()
 
+	defer rows.Close()
 	var records []*FingerprintRecord
+
 	for rows.Next() {
 		var record FingerprintRecord
 		var fp int64
@@ -103,6 +104,7 @@ func (s *PostgresFingerprintStore) LoadAll(ctx context.Context) ([]*FingerprintR
 		}
 
 		record.Fingerprint = Fingerprint(fp) //nolint:gosec // int64 and uint64 have same width
+
 		if ccSignal != nil {
 			record.CCSignal = CCSignal(*ccSignal)
 		}
@@ -113,7 +115,7 @@ func (s *PostgresFingerprintStore) LoadAll(ctx context.Context) ([]*FingerprintR
 	return records, rows.Err()
 }
 
-// GetByWorkID retrieves fingerprint by work ID
+// retrieves fingerprint by work ID
 func (s *PostgresFingerprintStore) GetByWorkID(ctx context.Context, workID string) (*FingerprintRecord, error) {
 	var record FingerprintRecord
 	var fp int64

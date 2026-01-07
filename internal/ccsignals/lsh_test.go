@@ -93,6 +93,7 @@ func TestLSHIndex_QuerySimilar(t *testing.T) {
 		WorkID:      "work1",
 		CCSignal:    SignalNoAI,
 	}
+
 	idx.Insert(record)
 
 	// flip 5 bits - should match (within threshold of 10)

@@ -16,7 +16,7 @@ const (
 	MinNumBands = 4
 )
 
-// FingerprintRecord stores a fingerprint with its metadata
+// stores a fingerprint with its metadata
 type FingerprintRecord struct {
 	ID          string
 	Fingerprint Fingerprint
@@ -26,7 +26,7 @@ type FingerprintRecord struct {
 	Content     string
 }
 
-// MatchResult represents a fingerprint match
+// represents a fingerprint match
 type MatchResult struct {
 	Record   *FingerprintRecord
 	Distance int
@@ -48,15 +48,17 @@ type LSHIndex struct {
 	records map[string]*FingerprintRecord
 }
 
-// NewLSHIndex creates a new LSH index with the given configuration
+// creates a new LSH index with the given configuration
 func NewLSHIndex(numBands, similarityThreshold int) *LSHIndex {
 	// enforce minimum bands to prevent uint16 overflow
 	if numBands < MinNumBands {
 		numBands = DefaultNumBands
 	}
+
 	if numBands > 8 {
 		numBands = 8
 	}
+
 	if similarityThreshold < 1 {
 		similarityThreshold = DefaultSimilarityThreshold
 	}
@@ -78,7 +80,7 @@ func NewLSHIndex(numBands, similarityThreshold int) *LSHIndex {
 	return index
 }
 
-// Insert adds a fingerprint record to the index
+// adds a fingerprint record to the index
 func (idx *LSHIndex) Insert(record *FingerprintRecord) {
 	idx.mu.Lock()
 	defer idx.mu.Unlock()
@@ -91,7 +93,7 @@ func (idx *LSHIndex) Insert(record *FingerprintRecord) {
 	}
 }
 
-// Remove removes a fingerprint record from the index
+// removes a fingerprint record from the index
 func (idx *LSHIndex) Remove(id string) {
 	idx.mu.Lock()
 	defer idx.mu.Unlock()
@@ -115,7 +117,7 @@ func (idx *LSHIndex) Remove(id string) {
 	delete(idx.records, id)
 }
 
-// Query finds all similar fingerprints within the similarity threshold
+// finds all similar fingerprints within the similarity threshold
 func (idx *LSHIndex) Query(fingerprint Fingerprint) []*MatchResult {
 	idx.mu.RLock()
 	defer idx.mu.RUnlock()
@@ -148,7 +150,7 @@ func (idx *LSHIndex) Query(fingerprint Fingerprint) []*MatchResult {
 	return results
 }
 
-// QueryBest finds the best matching fingerprint (lowest hamming distance)
+// finds the best matching fingerprint (lowest hamming distance)
 func (idx *LSHIndex) QueryBest(fingerprint Fingerprint) *MatchResult {
 	results := idx.Query(fingerprint)
 	if len(results) == 0 {
@@ -165,7 +167,7 @@ func (idx *LSHIndex) QueryBest(fingerprint Fingerprint) *MatchResult {
 	return best
 }
 
-// getBands extracts band values from a fingerprint
+// extracts band values from a fingerprint
 func (idx *LSHIndex) getBands(fp Fingerprint) []uint16 {
 	bands := make([]uint16, idx.numBands)
 	mask := uint64((1 << idx.bitsPerBand) - 1)
@@ -178,21 +180,21 @@ func (idx *LSHIndex) getBands(fp Fingerprint) []uint16 {
 	return bands
 }
 
-// Size returns the number of records in the index
+// returns the number of records in the index
 func (idx *LSHIndex) Size() int {
 	idx.mu.RLock()
 	defer idx.mu.RUnlock()
 	return len(idx.records)
 }
 
-// GetRecord retrieves a record by ID
+// retrieves a record by ID
 func (idx *LSHIndex) GetRecord(id string) *FingerprintRecord {
 	idx.mu.RLock()
 	defer idx.mu.RUnlock()
 	return idx.records[id]
 }
 
-// FingerprintStore defines the interface for persistent fingerprint storage
+// defines the interface for persistent fingerprint storage
 type FingerprintStore interface {
 	Store(ctx context.Context, record *FingerprintRecord) error
 	Delete(ctx context.Context, id string) error
@@ -200,14 +202,14 @@ type FingerprintStore interface {
 	GetByWorkID(ctx context.Context, workID string) (*FingerprintRecord, error)
 }
 
-// IndexedFingerprintStore combines LSH index with persistent storage
+// combines LSH index with persistent storage
 type IndexedFingerprintStore struct {
 	index  *LSHIndex
 	store  FingerprintStore
 	hasher *SimHasher
 }
 
-// NewIndexedFingerprintStore creates a new indexed store
+// creates a new indexed store
 func NewIndexedFingerprintStore(store FingerprintStore, numBands, threshold, shingleSize int) *IndexedFingerprintStore {
 	return &IndexedFingerprintStore{
 		index:  NewLSHIndex(numBands, threshold),
@@ -216,7 +218,7 @@ func NewIndexedFingerprintStore(store FingerprintStore, numBands, threshold, shi
 	}
 }
 
-// Initialize loads all records from storage into the index
+// loads all records from storage into the index
 func (s *IndexedFingerprintStore) Initialize(ctx context.Context) error {
 	records, err := s.store.LoadAll(ctx)
 	if err != nil {
@@ -230,7 +232,7 @@ func (s *IndexedFingerprintStore) Initialize(ctx context.Context) error {
 	return nil
 }
 
-// Add creates a fingerprint for content and stores it
+// creates a fingerprint for content and stores it
 func (s *IndexedFingerprintStore) Add(ctx context.Context, workID, creatorID string, ccSignal CCSignal, content string) (*FingerprintRecord, error) {
 	fingerprint := s.hasher.Hash(content)
 
@@ -252,25 +254,25 @@ func (s *IndexedFingerprintStore) Add(ctx context.Context, workID, creatorID str
 	return record, nil
 }
 
-// Remove removes a fingerprint by work ID
+// removes a fingerprint by work ID
 func (s *IndexedFingerprintStore) Remove(ctx context.Context, workID string) error {
 	s.index.Remove(workID)
 	return s.store.Delete(ctx, workID)
 }
 
-// FindSimilar searches for content similar to the query
+// searches for content similar to the query
 func (s *IndexedFingerprintStore) FindSimilar(content string) []*MatchResult {
 	fingerprint := s.hasher.Hash(content)
 	return s.index.Query(fingerprint)
 }
 
-// FindBestMatch finds the most similar content
+// finds the most similar content
 func (s *IndexedFingerprintStore) FindBestMatch(content string) *MatchResult {
 	fingerprint := s.hasher.Hash(content)
 	return s.index.QueryBest(fingerprint)
 }
 
-// Size returns the number of indexed fingerprints
+// returns the number of indexed fingerprints
 func (s *IndexedFingerprintStore) Size() int {
 	return s.index.Size()
 }
