@@ -166,8 +166,7 @@ func GetStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 		// fetch parent CC signal if this is a fork
 		var parentCCSignal *strudels.CCSignal
 		if strudel.ForkedFrom != nil {
-			parentCCSignal, _ = strudelRepo.GetParentCCSignal(c.Request.Context(), *strudel.ForkedFrom)
-			// ignore error - parent may have been deleted
+			parentCCSignal, _ = strudelRepo.GetParentCCSignal(c.Request.Context(), *strudel.ForkedFrom) //nolint:errcheck // parent may have been deleted
 		}
 
 		c.JSON(http.StatusOK, StrudelDetailResponse{

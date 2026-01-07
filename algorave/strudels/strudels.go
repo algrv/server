@@ -633,13 +633,15 @@ func (r *Repository) AddStrudelMessage(ctx context.Context, req *AddStrudelMessa
 	return &msg, nil
 }
 
-// GetParentCCSignal returns the CC signal of the parent strudel (for fork chain validation)
+// returns the CC signal of the parent strudel (for fork chain validation)
 func (r *Repository) GetParentCCSignal(ctx context.Context, parentID string) (*CCSignal, error) {
 	var signal *CCSignal
+
 	err := r.db.QueryRow(ctx, queryGetParentCCSignal, parentID).Scan(&signal)
 	if err != nil {
 		return nil, err
 	}
+
 	return signal, nil
 }
 
