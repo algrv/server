@@ -28,9 +28,11 @@ func TestMemoryFingerprintStore_Store(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
+
 	if got == nil {
 		t.Fatal("expected record to be found")
 	}
+
 	if got.ID != "record1" {
 		t.Errorf("ID = %s, want record1", got.ID)
 	}
@@ -128,9 +130,11 @@ func TestMemoryFingerprintStore_GetByWorkID(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
+
 	if got == nil {
 		t.Fatal("expected record to be found")
 	}
+
 	if got.CCSignal != SignalNoAI {
 		t.Errorf("CCSignal = %s, want %s", got.CCSignal, SignalNoAI)
 	}
@@ -175,6 +179,7 @@ func TestMemoryFingerprintStore_Overwrite(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
+
 	if got.CCSignal != SignalNoAI {
 		t.Errorf("CCSignal = %s, want %s (overwritten value)", got.CCSignal, SignalNoAI)
 	}
