@@ -14,17 +14,17 @@ const (
 	keyPasteBaseline = "ccsignals:paste_baseline:%s"
 )
 
-// RedisLockStore implements LockStore using Redis
+// implements LockStore using Redis
 type RedisLockStore struct {
 	client *redis.Client
 }
 
-// NewRedisLockStore creates a new Redis-backed lock store
+// creates a new Redis-backed lock store
 func NewRedisLockStore(client *redis.Client) *RedisLockStore {
 	return &RedisLockStore{client: client}
 }
 
-// NewRedisLockStoreFromURL creates a new Redis-backed lock store from a URL
+// creates a new Redis-backed lock store from a URL
 func NewRedisLockStoreFromURL(redisURL string) (*RedisLockStore, error) {
 	opts, err := redis.ParseURL(redisURL)
 	if err != nil {
@@ -43,7 +43,7 @@ func NewRedisLockStoreFromURL(redisURL string) (*RedisLockStore, error) {
 	return &RedisLockStore{client: client}, nil
 }
 
-// SetLock sets a paste lock for a session with the baseline code
+// sets a paste lock for a session with the baseline code
 func (s *RedisLockStore) SetLock(ctx context.Context, sessionID, baselineCode string, ttl time.Duration) error {
 	lockKey := fmt.Sprintf(keyPasteLock, sessionID)
 	baselineKey := fmt.Sprintf(keyPasteBaseline, sessionID)
@@ -56,7 +56,7 @@ func (s *RedisLockStore) SetLock(ctx context.Context, sessionID, baselineCode st
 	return err
 }
 
-// GetLock retrieves the current lock state for a session
+// retrieves the current lock state for a session
 func (s *RedisLockStore) GetLock(ctx context.Context, sessionID string) (*LockState, error) {
 	lockKey := fmt.Sprintf(keyPasteLock, sessionID)
 	baselineKey := fmt.Sprintf(keyPasteBaseline, sessionID)
@@ -70,9 +70,11 @@ func (s *RedisLockStore) GetLock(ctx context.Context, sessionID string) (*LockSt
 	if err != nil && !errors.Is(err, redis.Nil) {
 		// check if it's just missing keys
 		lockErr := lockCmd.Err()
+
 		if errors.Is(lockErr, redis.Nil) {
 			return &LockState{Locked: false}, nil
 		}
+
 		if lockErr != nil {
 			return nil, lockErr
 		}
@@ -83,6 +85,7 @@ func (s *RedisLockStore) GetLock(ctx context.Context, sessionID string) (*LockSt
 	if errors.Is(lockErr, redis.Nil) {
 		return &LockState{Locked: false}, nil
 	}
+
 	if lockErr != nil {
 		return nil, lockErr
 	}
@@ -93,6 +96,7 @@ func (s *RedisLockStore) GetLock(ctx context.Context, sessionID string) (*LockSt
 		// lock exists but baseline expired - treat as invalid lock
 		return &LockState{Locked: false}, nil
 	}
+
 	if baselineErr != nil {
 		return nil, baselineErr
 	}
@@ -108,7 +112,7 @@ func (s *RedisLockStore) GetLock(ctx context.Context, sessionID string) (*LockSt
 	}, nil
 }
 
-// RemoveLock removes the paste lock for a session
+// removes the paste lock for a session
 func (s *RedisLockStore) RemoveLock(ctx context.Context, sessionID string) error {
 	lockKey := fmt.Sprintf(keyPasteLock, sessionID)
 	baselineKey := fmt.Sprintf(keyPasteBaseline, sessionID)
@@ -116,7 +120,7 @@ func (s *RedisLockStore) RemoveLock(ctx context.Context, sessionID string) error
 	return s.client.Del(ctx, lockKey, baselineKey).Err()
 }
 
-// RefreshTTL extends the lock TTL without changing other state
+// extends the lock TTL without changing other state
 func (s *RedisLockStore) RefreshTTL(ctx context.Context, sessionID string, ttl time.Duration) error {
 	lockKey := fmt.Sprintf(keyPasteLock, sessionID)
 	baselineKey := fmt.Sprintf(keyPasteBaseline, sessionID)
@@ -129,7 +133,7 @@ func (s *RedisLockStore) RefreshTTL(ctx context.Context, sessionID string, ttl t
 	return err
 }
 
-// Close closes the Redis connection
+// closes the redis connection
 func (s *RedisLockStore) Close() error {
 	return s.client.Close()
 }

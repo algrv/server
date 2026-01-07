@@ -109,6 +109,31 @@ func NewServer(cfg *config.Config) (*Server, error) {
 		}
 	})
 
+	// send paste lock status on client connect (for session reconnects)
+	hub.OnClientRegistered(func(client *ws.Client) {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		locked, err := sessionBuffer.IsPasteLocked(ctx, client.SessionID)
+		if err != nil {
+			return // ignore errors, not critical
+		}
+
+		if locked {
+			payload := ws.PasteLockChangedPayload{
+				Locked: true,
+				Reason: "session_reconnect",
+			}
+
+			msg, err := ws.NewMessage(ws.TypePasteLockChanged, client.SessionID, client.UserID, payload)
+			if err != nil {
+				return
+			}
+
+			client.Send(msg) //nolint:errcheck,gosec // best-effort
+		}
+	})
+
 	router := gin.Default()
 
 	server := &Server{

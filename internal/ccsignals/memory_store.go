@@ -20,7 +20,7 @@ type memoryLock struct {
 	expiresAt time.Time
 }
 
-// NewMemoryLockStore creates a new in-memory lock store
+// creates a new in-memory lock store
 func NewMemoryLockStore() *MemoryLockStore {
 	store := &MemoryLockStore{
 		locks: make(map[string]*memoryLock),
@@ -32,12 +32,12 @@ func NewMemoryLockStore() *MemoryLockStore {
 	return store
 }
 
-// SetLock sets a paste lock for a session with the baseline code
+// sets a paste lock for a session with the baseline code
 func (s *MemoryLockStore) SetLock(_ context.Context, sessionID, baselineCode string, ttl time.Duration) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
 	now := time.Now()
+
 	s.locks[sessionID] = &memoryLock{
 		baseline:  baselineCode,
 		lockedAt:  now,
@@ -47,7 +47,7 @@ func (s *MemoryLockStore) SetLock(_ context.Context, sessionID, baselineCode str
 	return nil
 }
 
-// GetLock retrieves the current lock state for a session
+// retrieves the current lock state for a session
 func (s *MemoryLockStore) GetLock(_ context.Context, sessionID string) (*LockState, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -69,7 +69,7 @@ func (s *MemoryLockStore) GetLock(_ context.Context, sessionID string) (*LockSta
 	}, nil
 }
 
-// RemoveLock removes the paste lock for a session
+// removes the paste lock for a session
 func (s *MemoryLockStore) RemoveLock(_ context.Context, sessionID string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -78,7 +78,7 @@ func (s *MemoryLockStore) RemoveLock(_ context.Context, sessionID string) error 
 	return nil
 }
 
-// RefreshTTL extends the lock TTL without changing other state
+// extends the lock TTL without changing other state
 func (s *MemoryLockStore) RefreshTTL(_ context.Context, sessionID string, ttl time.Duration) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -90,7 +90,7 @@ func (s *MemoryLockStore) RefreshTTL(_ context.Context, sessionID string, ttl ti
 	return nil
 }
 
-// Close stops the cleanup goroutine
+// stops the cleanup goroutine
 func (s *MemoryLockStore) Close() error {
 	s.mu.Lock()
 	defer s.mu.Unlock()

@@ -10,7 +10,7 @@ var (
 	ErrNilStore = errors.New("ccsignals: store is nil")
 )
 
-// Detector handles paste detection and lock management
+// handles paste detection and lock management
 type Detector struct {
 	config       Config
 	store        LockStore
@@ -18,7 +18,7 @@ type Detector struct {
 	fingerprints *IndexedFingerprintStore
 }
 
-// NewDetector creates a new detector with the given dependencies
+// creates a new detector with the given dependencies
 func NewDetector(config Config, store LockStore, validator ContentValidator) *Detector {
 	return &Detector{
 		config:    config,
@@ -27,13 +27,13 @@ func NewDetector(config Config, store LockStore, validator ContentValidator) *De
 	}
 }
 
-// WithFingerprints enables fingerprint-based similarity detection
+// enables fingerprint-based similarity detection
 func (d *Detector) WithFingerprints(fps *IndexedFingerprintStore) *Detector {
 	d.fingerprints = fps
 	return d
 }
 
-// DetectionResult contains the result of paste detection
+// contains the result of paste detection
 type DetectionResult struct {
 	ShouldLock       bool
 	Reason           string
@@ -41,7 +41,7 @@ type DetectionResult struct {
 	FingerprintMatch *MatchResult
 }
 
-// DetectPaste analyzes a code update and determines if it should be locked
+// analyzes a code update and determines if it should be locked
 func (d *Detector) DetectPaste(ctx context.Context, _, userID, previousCode, newCode string) (*DetectionResult, error) {
 	if !d.IsLargeDelta(previousCode, newCode) {
 		return &DetectionResult{
@@ -111,7 +111,7 @@ func (d *Detector) DetectPaste(ctx context.Context, _, userID, previousCode, new
 	}, nil
 }
 
-// ProcessCodeUpdate handles a code update event, managing locks as needed
+// handles a code update event, managing locks as needed
 func (d *Detector) ProcessCodeUpdate(ctx context.Context, sessionID, userID, previousCode, newCode string) error {
 	if d.store == nil {
 		return ErrNilStore
@@ -129,7 +129,7 @@ func (d *Detector) ProcessCodeUpdate(ctx context.Context, sessionID, userID, pre
 	return d.CheckUnlock(ctx, sessionID, newCode)
 }
 
-// CheckUnlock checks if edits are significant enough to unlock a session
+// checks if edits are significant enough to unlock a session
 func (d *Detector) CheckUnlock(ctx context.Context, sessionID, currentCode string) error {
 	if d.store == nil {
 		return ErrNilStore
@@ -151,7 +151,7 @@ func (d *Detector) CheckUnlock(ctx context.Context, sessionID, currentCode strin
 	return d.store.RefreshTTL(ctx, sessionID, d.config.LockTTL)
 }
 
-// IsLocked checks if a session is currently paste-locked
+// checks if a session is currently paste-locked
 func (d *Detector) IsLocked(ctx context.Context, sessionID string) (bool, error) {
 	if d.store == nil {
 		return false, ErrNilStore
@@ -161,10 +161,11 @@ func (d *Detector) IsLocked(ctx context.Context, sessionID string) (bool, error)
 	if err != nil {
 		return false, err
 	}
+
 	return state != nil && state.Locked, nil
 }
 
-// IsLargeDelta determines if a code update has a large delta
+// determines if a code update has a large delta
 func (d *Detector) IsLargeDelta(previousCode, newCode string) bool {
 	deltaLen := len(newCode) - len(previousCode)
 	if deltaLen >= d.config.PasteDeltaThreshold {
@@ -175,7 +176,7 @@ func (d *Detector) IsLargeDelta(previousCode, newCode string) bool {
 	return newLines >= d.config.PasteLineThreshold
 }
 
-// IsSignificantEdit determines if edits are significant enough to unlock
+// determines if edits are significant enough to unlock
 func (d *Detector) IsSignificantEdit(baseline, current string) bool {
 	if baseline == "" {
 		return true
@@ -183,6 +184,7 @@ func (d *Detector) IsSignificantEdit(baseline, current string) bool {
 
 	distance := LevenshteinDistance(baseline, current)
 	baselineLen := len(baseline)
+
 	if baselineLen == 0 {
 		return true
 	}

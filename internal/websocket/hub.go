@@ -35,6 +35,13 @@ func (h *Hub) OnClientDisconnect(callback func(client *Client)) {
 	h.onClientDisconnect = callback
 }
 
+// sets callback to be called after a client is registered and session_state is sent
+func (h *Hub) OnClientRegistered(callback func(client *Client)) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	h.onClientRegistered = callback
+}
+
 // starts the hub's main loop
 func (h *Hub) Run() {
 	h.running = true
@@ -118,6 +125,11 @@ func (h *Hub) registerClient(client *Client) {
 	})
 	if err == nil {
 		h.broadcastToSession(client.SessionID, userJoinedMsg, client.ID)
+	}
+
+	// call registered callback (e.g., to send paste lock status)
+	if h.onClientRegistered != nil {
+		go h.onClientRegistered(client)
 	}
 }
 

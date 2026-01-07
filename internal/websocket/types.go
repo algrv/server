@@ -270,6 +270,9 @@ type Hub struct {
 
 	// callback for client disconnect (e.g., save code to DB)
 	onClientDisconnect func(client *Client)
+
+	// callback for client registered (e.g., send paste lock status)
+	onClientRegistered func(client *Client)
 }
 
 // processes a specific message type

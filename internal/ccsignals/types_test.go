@@ -60,12 +60,15 @@ func TestDefaultConfig(t *testing.T) {
 	if config.PasteDeltaThreshold != 200 {
 		t.Errorf("PasteDeltaThreshold = %d, want 200", config.PasteDeltaThreshold)
 	}
+
 	if config.PasteLineThreshold != 50 {
 		t.Errorf("PasteLineThreshold = %d, want 50", config.PasteLineThreshold)
 	}
+
 	if config.UnlockThreshold != 0.30 {
 		t.Errorf("UnlockThreshold = %v, want 0.30", config.UnlockThreshold)
 	}
+
 	if config.LockTTL != 1*time.Hour {
 		t.Errorf("LockTTL = %v, want 1h", config.LockTTL)
 	}

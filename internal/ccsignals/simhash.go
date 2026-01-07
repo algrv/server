@@ -12,23 +12,24 @@ const (
 	DefaultShingleSize = 3
 )
 
-// Fingerprint represents a 64-bit SimHash fingerprint
+// represents a 64-bit SimHash fingerprint
 type Fingerprint uint64
 
-// SimHasher generates SimHash fingerprints from text content
+// generates SimHash fingerprints from text content
 type SimHasher struct {
 	shingleSize int
 }
 
-// NewSimHasher creates a new SimHasher with the given shingle size
+// creates a new SimHasher with the given shingle size
 func NewSimHasher(shingleSize int) *SimHasher {
 	if shingleSize < 1 {
 		shingleSize = DefaultShingleSize
 	}
+
 	return &SimHasher{shingleSize: shingleSize}
 }
 
-// Hash generates a SimHash fingerprint from text content
+// generates a SimHash fingerprint from text content
 func (s *SimHasher) Hash(content string) Fingerprint {
 	normalized := normalizeText(content)
 
@@ -70,6 +71,7 @@ func tokenize(text string) []string {
 	if text == "" {
 		return nil
 	}
+
 	return wordSplitRegex.Split(text, -1)
 }
 
@@ -79,6 +81,7 @@ func (s *SimHasher) generateShingles(words []string) []string {
 	}
 
 	shingles := make([]string, 0, len(words)-s.shingleSize+1)
+
 	for i := 0; i <= len(words)-s.shingleSize; i++ {
 		shingle := strings.Join(words[i:i+s.shingleSize], " ")
 		shingles = append(shingles, shingle)
@@ -93,7 +96,7 @@ func computeSimHash(shingles []string) Fingerprint {
 	for _, shingle := range shingles {
 		hash := hashString(shingle)
 
-		for i := 0; i < HashBits; i++ {
+		for i := range HashBits {
 			bit := (hash >> i) & 1
 			if bit == 1 {
 				v[i]++
@@ -119,7 +122,7 @@ func hashString(s string) uint64 {
 	return h.Sum64()
 }
 
-// HammingDistance calculates the number of differing bits between two fingerprints
+// calculates the number of differing bits between two fingerprints
 func HammingDistance(a, b Fingerprint) int {
 	xor := a ^ b
 	count := 0
@@ -132,7 +135,7 @@ func HammingDistance(a, b Fingerprint) int {
 	return count
 }
 
-// IsSimilar checks if two fingerprints are similar within the given threshold
+// checks if two fingerprints are similar within the given threshold
 func IsSimilar(a, b Fingerprint, threshold int) bool {
 	return HammingDistance(a, b) <= threshold
 }
