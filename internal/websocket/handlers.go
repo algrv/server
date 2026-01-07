@@ -87,16 +87,21 @@ func CodeUpdateHandler(sessionRepo sessions.Repository, sessionBuffer *buffer.Se
 
 			// if still shouldLock, this is likely an external paste
 			if shouldLock {
-				if err := sessionBuffer.SetPasteLock(ctx, client.SessionID, payload.Code); err != nil {
-					logger.ErrorErr(err, "failed to set paste lock", "session_id", client.SessionID)
-				} else {
-					logger.Info("paste lock set",
-						"session_id", client.SessionID,
-						"source", payload.Source,
-						"delta_len", len(payload.Code)-len(previousCode),
-					)
-					// notify client that paste lock is active
-					sendPasteLockStatus(hub, client, true, "paste_detected")
+				// only set lock if not already locked - preserve original baseline
+				// (prevents bypass via duplicate-then-remove)
+				alreadyLocked, _ := sessionBuffer.IsPasteLocked(ctx, client.SessionID)
+				if !alreadyLocked {
+					if err := sessionBuffer.SetPasteLock(ctx, client.SessionID, payload.Code); err != nil {
+						logger.ErrorErr(err, "failed to set paste lock", "session_id", client.SessionID)
+					} else {
+						logger.Info("paste lock set",
+							"session_id", client.SessionID,
+							"source", payload.Source,
+							"delta_len", len(payload.Code)-len(previousCode),
+						)
+						// notify client that paste lock is active
+						sendPasteLockStatus(hub, client, true, "paste_detected")
+					}
 				}
 			}
 		} else {
