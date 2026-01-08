@@ -47,11 +47,19 @@ type Repository interface {
 	ValidateInviteToken(ctx context.Context, token string) (*InviteToken, error)
 	IncrementTokenUses(ctx context.Context, tokenID string) error
 	RevokeInviteToken(ctx context.Context, tokenID string) error
+	RevokeAllInviteTokens(ctx context.Context, sessionID string) error
+	HasActiveInviteTokens(ctx context.Context, sessionID string) (bool, error)
 
 	// chat message operations (session-scoped, for real-time communication)
 	GetChatMessages(ctx context.Context, sessionID string, limit int) ([]*Message, error)
 	AddChatMessage(ctx context.Context, sessionID, userID, content, displayName, avatarURL string) (*Message, error)
 	UpdateLastActivity(ctx context.Context, sessionID string) error
+
+	// soft-end and cleanup operations
+	MarkAllNonHostParticipantsLeft(ctx context.Context, sessionID, hostUserID string) error
+	GetLastUserSession(ctx context.Context, userID string) (*Session, error)
+	ListStaleSessions(ctx context.Context, threshold time.Time) ([]*Session, error)
+	CountActiveParticipants(ctx context.Context, sessionID string) (int, error)
 }
 
 // represents a collaborative coding session

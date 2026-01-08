@@ -193,4 +193,55 @@ const (
 		SET last_activity = NOW()
 		WHERE id = $1
 	`
+
+	// soft-end session queries
+	queryRevokeAllInviteTokens = `
+		DELETE FROM invite_tokens
+		WHERE session_id = $1
+	`
+
+	queryMarkAllAuthParticipantsLeft = `
+		UPDATE session_participants
+		SET status = 'left', left_at = NOW()
+		WHERE session_id = $1 AND user_id != $2 AND status = 'active'
+	`
+
+	queryMarkAllAnonParticipantsLeft = `
+		UPDATE anonymous_participants
+		SET status = 'left', left_at = NOW()
+		WHERE session_id = $1 AND status = 'active'
+	`
+
+	// get last user session (most recent active session where user is host or co-author)
+	queryGetLastUserSession = `
+		SELECT DISTINCT s.id, s.host_user_id, s.title, s.code, s.is_active, s.is_discoverable, s.created_at, s.ended_at, s.last_activity
+		FROM sessions s
+		LEFT JOIN session_participants sp ON s.id = sp.session_id
+		WHERE s.is_active = true
+			AND (s.host_user_id = $1 OR (sp.user_id = $1 AND sp.role IN ('host', 'co-author') AND sp.status = 'active'))
+		ORDER BY s.last_activity DESC
+		LIMIT 1
+	`
+
+	// cleanup queries for stale sessions
+	queryListStaleSessions = `
+		SELECT id, host_user_id, title, code, is_active, is_discoverable, created_at, ended_at, last_activity
+		FROM sessions
+		WHERE is_active = true AND last_activity < $1
+	`
+
+	queryCountActiveParticipants = `
+		SELECT
+			(SELECT COUNT(*) FROM session_participants WHERE session_id = $1 AND status = 'active') +
+			(SELECT COUNT(*) FROM anonymous_participants WHERE session_id = $1 AND status = 'active')
+	`
+
+	queryHasActiveInviteTokens = `
+		SELECT EXISTS(
+			SELECT 1 FROM invite_tokens
+			WHERE session_id = $1
+			AND (expires_at IS NULL OR expires_at > NOW())
+			AND (max_uses IS NULL OR uses_count < max_uses)
+		)
+	`
 )

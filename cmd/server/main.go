@@ -86,10 +86,17 @@ func main() {
 	// start buffer flusher (Redis → Postgres)
 	srv.flusher.Start()
 
+	// start session cleanup service with cancellable context
+	cleanupCtx, cleanupCancel := context.WithCancel(context.Background())
+	go srv.cleanupService.Start(cleanupCtx)
+
 	// wait for interrupt signal for graceful shutdown
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
+
+	// stop cleanup service
+	cleanupCancel()
 
 	logger.Info("shutting down server")
 

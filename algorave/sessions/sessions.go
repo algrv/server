@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -648,4 +649,98 @@ func generateToken() (string, error) {
 	}
 
 	return hex.EncodeToString(bytes), nil
+}
+
+// revokes all invite tokens for a session
+func (r *repository) RevokeAllInviteTokens(ctx context.Context, sessionID string) error {
+	_, err := r.db.Exec(ctx, queryRevokeAllInviteTokens, sessionID)
+	return err
+}
+
+// marks all non-host participants as left (both authenticated and anonymous)
+func (r *repository) MarkAllNonHostParticipantsLeft(ctx context.Context, sessionID, hostUserID string) error {
+	// mark authenticated participants (excluding host)
+	if _, err := r.db.Exec(ctx, queryMarkAllAuthParticipantsLeft, sessionID, hostUserID); err != nil {
+		return err
+	}
+
+	// mark all anonymous participants
+	if _, err := r.db.Exec(ctx, queryMarkAllAnonParticipantsLeft, sessionID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// retrieves the user's most recent active session where they are host or co-author
+func (r *repository) GetLastUserSession(ctx context.Context, userID string) (*Session, error) {
+	var session Session
+
+	err := r.db.QueryRow(ctx, queryGetLastUserSession, userID).Scan(
+		&session.ID,
+		&session.HostUserID,
+		&session.Title,
+		&session.Code,
+		&session.IsActive,
+		&session.IsDiscoverable,
+		&session.CreatedAt,
+		&session.EndedAt,
+		&session.LastActivity,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &session, nil
+}
+
+// lists all sessions that have been inactive for longer than the threshold
+func (r *repository) ListStaleSessions(ctx context.Context, threshold time.Time) ([]*Session, error) {
+	rows, err := r.db.Query(ctx, queryListStaleSessions, threshold)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+	var sessions []*Session
+
+	for rows.Next() {
+		var s Session
+		err := rows.Scan(
+			&s.ID,
+			&s.HostUserID,
+			&s.Title,
+			&s.Code,
+			&s.IsActive,
+			&s.IsDiscoverable,
+			&s.CreatedAt,
+			&s.EndedAt,
+			&s.LastActivity,
+		)
+		if err != nil {
+			return nil, err
+		}
+		sessions = append(sessions, &s)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return sessions, nil
+}
+
+// counts active participants (both authenticated and anonymous)
+func (r *repository) CountActiveParticipants(ctx context.Context, sessionID string) (int, error) {
+	var count int
+	err := r.db.QueryRow(ctx, queryCountActiveParticipants, sessionID).Scan(&count)
+	return count, err
+}
+
+// checks if session has any active (valid) invite tokens
+func (r *repository) HasActiveInviteTokens(ctx context.Context, sessionID string) (bool, error) {
+	var exists bool
+	err := r.db.QueryRow(ctx, queryHasActiveInviteTokens, sessionID).Scan(&exists)
+	return exists, err
 }

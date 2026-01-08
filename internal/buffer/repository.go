@@ -199,3 +199,29 @@ func (r *BufferedRepository) GetChatMessages(ctx context.Context, sessionID stri
 func (r *BufferedRepository) UpdateLastActivity(ctx context.Context, sessionID string) error {
 	return r.db.UpdateLastActivity(ctx, sessionID)
 }
+
+// === NEW SOFT-END AND CLEANUP OPERATIONS ===
+
+func (r *BufferedRepository) RevokeAllInviteTokens(ctx context.Context, sessionID string) error {
+	return r.db.RevokeAllInviteTokens(ctx, sessionID)
+}
+
+func (r *BufferedRepository) HasActiveInviteTokens(ctx context.Context, sessionID string) (bool, error) {
+	return r.db.HasActiveInviteTokens(ctx, sessionID)
+}
+
+func (r *BufferedRepository) MarkAllNonHostParticipantsLeft(ctx context.Context, sessionID, hostUserID string) error {
+	return r.db.MarkAllNonHostParticipantsLeft(ctx, sessionID, hostUserID)
+}
+
+func (r *BufferedRepository) GetLastUserSession(ctx context.Context, userID string) (*sessions.Session, error) {
+	return r.db.GetLastUserSession(ctx, userID)
+}
+
+func (r *BufferedRepository) ListStaleSessions(ctx context.Context, threshold time.Time) ([]*sessions.Session, error) {
+	return r.db.ListStaleSessions(ctx, threshold)
+}
+
+func (r *BufferedRepository) CountActiveParticipants(ctx context.Context, sessionID string) (int, error) {
+	return r.db.CountActiveParticipants(ctx, sessionID)
+}
