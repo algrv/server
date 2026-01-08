@@ -141,3 +141,17 @@ type LiveSessionsListResponse struct {
 	Sessions   []LiveSessionResponse `json:"sessions"`
 	Pagination pagination.Meta       `json:"pagination"`
 }
+
+// SoftEndSessionResponse returned after soft-ending a session
+type SoftEndSessionResponse struct {
+	Message            string `json:"message"`
+	ParticipantsKicked int    `json:"participants_kicked"`
+	InvitesRevoked     bool   `json:"invites_revoked"`
+}
+
+// IsLiveResponse for checking if a session is currently "live"
+type IsLiveResponse struct {
+	IsLive                 bool `json:"is_live"`
+	ParticipantCount       int  `json:"participant_count"`
+	HasActiveInviteTokens  bool `json:"has_active_invite_tokens"`
+}

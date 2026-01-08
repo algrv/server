@@ -20,6 +20,12 @@ import (
 const (
 	// how often the flusher writes buffered data to Postgres
 	bufferFlushInterval = 5 * time.Second
+
+	// how often the cleanup service checks for stale sessions
+	cleanupCheckInterval = 5 * time.Minute
+
+	// sessions inactive for longer than this will be ended
+	sessionInactivityThreshold = 30 * time.Minute
 )
 
 // creates and configures a new server instance with all dependencies
@@ -136,17 +142,29 @@ func NewServer(cfg *config.Config) (*Server, error) {
 
 	router := gin.Default()
 
+	// create session cleanup service (handles auto-expiry of stale sessions)
+	cleanupService := sessions.NewCleanupService(
+		postgresSessionRepo, // use postgres repo directly to avoid buffering issues
+		cleanupCheckInterval,
+		sessionInactivityThreshold,
+		func(sessionID string, reason string) {
+			// notify WebSocket clients when session is being cleaned up
+			hub.EndSession(sessionID, reason)
+		},
+	)
+
 	server := &Server{
-		db:          db,
-		config:      cfg,
-		userRepo:    userRepo,
-		strudelRepo: strudelRepo,
-		sessionRepo: sessionRepo,
-		services:    services,
-		hub:         hub,
-		router:      router,
-		buffer:      sessionBuffer,
-		flusher:     flusher,
+		db:             db,
+		config:         cfg,
+		userRepo:       userRepo,
+		strudelRepo:    strudelRepo,
+		sessionRepo:    sessionRepo,
+		services:       services,
+		hub:            hub,
+		router:         router,
+		buffer:         sessionBuffer,
+		flusher:        flusher,
+		cleanupService: cleanupService,
 	}
 
 	RegisterRoutes(router, server)

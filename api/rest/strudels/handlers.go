@@ -107,15 +107,15 @@ func GetStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 		}
 
 		var strudel *strudels.Strudel
-		var err error
 
 		// try to get as owner first if authenticated
 		if userID, exists := auth.GetUserID(c); exists {
-			strudel, err = strudelRepo.Get(c.Request.Context(), strudelID, userID)
+			strudel, _ = strudelRepo.Get(c.Request.Context(), strudelID, userID) //nolint:errcheck // fallback to public below
 		}
 
 		// fall back to public strudel if not owner
 		if strudel == nil {
+			var err error
 			strudel, err = strudelRepo.GetPublic(c.Request.Context(), strudelID)
 			if err != nil {
 				errors.NotFound(c, "strudel")

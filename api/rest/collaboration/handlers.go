@@ -834,7 +834,7 @@ func ListLiveSessionsHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 				for _, s := range userSessions {
 					userSessionIDs[s.ID] = true
 
-					participants, _ := sessionRepo.ListAllParticipants(c.Request.Context(), s.ID)
+					participants, _ := sessionRepo.ListAllParticipants(c.Request.Context(), s.ID) //nolint:errcheck // best-effort count
 					participantCount := len(participants)
 
 					memberSessions = append(memberSessions, LiveSessionResponse{
@@ -866,7 +866,7 @@ func ListLiveSessionsHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 				continue
 			}
 
-			participants, _ := sessionRepo.ListAllParticipants(c.Request.Context(), s.ID)
+			participants, _ := sessionRepo.ListAllParticipants(c.Request.Context(), s.ID) //nolint:errcheck // best-effort count
 			participantCount := len(participants)
 
 			responses = append(responses, LiveSessionResponse{
@@ -973,4 +973,197 @@ func parsePaginationParams(c *gin.Context) (limit, offset int) {
 		}
 	}
 	return limit, offset
+}
+
+// SoftEndSessionHandler godoc
+// @Summary Soft-end a live session
+// @Description Ends the live portion of a session: kicks all non-host participants, revokes all invite tokens,
+// @Description sets discoverable to false. Host keeps access to the session and their code.
+// @Tags sessions
+// @Produce json
+// @Param id path string true "Session ID (UUID)"
+// @Success 200 {object} SoftEndSessionResponse
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 401 {object} errors.ErrorResponse
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /api/v1/sessions/{id}/end-live [post]
+// @Security BearerAuth
+func SoftEndSessionHandler(sessionRepo sessions.Repository, sessionEnder SessionEnder) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		sessionID, ok := errors.ValidatePathUUID(c, "id")
+		if !ok {
+			return
+		}
+
+		userID, exists := auth.GetUserID(c)
+		if !exists {
+			errors.Unauthorized(c, "")
+			return
+		}
+
+		session, err := sessionRepo.GetSession(c.Request.Context(), sessionID)
+		if err != nil {
+			errors.SessionNotFound(c)
+			return
+		}
+
+		// only host can soft-end the session
+		if session.HostUserID != userID {
+			errors.Forbidden(c, "only the host can end the live session")
+			return
+		}
+
+		// count participants before kicking them
+		participants, _ := sessionRepo.ListAllParticipants(c.Request.Context(), sessionID) //nolint:errcheck // best-effort count
+		participantsKicked := 0
+		for _, p := range participants {
+			// count active non-host participants
+			if p.Status == "active" && (p.UserID == nil || *p.UserID != userID) {
+				participantsKicked++
+			}
+		}
+
+		// 1. set discoverable to false
+		if err := sessionRepo.SetDiscoverable(c.Request.Context(), sessionID, false); err != nil {
+			logger.ErrorErr(err, "failed to set discoverable to false", "session_id", sessionID)
+		}
+
+		// 2. revoke all invite tokens
+		invitesRevoked := false
+		if err := sessionRepo.RevokeAllInviteTokens(c.Request.Context(), sessionID); err != nil {
+			logger.ErrorErr(err, "failed to revoke invite tokens", "session_id", sessionID)
+		} else {
+			invitesRevoked = true
+		}
+
+		// 3. mark all non-host participants as left
+		if err := sessionRepo.MarkAllNonHostParticipantsLeft(c.Request.Context(), sessionID, userID); err != nil {
+			logger.ErrorErr(err, "failed to mark participants as left", "session_id", sessionID)
+		}
+
+		// 4. notify WebSocket clients (they will be disconnected)
+		if sessionEnder != nil {
+			sessionEnder.EndSession(sessionID, "live session ended by host")
+		}
+
+		c.JSON(http.StatusOK, SoftEndSessionResponse{
+			Message:            "live session ended successfully",
+			ParticipantsKicked: participantsKicked,
+			InvitesRevoked:     invitesRevoked,
+		})
+	}
+}
+
+// GetLastUserSessionHandler godoc
+// @Summary Get user's last active session
+// @Description Returns the user's most recent active session where they are host or co-author
+// @Tags sessions
+// @Produce json
+// @Success 200 {object} LiveSessionResponse
+// @Failure 401 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /api/v1/sessions/last [get]
+// @Security BearerAuth
+func GetLastUserSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID, exists := auth.GetUserID(c)
+		if !exists {
+			errors.Unauthorized(c, "")
+			return
+		}
+
+		session, err := sessionRepo.GetLastUserSession(c.Request.Context(), userID)
+		if err != nil {
+			errors.NotFound(c, "no active session found")
+			return
+		}
+
+		// get participant count
+		participants, _ := sessionRepo.ListAllParticipants(c.Request.Context(), session.ID)
+		participantCount := 0
+		for _, p := range participants {
+			if p.Status == "active" {
+				participantCount++
+			}
+		}
+
+		c.JSON(http.StatusOK, LiveSessionResponse{
+			ID:               session.ID,
+			Title:            session.Title,
+			ParticipantCount: participantCount,
+			IsMember:         true,
+			CreatedAt:        session.CreatedAt,
+			LastActivity:     session.LastActivity,
+		})
+	}
+}
+
+// GetSessionLiveStatusHandler godoc
+// @Summary Check if session is live
+// @Description Returns whether a session is currently live (has other participants or active invite tokens)
+// @Tags sessions
+// @Produce json
+// @Param id path string true "Session ID (UUID)"
+// @Success 200 {object} IsLiveResponse
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 401 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /api/v1/sessions/{id}/live-status [get]
+// @Security BearerAuth
+func GetSessionLiveStatusHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		sessionID, ok := errors.ValidatePathUUID(c, "id")
+		if !ok {
+			return
+		}
+
+		userID, exists := auth.GetUserID(c)
+		if !exists {
+			errors.Unauthorized(c, "")
+			return
+		}
+
+		session, err := sessionRepo.GetSession(c.Request.Context(), sessionID)
+		if err != nil {
+			errors.SessionNotFound(c)
+			return
+		}
+
+		// verify user is host or participant
+		if session.HostUserID != userID {
+			participant, err := sessionRepo.GetAuthenticatedParticipant(c.Request.Context(), sessionID, userID)
+			if err != nil || participant.Status != "active" {
+				errors.Forbidden(c, "you are not a member of this session")
+				return
+			}
+		}
+
+		// count active participants (excluding current user)
+		participants, _ := sessionRepo.ListAllParticipants(c.Request.Context(), sessionID)
+		participantCount := 0
+		for _, p := range participants {
+			if p.Status == "active" {
+				participantCount++
+			}
+		}
+
+		// check for active invite tokens
+		hasActiveTokens, err := sessionRepo.HasActiveInviteTokens(c.Request.Context(), sessionID)
+		if err != nil {
+			hasActiveTokens = false
+		}
+
+		// session is "live" if it has multiple participants OR has active invite tokens
+		isLive := participantCount > 1 || hasActiveTokens
+
+		c.JSON(http.StatusOK, IsLiveResponse{
+			IsLive:                isLive,
+			ParticipantCount:      participantCount,
+			HasActiveInviteTokens: hasActiveTokens,
+		})
+	}
 }

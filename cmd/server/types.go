@@ -20,16 +20,17 @@ import (
 
 // holds all dependencies and state for the API server
 type Server struct {
-	db          *pgxpool.Pool
-	config      *config.Config
-	userRepo    *users.Repository
-	strudelRepo *strudels.Repository
-	sessionRepo sessions.Repository
-	services    *Services
-	hub         *ws.Hub
-	router      *gin.Engine
-	buffer      *buffer.SessionBuffer
-	flusher     *buffer.Flusher
+	db             *pgxpool.Pool
+	config         *config.Config
+	userRepo       *users.Repository
+	strudelRepo    *strudels.Repository
+	sessionRepo    sessions.Repository
+	services       *Services
+	hub            *ws.Hub
+	router         *gin.Engine
+	buffer         *buffer.SessionBuffer
+	flusher        *buffer.Flusher
+	cleanupService *sessions.CleanupService
 }
 
 // holds all external service clients (LLM, storage, retriever, agent)

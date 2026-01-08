@@ -11,6 +11,9 @@ func RegisterRoutes(router *gin.RouterGroup, sessionRepo sessions.Repository, se
 	// live sessions (optional auth - includes user's sessions if authenticated)
 	router.GET("/sessions/live", auth.OptionalAuthMiddleware(), ListLiveSessionsHandler(sessionRepo))
 
+	// user's last active session (for recovery)
+	router.GET("/sessions/last", auth.AuthMiddleware(), GetLastUserSessionHandler(sessionRepo))
+
 	// session management (authenticated)
 	router.POST("/sessions", auth.AuthMiddleware(), CreateSessionHandler(sessionRepo))
 	router.GET("/sessions", auth.AuthMiddleware(), ListUserSessionsHandler(sessionRepo))
@@ -19,6 +22,12 @@ func RegisterRoutes(router *gin.RouterGroup, sessionRepo sessions.Repository, se
 	router.DELETE("/sessions/:id", auth.AuthMiddleware(), EndSessionHandler(sessionRepo, sessionEnder))
 	router.POST("/sessions/:id/leave", auth.AuthMiddleware(), LeaveSessionHandler(sessionRepo))
 	router.PUT("/sessions/:id/discoverable", auth.AuthMiddleware(), SetDiscoverableHandler(sessionRepo))
+
+	// soft-end live session (kicks participants, revokes invites, keeps code)
+	router.POST("/sessions/:id/end-live", auth.AuthMiddleware(), SoftEndSessionHandler(sessionRepo, sessionEnder))
+
+	// check live status
+	router.GET("/sessions/:id/live-status", auth.AuthMiddleware(), GetSessionLiveStatusHandler(sessionRepo))
 
 	// session messages
 	router.GET("/sessions/:id/messages", auth.AuthMiddleware(), GetSessionMessagesHandler(sessionRepo))
