@@ -826,6 +826,9 @@ func ListLiveSessionsHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 		// track user's session IDs for membership check
 		userSessionIDs := make(map[string]bool)
 
+		// track sessions where user is currently active (to exclude from results)
+		currentSessionIDs := make(map[string]bool)
+
 		// if authenticated, get user's active sessions first
 		var memberSessions []LiveSessionResponse
 		if isAuthenticated {
@@ -835,7 +838,30 @@ func ListLiveSessionsHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 					userSessionIDs[s.ID] = true
 
 					participants, _ := sessionRepo.ListAllParticipants(c.Request.Context(), s.ID) //nolint:errcheck // best-effort count
-					participantCount := len(participants)
+
+					// count active participants and check if user is currently active in this session
+					participantCount := 0
+					userIsActive := false
+					for _, p := range participants {
+						if p.Status == "active" {
+							participantCount++
+							if p.UserID != nil && *p.UserID == userID {
+								userIsActive = true
+							}
+						}
+					}
+
+					// skip sessions where user is currently active (they're already in it)
+					if userIsActive {
+						currentSessionIDs[s.ID] = true
+						continue
+					}
+
+					// only include member sessions if they have other participants or are discoverable
+					// this prevents showing empty private sessions the user happens to be a member of
+					if participantCount <= 1 && !s.IsDiscoverable {
+						continue
+					}
 
 					memberSessions = append(memberSessions, LiveSessionResponse{
 						ID:               s.ID,
@@ -867,8 +893,18 @@ func ListLiveSessionsHandler(sessionRepo sessions.Repository) gin.HandlerFunc {
 				continue
 			}
 
+			// skip sessions where user is currently active
+			if currentSessionIDs[s.ID] {
+				continue
+			}
+
 			participants, _ := sessionRepo.ListAllParticipants(c.Request.Context(), s.ID) //nolint:errcheck // best-effort count
-			participantCount := len(participants)
+			participantCount := 0
+			for _, p := range participants {
+				if p.Status == "active" {
+					participantCount++
+				}
+			}
 
 			responses = append(responses, LiveSessionResponse{
 				ID:               s.ID,
@@ -1020,6 +1056,7 @@ func SoftEndSessionHandler(sessionRepo sessions.Repository, sessionEnder Session
 		// count participants before kicking them
 		participants, _ := sessionRepo.ListAllParticipants(c.Request.Context(), sessionID) //nolint:errcheck // best-effort count
 		participantsKicked := 0
+
 		for _, p := range participants {
 			// count active non-host participants
 			if p.Status == "active" && (p.UserID == nil || *p.UserID != userID) {
@@ -1059,8 +1096,8 @@ func SoftEndSessionHandler(sessionRepo sessions.Repository, sessionEnder Session
 }
 
 // GetLastUserSessionHandler godoc
-// @Summary Get user's last active session
-// @Description Returns the user's most recent active session where they are host or co-author
+// @Summary Get user's last active session for recovery
+// @Description Returns the user's most recent active session where they are host, excluding sessions they're currently in
 // @Tags sessions
 // @Produce json
 // @Success 200 {object} LiveSessionResponse
@@ -1083,13 +1120,29 @@ func GetLastUserSessionHandler(sessionRepo sessions.Repository) gin.HandlerFunc 
 			return
 		}
 
-		// get participant count
+		// get participants and check if user is currently active
 		participants, _ := sessionRepo.ListAllParticipants(c.Request.Context(), session.ID) //nolint:errcheck // best-effort count
 		participantCount := 0
+		userIsActive := false
 		for _, p := range participants {
 			if p.Status == "active" {
 				participantCount++
+				if p.UserID != nil && *p.UserID == userID {
+					userIsActive = true
+				}
 			}
+		}
+
+		// don't return session if user is currently active in it (they're already in it)
+		if userIsActive {
+			errors.NotFound(c, "no active session found")
+			return
+		}
+
+		// don't return session if it's empty and private (no reason to rejoin)
+		if participantCount <= 1 && !session.IsDiscoverable {
+			errors.NotFound(c, "no active session found")
+			return
 		}
 
 		c.JSON(http.StatusOK, LiveSessionResponse{
