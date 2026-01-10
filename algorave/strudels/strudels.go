@@ -66,6 +66,7 @@ func (r *Repository) Create(
 		req.Title,
 		req.Code,
 		req.IsPublic,
+		req.License,
 		ccSignal,
 		aiAssistCount,
 		req.ForkedFrom,
@@ -79,6 +80,7 @@ func (r *Repository) Create(
 		&strudel.Title,
 		&strudel.Code,
 		&strudel.IsPublic,
+		&strudel.License,
 		&strudel.CCSignal,
 		&strudel.UseInTraining,
 		&strudel.AIAssistCount,
@@ -126,7 +128,7 @@ func (r *Repository) List(ctx context.Context, userID string, limit, offset int,
 
 	// build list query
 	listQuery := fmt.Sprintf(`
-		SELECT id, user_id, title, code, is_public, cc_signal, use_in_training, ai_assist_count, forked_from, description, tags, categories, conversation_history, created_at, updated_at
+		SELECT id, user_id, title, code, is_public, license, cc_signal, use_in_training, ai_assist_count, forked_from, description, tags, categories, conversation_history, created_at, updated_at
 		FROM user_strudels
 		%s
 		ORDER BY created_at DESC
@@ -150,6 +152,7 @@ func (r *Repository) List(ctx context.Context, userID string, limit, offset int,
 			&s.Title,
 			&s.Code,
 			&s.IsPublic,
+			&s.License,
 			&s.CCSignal,
 			&s.UseInTraining,
 			&s.AIAssistCount,
@@ -203,7 +206,7 @@ func (r *Repository) ListPublic(ctx context.Context, limit, offset int, filter L
 
 	// build list query
 	listQuery := fmt.Sprintf(`
-		SELECT id, user_id, title, code, is_public, cc_signal, use_in_training, ai_assist_count, forked_from, description, tags, categories, conversation_history, created_at, updated_at
+		SELECT id, user_id, title, code, is_public, license, cc_signal, use_in_training, ai_assist_count, forked_from, description, tags, categories, conversation_history, created_at, updated_at
 		FROM user_strudels
 		%s
 		ORDER BY created_at DESC
@@ -227,6 +230,7 @@ func (r *Repository) ListPublic(ctx context.Context, limit, offset int, filter L
 			&s.Title,
 			&s.Code,
 			&s.IsPublic,
+			&s.License,
 			&s.CCSignal,
 			&s.UseInTraining,
 			&s.AIAssistCount,
@@ -261,6 +265,7 @@ func (r *Repository) GetPublic(ctx context.Context, strudelID string) (*Strudel,
 		&strudel.Title,
 		&strudel.Code,
 		&strudel.IsPublic,
+		&strudel.License,
 		&strudel.CCSignal,
 		&strudel.UseInTraining,
 		&strudel.AIAssistCount,
@@ -289,6 +294,7 @@ func (r *Repository) Get(ctx context.Context, strudelID, userID string) (*Strude
 		&strudel.Title,
 		&strudel.Code,
 		&strudel.IsPublic,
+		&strudel.License,
 		&strudel.CCSignal,
 		&strudel.UseInTraining,
 		&strudel.AIAssistCount,
@@ -336,6 +342,7 @@ func (r *Repository) Update(
 		req.Title,
 		req.Code,
 		req.IsPublic,
+		req.License,
 		req.CCSignal,
 		aiAssistCount,
 		req.Description,
@@ -350,6 +357,7 @@ func (r *Repository) Update(
 		&strudel.Title,
 		&strudel.Code,
 		&strudel.IsPublic,
+		&strudel.License,
 		&strudel.CCSignal,
 		&strudel.UseInTraining,
 		&strudel.AIAssistCount,
@@ -401,6 +409,7 @@ func (r *Repository) ListTrainableWithoutEmbedding(ctx context.Context, limit in
 			&s.Title,
 			&s.Code,
 			&s.IsPublic,
+			&s.License,
 			&s.CCSignal,
 			&s.UseInTraining,
 			&s.AIAssistCount,
@@ -441,6 +450,7 @@ func (r *Repository) AdminGetStrudel(ctx context.Context, strudelID string) (*St
 		&strudel.Title,
 		&strudel.Code,
 		&strudel.IsPublic,
+		&strudel.License,
 		&strudel.CCSignal,
 		&strudel.UseInTraining,
 		&strudel.AIAssistCount,
@@ -470,6 +480,7 @@ func (r *Repository) AdminSetUseInTraining(ctx context.Context, strudelID string
 		&strudel.Title,
 		&strudel.Code,
 		&strudel.IsPublic,
+		&strudel.License,
 		&strudel.CCSignal,
 		&strudel.UseInTraining,
 		&strudel.AIAssistCount,

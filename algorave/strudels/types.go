@@ -20,6 +20,17 @@ const (
 	CCSignalNoAI      CCSignal = "no-ai" // No AI: Explicitly opt-out of AI training
 )
 
+// Valid Creative Commons license values
+const (
+	LicenseCC0      = "CC0 1.0"
+	LicenseBY       = "CC BY 4.0"
+	LicenseBYSA     = "CC BY-SA 4.0"
+	LicenseBYNC     = "CC BY-NC 4.0"
+	LicenseBYNCSA   = "CC BY-NC-SA 4.0"
+	LicenseBYND     = "CC BY-ND 4.0"
+	LicenseBYNCND   = "CC BY-NC-ND 4.0"
+)
+
 // signalRestrictiveness defines the restrictiveness order (higher = more restrictive)
 var signalRestrictiveness = map[CCSignal]int{
 	"":                0, // NULL - no preference
@@ -55,6 +66,7 @@ type Strudel struct {
 	Title               string              `json:"title"`
 	Code                string              `json:"code"`
 	IsPublic            bool                `json:"is_public"`
+	License             *string             `json:"license,omitempty"`
 	CCSignal            *CCSignal           `json:"cc_signal,omitempty"`
 	UseInTraining       bool                `json:"-"` // admin-only, not exposed to users
 	AIAssistCount       int                 `json:"ai_assist_count"`
@@ -100,6 +112,7 @@ type CreateStrudelRequest struct {
 	Title               string              `json:"title" binding:"required,max=200"`
 	Code                string              `json:"code" binding:"required,max=1048576"` // 1MB limit
 	IsPublic            bool                `json:"is_public"`
+	License             *string             `json:"license,omitempty"`
 	CCSignal            *CCSignal           `json:"cc_signal,omitempty"`
 	ForkedFrom          *string             `json:"forked_from,omitempty"`
 	Description         string              `json:"description,omitempty" binding:"max=2000"`
@@ -112,6 +125,7 @@ type UpdateStrudelRequest struct {
 	Title               *string             `json:"title,omitempty" binding:"omitempty,max=200"`
 	Code                *string             `json:"code,omitempty" binding:"omitempty,max=1048576"` // 1MB limit
 	IsPublic            *bool               `json:"is_public,omitempty"`
+	License             *string             `json:"license,omitempty"`
 	CCSignal            *CCSignal           `json:"cc_signal,omitempty"`
 	Description         *string             `json:"description,omitempty" binding:"omitempty,max=2000"`
 	Tags                []string            `json:"tags,omitempty" binding:"max=20,dive,max=50"`
