@@ -13,6 +13,8 @@ For comprehensive architecture documentation, see:
 - **[Product Architecture](./docs/system-specs/PRODUCT_ARCHITECTURE.md)** - User features (auth, strudels, collaboration)
 - **[Hybrid Retrieval Guide](./docs/system-specs/HYBRID_RETRIEVAL_GUIDE.md)** - Detailed retrieval implementation
 - **[Strudel Code Analysis](./docs/system-specs/STRUDEL_CODE_ANALYSIS.md)** - Code pattern analysis
+- **[CC Signals Architecture](./internal/ccsignals/.architecture.md)** - Content protection system design
+- **[Enforcing CC Signals](./docs/system-specs/ENFORCING-CC-SIGNALS.md)** - Paste lock implementation details
 
 This file contains detailed implementation decisions and technical context for the RAG system.
 
@@ -59,6 +61,8 @@ algorave/
 ├── internal/                # Internal packages
 │   ├── agent/               # Code generation orchestration
 │   ├── auth/                # JWT authentication & middleware
+│   ├── buffer/              # Redis-based session buffer & paste lock storage
+│   ├── ccsignals/           # CC Signal enforcement (fingerprinting, detection, locks)
 │   ├── chunker/             # Markdown chunking for RAG
 │   ├── config/              # Environment configuration
 │   ├── errors/              # Standardized error handling
@@ -1093,6 +1097,83 @@ func uniqueStrings(slice []string) []string {
 - Log similarity scores during retrieval (helps tune topK)
 - Print retrieved chunks to verify relevance
 - Print page grouping results to verify organization logic
+
+## CC Signals & Licenses
+
+### Overview
+
+The platform implements a dual system for content rights management:
+
+1. **Creative Commons Licenses** - Standard CC licenses for general sharing rights
+2. **CC Signals** - AI-specific preferences for how content can be used with AI tools
+
+### CC Signals (AI Preferences)
+
+CC Signals are stored in the `cc_signal` column of `user_strudels`:
+
+| Signal   | Name              | Meaning                                          |
+| -------- | ----------------- | ------------------------------------------------ |
+| `cc-cr`  | Credit            | Allow AI use with attribution                    |
+| `cc-dc`  | Credit + Direct   | Attribution + financial/in-kind support          |
+| `cc-ec`  | Credit + Ecosystem| Attribution + contribute to commons              |
+| `cc-op`  | Credit + Open     | Attribution + keep derivatives open              |
+| `no-ai`  | No AI             | Explicitly opt-out of AI assistance              |
+
+**Restrictiveness order:** `cc-cr` < `cc-dc` < `cc-ec` < `cc-op` < `no-ai`
+
+### Creative Commons Licenses (Sharing Rights)
+
+Standard CC licenses stored in the `license` column:
+
+- `CC0 1.0` - Public Domain
+- `CC BY 4.0` - Attribution
+- `CC BY-SA 4.0` - Attribution-ShareAlike
+- `CC BY-NC 4.0` - Attribution-NonCommercial
+- `CC BY-NC-SA 4.0` - Attribution-NonCommercial-ShareAlike
+- `CC BY-ND 4.0` - Attribution-NoDerivatives
+- `CC BY-NC-ND 4.0` - Attribution-NonCommercial-NoDerivatives
+
+### CC Signal Enforcement (Paste Lock System)
+
+The `internal/ccsignals/` package implements content protection:
+
+**Problem:** Users can bypass `no-ai` restrictions by copy-pasting protected code and requesting AI assistance on it.
+
+**Solution:** Behavioral detection + paste locks:
+
+1. **Detection:** WebSocket handler detects large code deltas (200+ chars or 50+ lines)
+2. **Validation:** Server validates if code is from legitimate source:
+   - User's own strudel → No lock
+   - Public strudel with AI-allowing signal → No lock
+   - Public strudel with `no-ai` signal → **LOCK**
+   - Unknown external paste → **LOCK**
+3. **Lock Storage:** Redis stores paste lock with baseline code (1-hour TTL)
+4. **Unlock:** 30%+ edit distance from baseline releases the lock
+5. **Enforcement:** REST `/agent/generate` endpoint checks lock before AI generation
+
+**Key Files:**
+- `internal/ccsignals/types.go` - Core types, interfaces, CCSignal enum
+- `internal/ccsignals/detector.go` - Main detection logic
+- `internal/ccsignals/levenshtein.go` - Edit distance calculation
+- `internal/ccsignals/simhash.go` - 64-bit fingerprint generation
+- `internal/ccsignals/lsh.go` - LSH indexing for O(1) similarity search
+- `internal/ccsignals/redis_store.go` - Redis lock storage
+- `internal/ccsignals/postgres_store.go` - PostgreSQL fingerprint storage
+- `internal/buffer/buffer.go` - Session buffer with paste lock methods
+
+**Configuration:**
+```go
+config := ccsignals.Config{
+    PasteDeltaThreshold: 200,   // chars to trigger detection
+    PasteLineThreshold:  50,    // lines to trigger detection
+    UnlockThreshold:     0.30,  // 30% edit distance to unlock
+    LockTTL:             time.Hour,
+}
+```
+
+See detailed documentation:
+- [CC Signals Architecture](./internal/ccsignals/.architecture.md)
+- [Enforcing CC Signals](./docs/system-specs/ENFORCING-CC-SIGNALS.md)
 
 ## Future Enhancements (Not MVP)
 - Conversation summarization for very long chats

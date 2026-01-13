@@ -60,13 +60,41 @@ Users can save, organize, and share their Strudel code.
 
 #### Database: `user_strudels` table
 
-Key columns: `id`, `user_id`, `title`, `code`, `tags[]`, `categories[]`, `is_public`
+Key columns: `id`, `user_id`, `title`, `code`, `tags[]`, `categories[]`, `is_public`, `license`, `cc_signal`
 
 #### Features
 
 - Tags/categories for organization
 - Public/private visibility
 - Full CRUD operations
+- CC Signals for AI usage preferences
+- Creative Commons licenses for sharing rights
+
+#### CC Signals (AI Preferences)
+
+Users can set AI-specific preferences when saving strudels:
+
+| Signal   | Name              | Meaning                                          |
+| -------- | ----------------- | ------------------------------------------------ |
+| `cc-cr`  | Credit            | Allow AI use with attribution                    |
+| `cc-dc`  | Credit + Direct   | Attribution + financial/in-kind support          |
+| `cc-ec`  | Credit + Ecosystem| Attribution + contribute to commons              |
+| `cc-op`  | Credit + Open     | Attribution + keep derivatives open              |
+| `no-ai`  | No AI             | Explicitly opt-out of AI assistance              |
+
+The `no-ai` signal is enforced server-side via paste lock detection. See [Enforcing CC Signals](./ENFORCING-CC-SIGNALS.md).
+
+#### Creative Commons Licenses
+
+Standard CC licenses for sharing rights:
+
+- `CC0 1.0` - Public Domain
+- `CC BY 4.0` - Attribution
+- `CC BY-SA 4.0` - Attribution-ShareAlike
+- `CC BY-NC 4.0` - Attribution-NonCommercial
+- `CC BY-NC-SA 4.0` - Attribution-NonCommercial-ShareAlike
+- `CC BY-ND 4.0` - Attribution-NoDerivatives
+- `CC BY-NC-ND 4.0` - Attribution-NonCommercial-NoDerivatives
 
 #### API Endpoints
 
@@ -106,13 +134,17 @@ WebSocket Hub (in-memory, with Redis pub/sub planned for scaling)
 #### WebSocket Message Types
 
 - `code_update` - Code synchronization between participants
-- `agent_request` - Request AI code generation
-- `agent_response` - AI-generated code response
 - `chat_message` - Text chat between participants
+- `play` / `stop` - Playback control (sync across participants)
 - `user_joined` / `user_left` - Presence notifications
+- `paste_lock_changed` - CC Signal enforcement (paste lock status)
+- `session_state` - Initial session state on connect
+- `session_ended` - Session terminated by host
 - `ping` / `pong` - Connection health checks
 - `error` - Error notifications
 - `server_shutdown` - Graceful shutdown signal
+
+See [WebSocket API Documentation](../websocket/API.md) for full details.
 
 ### 5. Events & Scheduled Sessions
 

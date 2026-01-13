@@ -363,6 +363,44 @@ Sent when the server is shutting down for maintenance.
 
 ---
 
+### `paste_lock_changed`
+
+Sent when a paste lock is set or removed on the session. This is part of the CC Signal enforcement system that protects `no-ai` content.
+
+**When is a paste lock set?**
+- Large code delta detected (200+ chars or 50+ lines)
+- Code doesn't match user's own strudels
+- Code doesn't match a public strudel that allows AI
+- Code matches a public strudel with `no-ai` signal
+
+**When is a paste lock removed?**
+- User makes significant edits (30%+ edit distance from original paste)
+- Lock TTL expires (1 hour of inactivity)
+
+```json
+{
+  "type": "paste_lock_changed",
+  "session_id": "uuid",
+  "user_id": "uuid",
+  "timestamp": "2024-01-01T00:00:00Z",
+  "payload": {
+    "locked": true,
+    "reason": "paste_detected"
+  }
+}
+```
+
+| Field    | Type    | Description                                                  |
+| -------- | ------- | ------------------------------------------------------------ |
+| `locked` | boolean | Whether the paste lock is active                             |
+| `reason` | string  | Why lock changed: `paste_detected`, `parent_no_ai`, `edits_sufficient` |
+
+**Frontend handling:**
+- When `locked: true`: Disable AI assistant, show message explaining the lock
+- When `locked: false`: Re-enable AI assistant
+
+---
+
 ### `error`
 
 Sent when an error occurs processing a message.
@@ -387,6 +425,7 @@ Sent when an error occurs processing a message.
 | `validation_error`  | Invalid message format                                 |
 | `bad_request`       | Invalid request (e.g., code too large)                 |
 | `server_error`      | Internal server error                                  |
+| `paste_locked`      | AI blocked due to paste lock (CC Signal enforcement)   |
 
 ---
 
