@@ -141,4 +141,13 @@ const (
 		ORDER BY created_at DESC
 		LIMIT $2
 	`
+
+	// fingerprint protection: get all no-ai strudels with sufficient content
+	// used at startup to populate the LSH index for similarity detection
+	queryListNoAIStrudels = `
+		SELECT id, user_id, code, cc_signal
+		FROM user_strudels
+		WHERE cc_signal = 'no-ai'
+		  AND LENGTH(code) >= $1
+	`
 )

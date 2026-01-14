@@ -303,14 +303,11 @@ func TestDetector_WithFingerprints(t *testing.T) {
 	config := DefaultConfig()
 
 	t.Run("fingerprint match with no-ai locks", func(t *testing.T) {
-		fpStore := NewMemoryFingerprintStore()
-		indexed := NewIndexedFingerprintStore(fpStore, 4, 15, 3)
+		indexed := NewInMemoryIndexedStore(4, 15, 3)
 
 		// add protected content with enough chars to trigger large delta (200+)
 		protectedContent := "the quick brown fox jumps over the lazy dog and runs through the forest again and again until we have enough characters to trigger the paste detection threshold of two hundred characters easily done now"
-		if _, err := indexed.Add(ctx, "work1", "creator1", SignalNoAI, protectedContent); err != nil {
-			t.Fatalf("failed to add fingerprint: %v", err)
-		}
+		indexed.AddFromStrudel("work1", "creator1", SignalNoAI, protectedContent)
 
 		d := NewDetector(config, nil, nil).WithFingerprints(indexed)
 
@@ -328,14 +325,11 @@ func TestDetector_WithFingerprints(t *testing.T) {
 	})
 
 	t.Run("fingerprint match with allowed signal no lock", func(t *testing.T) {
-		fpStore := NewMemoryFingerprintStore()
-		indexed := NewIndexedFingerprintStore(fpStore, 4, 15, 3)
+		indexed := NewInMemoryIndexedStore(4, 15, 3)
 
 		// add open content with enough chars to trigger large delta (200+)
 		openContent := "the quick brown fox jumps over the lazy dog and runs through the meadow again and again until we have enough characters to trigger the paste detection threshold of two hundred characters easily done now"
-		if _, err := indexed.Add(ctx, "work1", "creator1", SignalCredit, openContent); err != nil {
-			t.Fatalf("failed to add fingerprint: %v", err)
-		}
+		indexed.AddFromStrudel("work1", "creator1", SignalCredit, openContent)
 
 		d := NewDetector(config, nil, nil).WithFingerprints(indexed)
 

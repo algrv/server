@@ -1,7 +1,6 @@
 package ccsignals
 
 import (
-	"context"
 	"sync"
 	"testing"
 )
@@ -260,36 +259,21 @@ func TestLSHIndex_Concurrent(_ *testing.T) {
 	wg.Wait()
 }
 
-func TestIndexedFingerprintStore_Add(t *testing.T) {
-	ctx := context.Background()
-	memStore := NewMemoryFingerprintStore()
-	indexed := NewIndexedFingerprintStore(memStore, 4, 10, 3)
+func TestIndexedFingerprintStore_AddFromStrudel(t *testing.T) {
+	indexed := NewInMemoryIndexedStore(4, 10, 3)
 
-	record, err := indexed.Add(ctx, "work1", "creator1", SignalCredit, "test content here")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	indexed.AddFromStrudel("work1", "creator1", SignalCredit, "test content here")
 
-	if record.WorkID != "work1" {
-		t.Errorf("WorkID = %s, want work1", record.WorkID)
-	}
-	if record.Fingerprint == 0 {
-		t.Error("expected non-zero fingerprint")
-	}
 	if indexed.Size() != 1 {
 		t.Errorf("Size() = %d, want 1", indexed.Size())
 	}
 }
 
 func TestIndexedFingerprintStore_FindSimilar(t *testing.T) {
-	ctx := context.Background()
-	memStore := NewMemoryFingerprintStore()
-	indexed := NewIndexedFingerprintStore(memStore, 4, 10, 3)
+	indexed := NewInMemoryIndexedStore(4, 10, 3)
 
 	content := "the quick brown fox jumps over the lazy dog"
-	if _, err := indexed.Add(ctx, "work1", "creator1", SignalNoAI, content); err != nil {
-		t.Fatalf("failed to add: %v", err)
-	}
+	indexed.AddFromStrudel("work1", "creator1", SignalNoAI, content)
 
 	// search for identical content (guaranteed to match)
 	results := indexed.FindSimilar(content)
@@ -300,16 +284,10 @@ func TestIndexedFingerprintStore_FindSimilar(t *testing.T) {
 }
 
 func TestIndexedFingerprintStore_FindBestMatch(t *testing.T) {
-	ctx := context.Background()
-	memStore := NewMemoryFingerprintStore()
-	indexed := NewIndexedFingerprintStore(memStore, 4, 10, 3)
+	indexed := NewInMemoryIndexedStore(4, 10, 3)
 
-	if _, err := indexed.Add(ctx, "work1", "creator1", SignalNoAI, "hello world this is a test"); err != nil {
-		t.Fatalf("failed to add work1: %v", err)
-	}
-	if _, err := indexed.Add(ctx, "work2", "creator2", SignalCredit, "completely different content here"); err != nil {
-		t.Fatalf("failed to add work2: %v", err)
-	}
+	indexed.AddFromStrudel("work1", "creator1", SignalNoAI, "hello world this is a test")
+	indexed.AddFromStrudel("work2", "creator2", SignalCredit, "completely different content here")
 
 	best := indexed.FindBestMatch("hello world this is a test")
 	if best == nil {
@@ -321,54 +299,34 @@ func TestIndexedFingerprintStore_FindBestMatch(t *testing.T) {
 }
 
 func TestIndexedFingerprintStore_Remove(t *testing.T) {
-	ctx := context.Background()
-	memStore := NewMemoryFingerprintStore()
-	indexed := NewIndexedFingerprintStore(memStore, 4, 10, 3)
+	indexed := NewInMemoryIndexedStore(4, 10, 3)
 
-	if _, err := indexed.Add(ctx, "work1", "creator1", SignalCredit, "test content"); err != nil {
-		t.Fatalf("failed to add: %v", err)
-	}
-
-	err := indexed.Remove(ctx, "work1")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	indexed.AddFromStrudel("work1", "creator1", SignalCredit, "test content")
+	indexed.Remove("work1")
 
 	if indexed.Size() != 0 {
 		t.Errorf("Size() = %d after removal, want 0", indexed.Size())
 	}
 }
 
-func TestIndexedFingerprintStore_Initialize(t *testing.T) {
-	ctx := context.Background()
-	memStore := NewMemoryFingerprintStore()
+func TestIndexedFingerprintStore_InsertRecord(t *testing.T) {
+	indexed := NewInMemoryIndexedStore(4, 10, 3)
 
-	// add records directly to underlying store
-	if err := memStore.Store(ctx, &FingerprintRecord{
+	// add records directly via InsertRecord
+	indexed.InsertRecord(&FingerprintRecord{
 		ID:          "work1",
 		Fingerprint: 0xABCD,
 		WorkID:      "work1",
 		CCSignal:    SignalNoAI,
-	}); err != nil {
-		t.Fatalf("failed to store: %v", err)
-	}
-	if err := memStore.Store(ctx, &FingerprintRecord{
+	})
+	indexed.InsertRecord(&FingerprintRecord{
 		ID:          "work2",
 		Fingerprint: 0x1234,
 		WorkID:      "work2",
 		CCSignal:    SignalCredit,
-	}); err != nil {
-		t.Fatalf("failed to store: %v", err)
-	}
-
-	// create new indexed store and initialize
-	indexed := NewIndexedFingerprintStore(memStore, 4, 10, 3)
-	err := indexed.Initialize(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	})
 
 	if indexed.Size() != 2 {
-		t.Errorf("Size() = %d after initialize, want 2", indexed.Size())
+		t.Errorf("Size() = %d, want 2", indexed.Size())
 	}
 }

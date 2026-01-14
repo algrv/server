@@ -9,6 +9,7 @@ import (
 	"github.com/algrv/server/algorave/strudels"
 	"github.com/algrv/server/algorave/users"
 	"github.com/algrv/server/internal/buffer"
+	"github.com/algrv/server/internal/ccsignals"
 	"github.com/algrv/server/internal/config"
 	"github.com/algrv/server/internal/logger"
 	ws "github.com/algrv/server/internal/websocket"
@@ -84,10 +85,23 @@ func NewServer(cfg *config.Config) (*Server, error) {
 		return nil, fmt.Errorf("failed to initialize services: %w", err)
 	}
 
+	// initialize CC signals detection system
+	ccSignals, err := InitializeCCSignals(ctx, sessionBuffer.Client(), strudelRepo)
+	if err != nil {
+		logger.ErrorErr(err, "failed to initialize ccsignals, continuing without paste protection")
+		// don't fail startup - paste protection is optional
+	}
+
+	// get detector (may be nil if initialization failed)
+	var detector *ccsignals.Detector
+	if ccSignals != nil {
+		detector = ccSignals.Detector
+	}
+
 	hub := ws.NewHub()
 
 	// register websocket message handlers (handlers use sessionRepo interface, unaware of Redis)
-	hub.RegisterHandler(ws.TypeCodeUpdate, ws.CodeUpdateHandler(sessionRepo, sessionBuffer, strudelRepo))
+	hub.RegisterHandler(ws.TypeCodeUpdate, ws.CodeUpdateHandler(sessionRepo, detector))
 	hub.RegisterHandler(ws.TypeChatMessage, ws.ChatHandler(sessionRepo))
 	hub.RegisterHandler(ws.TypePlay, ws.PlayHandler())
 	hub.RegisterHandler(ws.TypeStop, ws.StopHandler())
@@ -120,7 +134,15 @@ func NewServer(cfg *config.Config) (*Server, error) {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		locked, err := sessionBuffer.IsPasteLocked(ctx, client.SessionID)
+		// check paste lock status using detector if available, otherwise fall back to buffer
+		var locked bool
+		var err error
+		if detector != nil {
+			locked, err = detector.IsLocked(ctx, client.SessionID)
+		} else {
+			locked, err = sessionBuffer.IsPasteLocked(ctx, client.SessionID)
+		}
+
 		if err != nil {
 			return // ignore errors, not critical
 		}
@@ -165,6 +187,7 @@ func NewServer(cfg *config.Config) (*Server, error) {
 		buffer:         sessionBuffer,
 		flusher:        flusher,
 		cleanupService: cleanupService,
+		ccSignals:      ccSignals,
 	}
 
 	RegisterRoutes(router, server)

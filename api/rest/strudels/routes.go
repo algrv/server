@@ -4,10 +4,17 @@ import (
 	"github.com/algrv/server/algorave/strudels"
 	"github.com/algrv/server/internal/attribution"
 	"github.com/algrv/server/internal/auth"
+	"github.com/algrv/server/internal/ccsignals"
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterRoutes(router *gin.RouterGroup, strudelRepo *strudels.Repository, attrService *attribution.Service) {
+// provides methods to index/remove strudels from the fingerprint index
+type FingerprintIndexer interface {
+	IndexStrudel(strudelID, creatorID, code string, ccSignal ccsignals.CCSignal)
+	RemoveStrudel(strudelID string)
+}
+
+func RegisterRoutes(router *gin.RouterGroup, strudelRepo *strudels.Repository, attrService *attribution.Service, fpIndexer FingerprintIndexer) {
 	// GET strudel by ID - allows owner OR public access (optional auth)
 	router.GET("/strudels/:id", auth.OptionalAuthMiddleware(), GetStrudelHandler(strudelRepo))
 
@@ -16,10 +23,10 @@ func RegisterRoutes(router *gin.RouterGroup, strudelRepo *strudels.Repository, a
 	strudelsGroup.Use(auth.AuthMiddleware())
 	{
 		strudelsGroup.GET("", ListStrudelsHandler(strudelRepo))
-		strudelsGroup.POST("", CreateStrudelHandler(strudelRepo))
+		strudelsGroup.POST("", CreateStrudelHandler(strudelRepo, fpIndexer))
 		strudelsGroup.GET("/tags", ListUserTagsHandler(strudelRepo))
-		strudelsGroup.PUT("/:id", UpdateStrudelHandler(strudelRepo))
-		strudelsGroup.DELETE("/:id", DeleteStrudelHandler(strudelRepo))
+		strudelsGroup.PUT("/:id", UpdateStrudelHandler(strudelRepo, fpIndexer))
+		strudelsGroup.DELETE("/:id", DeleteStrudelHandler(strudelRepo, fpIndexer))
 	}
 
 	// public strudels (no auth required)

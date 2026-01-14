@@ -656,6 +656,46 @@ func (r *Repository) GetParentCCSignal(ctx context.Context, parentID string) (*C
 	return signal, nil
 }
 
+// returns no-ai strudels with code length >= minContentLength
+// used for fingerprint protection to detect pasted protected content
+type NoAIStrudel struct {
+	ID       string
+	UserID   string
+	Code     string
+	CCSignal CCSignal
+}
+
+func (r *Repository) ListNoAIStrudels(ctx context.Context, minContentLength int) ([]NoAIStrudel, error) {
+	rows, err := r.db.Query(ctx, queryListNoAIStrudels, minContentLength)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+	var strudels []NoAIStrudel
+
+	for rows.Next() {
+		var s NoAIStrudel
+		var ccSignal *string
+
+		if err := rows.Scan(&s.ID, &s.UserID, &s.Code, &ccSignal); err != nil {
+			return nil, err
+		}
+
+		if ccSignal != nil {
+			s.CCSignal = CCSignal(*ccSignal)
+		}
+
+		strudels = append(strudels, s)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return strudels, nil
+}
+
 // retrieves AI conversation messages for a strudel
 func (r *Repository) GetStrudelMessages(ctx context.Context, strudelID string, limit int) ([]*StrudelMessage, error) {
 	rows, err := r.db.Query(ctx, queryGetStrudelMessages, strudelID, limit)

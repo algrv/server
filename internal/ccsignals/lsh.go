@@ -1,7 +1,6 @@
 package ccsignals
 
 import (
-	"context"
 	"sync"
 )
 
@@ -18,12 +17,13 @@ const (
 
 // stores a fingerprint with its metadata
 type FingerprintRecord struct {
-	ID          string
-	Fingerprint Fingerprint
-	WorkID      string
-	CreatorID   string
-	CCSignal    CCSignal
-	Content     string
+	ID            string
+	Fingerprint   Fingerprint
+	WorkID        string
+	CreatorID     string
+	CCSignal      CCSignal
+	Content       string
+	ContentLength int
 }
 
 // represents a fingerprint match
@@ -32,7 +32,7 @@ type MatchResult struct {
 	Distance int
 }
 
-// LSHIndex provides locality-sensitive hashing for efficient similarity search.
+// provides locality-sensitive hashing for efficient similarity search.
 // divides fingerprints into bands and uses band values as bucket keys,
 // reducing average lookup from O(n) to O(candidates in shared buckets).
 type LSHIndex struct {
@@ -194,70 +194,45 @@ func (idx *LSHIndex) GetRecord(id string) *FingerprintRecord {
 	return idx.records[id]
 }
 
-// defines the interface for persistent fingerprint storage
-type FingerprintStore interface {
-	Store(ctx context.Context, record *FingerprintRecord) error
-	Delete(ctx context.Context, id string) error
-	LoadAll(ctx context.Context) ([]*FingerprintRecord, error)
-	GetByWorkID(ctx context.Context, workID string) (*FingerprintRecord, error)
-}
-
-// combines LSH index with persistent storage
+// in-memory indexed fingerprint store (no persistence, computed from strudels at startup)
 type IndexedFingerprintStore struct {
 	index  *LSHIndex
-	store  FingerprintStore
 	hasher *SimHasher
 }
 
-// creates a new indexed store
-func NewIndexedFingerprintStore(store FingerprintStore, numBands, threshold, shingleSize int) *IndexedFingerprintStore {
+// creates a new in-memory indexed store
+func NewInMemoryIndexedStore(numBands, threshold, shingleSize int) *IndexedFingerprintStore {
 	return &IndexedFingerprintStore{
 		index:  NewLSHIndex(numBands, threshold),
-		store:  store,
 		hasher: NewSimHasher(shingleSize),
 	}
 }
 
-// loads all records from storage into the index
-func (s *IndexedFingerprintStore) Initialize(ctx context.Context) error {
-	records, err := s.store.LoadAll(ctx)
-	if err != nil {
-		return err
-	}
-
-	for _, record := range records {
-		s.index.Insert(record)
-	}
-
-	return nil
-}
-
-// creates a fingerprint for content and stores it
-func (s *IndexedFingerprintStore) Add(ctx context.Context, workID, creatorID string, ccSignal CCSignal, content string) (*FingerprintRecord, error) {
+// adds a fingerprint record computed from a strudel
+func (s *IndexedFingerprintStore) AddFromStrudel(workID, creatorID string, ccSignal CCSignal, content string) {
 	fingerprint := s.hasher.Hash(content)
 
 	record := &FingerprintRecord{
-		ID:          workID,
-		Fingerprint: fingerprint,
-		WorkID:      workID,
-		CreatorID:   creatorID,
-		CCSignal:    ccSignal,
-		Content:     content,
-	}
-
-	if err := s.store.Store(ctx, record); err != nil {
-		return nil, err
+		ID:            workID,
+		Fingerprint:   fingerprint,
+		WorkID:        workID,
+		CreatorID:     creatorID,
+		CCSignal:      ccSignal,
+		Content:       content,
+		ContentLength: len(content),
 	}
 
 	s.index.Insert(record)
+}
 
-	return record, nil
+// inserts a pre-loaded record directly into the index
+func (s *IndexedFingerprintStore) InsertRecord(record *FingerprintRecord) {
+	s.index.Insert(record)
 }
 
 // removes a fingerprint by work ID
-func (s *IndexedFingerprintStore) Remove(ctx context.Context, workID string) error {
+func (s *IndexedFingerprintStore) Remove(workID string) {
 	s.index.Remove(workID)
-	return s.store.Delete(ctx, workID)
 }
 
 // searches for content similar to the query

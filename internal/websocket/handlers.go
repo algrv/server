@@ -6,13 +6,12 @@ import (
 	"time"
 
 	"github.com/algrv/server/algorave/sessions"
-	"github.com/algrv/server/algorave/strudels"
-	"github.com/algrv/server/internal/buffer"
+	"github.com/algrv/server/internal/ccsignals"
 	"github.com/algrv/server/internal/logger"
 )
 
-// handles code update messages
-func CodeUpdateHandler(sessionRepo sessions.Repository, sessionBuffer *buffer.SessionBuffer, strudelRepo *strudels.Repository) MessageHandler {
+// handles code update messages with CC signals detection
+func CodeUpdateHandler(sessionRepo sessions.Repository, detector *ccsignals.Detector) MessageHandler {
 	return func(hub *Hub, client *Client, msg *Message) error {
 		// check rate limit
 		if !client.checkCodeUpdateRateLimit() {
@@ -50,95 +49,9 @@ func CodeUpdateHandler(sessionRepo sessions.Repository, sessionBuffer *buffer.Se
 			previousCode = session.Code
 		}
 
-		// paste detection: server-side behavioral detection (independent of frontend source field)
-		// only process paste detection if there's a large delta
-		if buffer.IsLargeDelta(previousCode, payload.Code) {
-			// large delta detected - validate if it's from a legitimate source
-			shouldLock := true
-
-			// check 1: does code match session's existing code? (reconnection/sync)
-			if payload.Code == previousCode {
-				shouldLock = false
-			}
-
-			// check 2: does code match any of user's own strudels? (loading own work)
-			if shouldLock && client.UserID != "" && strudelRepo != nil {
-				owns, err := strudelRepo.UserOwnsStrudelWithCode(ctx, client.UserID, payload.Code)
-				if err == nil && owns {
-					shouldLock = false
-					logger.Info("large delta from own strudel, skipping paste lock",
-						"session_id", client.SessionID,
-						"user_id", client.UserID,
-					)
-				}
-			}
-
-			// check 3: does code match any public strudel that allows AI? (legitimate fork)
-			// note: public strudels with no-ai CC signal will NOT bypass the lock
-			if shouldLock && strudelRepo != nil {
-				exists, err := strudelRepo.PublicStrudelExistsWithCodeAllowsAI(ctx, payload.Code)
-				if err == nil && exists {
-					shouldLock = false
-					logger.Info("large delta from public strudel (fork, allows AI), skipping paste lock",
-						"session_id", client.SessionID,
-					)
-				}
-			}
-
-			// if still shouldLock, this is likely an external paste
-			if shouldLock {
-				// only set lock if not already locked - preserve original baseline
-				// (prevents bypass via duplicate-then-remove)
-				alreadyLocked, _ := sessionBuffer.IsPasteLocked(ctx, client.SessionID) //nolint:errcheck // best-effort
-				if !alreadyLocked {
-					if err := sessionBuffer.SetPasteLock(ctx, client.SessionID, payload.Code); err != nil {
-						logger.ErrorErr(err, "failed to set paste lock", "session_id", client.SessionID)
-					} else {
-						// check if this paste is from a no-ai strudel (permanent block)
-						reason := "paste_detected"
-
-						if strudelRepo != nil {
-							isNoAI, err := strudelRepo.PublicStrudelExistsWithCodeNoAI(ctx, payload.Code)
-							if err == nil && isNoAI {
-								reason = "parent_no_ai"
-								logger.Info("paste lock set (parent has no-ai)",
-									"session_id", client.SessionID,
-									"source", payload.Source,
-								)
-							} else {
-								logger.Info("paste lock set",
-									"session_id", client.SessionID,
-									"source", payload.Source,
-									"delta_len", len(payload.Code)-len(previousCode),
-								)
-							}
-						}
-						// notify client that paste lock is active
-						sendPasteLockStatus(hub, client, true, reason)
-					}
-				}
-			}
-		} else {
-			// no large delta - check if session is locked and if edits are significant enough to unlock
-			locked, err := sessionBuffer.IsPasteLocked(ctx, client.SessionID)
-			if err == nil && locked {
-				baseline, err := sessionBuffer.GetPasteBaseline(ctx, client.SessionID)
-				if err == nil && buffer.IsSignificantEdit(baseline, payload.Code) {
-					// significant edits detected, remove lock
-					if err := sessionBuffer.RemovePasteLock(ctx, client.SessionID); err != nil {
-						logger.ErrorErr(err, "failed to remove paste lock", "session_id", client.SessionID)
-					} else {
-						logger.Info("paste lock removed due to significant edits",
-							"session_id", client.SessionID,
-						)
-						// notify client that paste lock is lifted
-						sendPasteLockStatus(hub, client, false, "edits_sufficient")
-					}
-				} else {
-					// refresh TTL while still locked
-					sessionBuffer.RefreshPasteLockTTL(ctx, client.SessionID) //nolint:errcheck,gosec // best-effort
-				}
-			}
+		// use ccsignals detector for paste detection
+		if detector != nil {
+			handlePasteDetection(ctx, hub, client, detector, previousCode, payload.Code)
 		}
 
 		// save code (goes to redis buffer via BufferedRepository)
@@ -167,6 +80,88 @@ func CodeUpdateHandler(sessionRepo sessions.Repository, sessionBuffer *buffer.Se
 		hub.BroadcastToSession(client.SessionID, broadcastMsg, client.ID)
 
 		return nil
+	}
+}
+
+// uses the ccsignals detector to manage paste locks
+func handlePasteDetection(ctx context.Context, hub *Hub, client *Client, detector *ccsignals.Detector, previousCode, newCode string) {
+	// check if this is a large delta (potential paste)
+	if detector.IsLargeDelta(previousCode, newCode) {
+		// detect paste and get result
+		result, err := detector.DetectPaste(ctx, client.SessionID, client.UserID, previousCode, newCode)
+		if err != nil {
+			logger.ErrorErr(err, "paste detection failed", "session_id", client.SessionID)
+			return
+		}
+
+		if result.ShouldLock {
+			// check if already locked (preserve original baseline)
+			alreadyLocked, err := detector.IsLocked(ctx, client.SessionID)
+			if err != nil {
+				logger.ErrorErr(err, "failed to check lock status", "session_id", client.SessionID)
+				// continue assuming not locked (will set new lock)
+			}
+
+			if !alreadyLocked {
+				// set the lock
+				config := ccsignals.DefaultConfig()
+				if err := detector.SetLock(ctx, client.SessionID, newCode, config.LockTTL); err != nil {
+					logger.ErrorErr(err, "failed to set paste lock", "session_id", client.SessionID)
+					return
+				}
+
+				// determine reason for logging and notification
+				reason := "paste_detected"
+
+				if result.FingerprintMatch != nil && !result.FingerprintMatch.Record.CCSignal.AllowsAI() {
+					reason = "similar_to_protected"
+					logger.Info("paste lock set (similar to protected content)",
+						"session_id", client.SessionID,
+						"matched_work_id", result.FingerprintMatch.Record.WorkID,
+						"similarity_distance", result.FingerprintMatch.Distance,
+					)
+				} else if result.MatchedContent != nil && result.MatchedContent.CCSignal == ccsignals.SignalNoAI {
+					reason = "parent_no_ai"
+					logger.Info("paste lock set (parent has no-ai)",
+						"session_id", client.SessionID,
+					)
+				} else {
+					logger.Info("paste lock set (external paste)",
+						"session_id", client.SessionID,
+						"reason", result.Reason,
+					)
+				}
+
+				// notify client
+				sendPasteLockStatus(hub, client, true, reason)
+			}
+		} else {
+			logger.Debug("paste detected but allowed",
+				"session_id", client.SessionID,
+				"reason", result.Reason,
+			)
+		}
+	} else {
+		// no large delta - check if edits are significant enough to unlock
+		if err := detector.CheckUnlock(ctx, client.SessionID, newCode); err != nil {
+			logger.ErrorErr(err, "failed to check unlock", "session_id", client.SessionID)
+			return
+		}
+
+		// check if lock was removed
+		locked, err := detector.IsLocked(ctx, client.SessionID)
+		if err == nil && !locked {
+			// lock was removed by CheckUnlock, notify client
+			// note: we only send this if lock was previously active
+			// CheckUnlock handles the state internally, we just notify
+			// For now, we check by seeing if significant edit threshold was met
+			if detector.IsSignificantEdit(previousCode, newCode) {
+				logger.Info("paste lock removed due to significant edits",
+					"session_id", client.SessionID,
+				)
+				sendPasteLockStatus(hub, client, false, "edits_sufficient")
+			}
+		}
 	}
 }
 

@@ -31,6 +31,7 @@ type Server struct {
 	buffer         *buffer.SessionBuffer
 	flusher        *buffer.Flusher
 	cleanupService *sessions.CleanupService
+	ccSignals      *CCSignalsSystem
 }
 
 // holds all external service clients (LLM, storage, retriever, agent)

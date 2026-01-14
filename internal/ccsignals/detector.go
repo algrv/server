@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"strings"
+	"time"
 )
 
 var (
@@ -163,6 +164,14 @@ func (d *Detector) IsLocked(ctx context.Context, sessionID string) (bool, error)
 	}
 
 	return state != nil && state.Locked, nil
+}
+
+// sets a paste lock for a session
+func (d *Detector) SetLock(ctx context.Context, sessionID, baselineCode string, ttl time.Duration) error {
+	if d.store == nil {
+		return ErrNilStore
+	}
+	return d.store.SetLock(ctx, sessionID, baselineCode, ttl)
 }
 
 // determines if a code update has a large delta

@@ -9,6 +9,7 @@ import (
 	"github.com/algrv/server/api/rest/pagination"
 	"github.com/algrv/server/internal/attribution"
 	"github.com/algrv/server/internal/auth"
+	"github.com/algrv/server/internal/ccsignals"
 	"github.com/algrv/server/internal/errors"
 	"github.com/gin-gonic/gin"
 )
@@ -26,7 +27,7 @@ import (
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /api/v1/strudels [post]
 // @Security BearerAuth
-func CreateStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
+func CreateStrudelHandler(strudelRepo *strudels.Repository, fpIndexer FingerprintIndexer) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID, exists := auth.GetUserID(c)
 		if !exists {
@@ -44,6 +45,11 @@ func CreateStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 		if err != nil {
 			errors.InternalError(c, "failed to create strudel", err)
 			return
+		}
+
+		// index fingerprint if no-ai signal (for paste protection)
+		if fpIndexer != nil && strudel.CCSignal != nil {
+			fpIndexer.IndexStrudel(strudel.ID, strudel.UserID, strudel.Code, ccsignals.CCSignal(*strudel.CCSignal))
 		}
 
 		c.JSON(http.StatusCreated, strudel)
@@ -205,7 +211,7 @@ func GetStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 // @Failure 404 {object} errors.ErrorResponse
 // @Router /api/v1/strudels/{id} [put]
 // @Security BearerAuth
-func UpdateStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
+func UpdateStrudelHandler(strudelRepo *strudels.Repository, fpIndexer FingerprintIndexer) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID, exists := auth.GetUserID(c)
 		if !exists {
@@ -231,6 +237,14 @@ func UpdateStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 			return
 		}
 
+		// update fingerprint index (remove old, add new if no-ai)
+		if fpIndexer != nil {
+			fpIndexer.RemoveStrudel(strudel.ID)
+			if strudel.CCSignal != nil {
+				fpIndexer.IndexStrudel(strudel.ID, strudel.UserID, strudel.Code, ccsignals.CCSignal(*strudel.CCSignal))
+			}
+		}
+
 		c.JSON(http.StatusOK, strudel)
 	}
 }
@@ -247,7 +261,7 @@ func UpdateStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 // @Failure 404 {object} errors.ErrorResponse
 // @Router /api/v1/strudels/{id} [delete]
 // @Security BearerAuth
-func DeleteStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
+func DeleteStrudelHandler(strudelRepo *strudels.Repository, fpIndexer FingerprintIndexer) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID, exists := auth.GetUserID(c)
 		if !exists {
@@ -264,6 +278,11 @@ func DeleteStrudelHandler(strudelRepo *strudels.Repository) gin.HandlerFunc {
 		if err != nil {
 			errors.NotFound(c, "strudel")
 			return
+		}
+
+		// remove from fingerprint index
+		if fpIndexer != nil {
+			fpIndexer.RemoveStrudel(strudelID)
 		}
 
 		c.JSON(http.StatusOK, MessageResponse{Message: "strudel deleted"})
