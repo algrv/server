@@ -7,6 +7,7 @@ import (
 
 	"codeberg.org/algorave/server/algorave/strudels"
 	"codeberg.org/algorave/server/api/rest/pagination"
+	"codeberg.org/algorave/server/internal/agent"
 	"codeberg.org/algorave/server/internal/attribution"
 	"codeberg.org/algorave/server/internal/auth"
 	"codeberg.org/algorave/server/internal/ccsignals"
@@ -51,6 +52,26 @@ func CreateStrudelHandler(strudelRepo *strudels.Repository, fpIndexer Fingerprin
 		if err != nil {
 			errors.InternalError(c, "failed to create strudel", err)
 			return
+		}
+
+		// migrate conversation history to strudel_messages table
+		// so GET endpoint can retrieve it (GET reads from strudel_messages, not JSONB column)
+		for _, msg := range req.ConversationHistory {
+			_, err := strudelRepo.AddStrudelMessage(c.Request.Context(), &strudels.AddStrudelMessageRequest{
+				StrudelID:           strudel.ID,
+				UserID:              &userID,
+				Role:                msg.Role,
+				Content:             msg.Content,
+				IsActionable:        msg.IsActionable,
+				IsCodeResponse:      msg.IsCodeResponse,
+				ClarifyingQuestions: msg.ClarifyingQuestions,
+				StrudelReferences:   convertStrudelRefs(msg.StrudelReferences),
+				DocReferences:       convertDocRefs(msg.DocReferences),
+			})
+			if err != nil {
+				// log but don't fail - strudel is already created
+				fmt.Printf("warning: failed to migrate conversation message: %v\n", err)
+			}
 		}
 
 		// index fingerprint if no-ai signal (for paste protection)
@@ -507,4 +528,31 @@ func GetStrudelStatsHandler(strudelRepo *strudels.Repository, attrService *attri
 
 		c.JSON(http.StatusOK, stats)
 	}
+}
+
+// convertStrudelRefs converts agent.StrudelReference to strudels.StrudelReference
+func convertStrudelRefs(refs []agent.StrudelReference) []strudels.StrudelReference {
+	result := make([]strudels.StrudelReference, len(refs))
+	for i, ref := range refs {
+		result[i] = strudels.StrudelReference{
+			ID:         ref.ID,
+			Title:      ref.Title,
+			AuthorName: ref.AuthorName,
+			URL:        ref.URL,
+		}
+	}
+	return result
+}
+
+// convertDocRefs converts agent.DocReference to strudels.DocReference
+func convertDocRefs(refs []agent.DocReference) []strudels.DocReference {
+	result := make([]strudels.DocReference, len(refs))
+	for i, ref := range refs {
+		result[i] = strudels.DocReference{
+			PageName:     ref.PageName,
+			SectionTitle: ref.SectionTitle,
+			URL:          ref.URL,
+		}
+	}
+	return result
 }
