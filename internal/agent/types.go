@@ -65,7 +65,11 @@ type GenerateResponse struct {
 
 // represents a single conversation turn
 type Message struct {
-	Role           string `json:"role"`                       // "user" or "assistant"
-	Content        string `json:"content"`                    // message content
-	IsCodeResponse bool   `json:"is_code_response,omitempty"` // true if AI generated code
+	Role                string            `json:"role"`                          // "user" or "assistant"
+	Content             string            `json:"content"`                       // message content
+	IsActionable        bool              `json:"is_actionable,omitempty"`       // true if response can be applied
+	IsCodeResponse      bool              `json:"is_code_response,omitempty"`    // true if AI generated code
+	ClarifyingQuestions []string          `json:"clarifying_questions,omitempty"`
+	StrudelReferences   []StrudelReference `json:"strudel_references,omitempty"`
+	DocReferences       []DocReference    `json:"doc_references,omitempty"`
 }
