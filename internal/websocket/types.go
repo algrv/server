@@ -49,6 +49,9 @@ const (
 
 	// is sent when paste lock status changes
 	TypePasteLockChanged = "paste_lock_changed"
+
+	// is sent when a user moves their cursor
+	TypeCursorPosition = "cursor_position"
 )
 
 // client connection constants
@@ -180,6 +183,15 @@ type SessionEndedPayload struct {
 type PasteLockChangedPayload struct {
 	Locked bool   `json:"locked"`
 	Reason string `json:"reason,omitempty"` // "paste_detected", "edits_sufficient", "ttl_expired"
+}
+
+// contains cursor position information for collaboration
+type CursorPositionPayload struct {
+	Line        int    `json:"line"`                   // 1-indexed line number
+	Col         int    `json:"col"`                    // 0-indexed column number
+	UserID      string `json:"user_id,omitempty"`      // user ID (added by backend)
+	DisplayName string `json:"display_name,omitempty"` // display name (added by backend)
+	Role        string `json:"role,omitempty"`         // role (added by backend)
 }
 
 // represents a websocket client connection
