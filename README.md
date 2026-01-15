@@ -6,10 +6,13 @@ Create music using human language.
 
 ### Prerequisites
 
-- Go 1.21+
-- Supabase account
-- OpenAI API key
-- Anthropic API key (for server phase)
+- Go 1.24+
+- Supabase account (PostgreSQL with pgvector)
+- Redis (for session buffering)
+- OpenAI API key (for embeddings)
+- Anthropic API key (for code generation)
+- Google OAuth credentials (required for authentication)
+- GitHub OAuth credentials (optional)
 
 ### Setup
 
@@ -48,10 +51,14 @@ Create music using human language.
    supabase db push
    ```
 
-   This will create:
-   - `doc_embeddings` table with pgvector support
-   - Vector similarity search index (ivfflat)
-   - Indexes on `page_name` and `created_at`
+   This will create the database schema including:
+   - `doc_embeddings` - Vector embeddings for RAG retrieval
+   - `users` - User accounts and preferences
+   - `user_strudels` - Saved Strudel patterns
+   - `collaborative_sessions` - Real-time collaboration rooms
+   - `session_messages` - Chat and code messages
+   - `usage_tracking` - API usage metrics
+   - And supporting indexes for vector similarity search
 
    d. Get your connection string:
    - Go to Supabase Dashboard → Project Settings → Database
@@ -61,13 +68,19 @@ Create music using human language.
 
    ```bash
    cp .env.example .env
-   # Edit .env with your actual API keys
+   # Edit .env with your actual values
    ```
 
    Required variables:
+   - `SUPABASE_CONNECTION_STRING` - PostgreSQL connection string
+   - `REDIS_URL` - Redis URL for session buffering
    - `OPENAI_API_KEY` - For generating embeddings
-   - `SUPABASE_CONNECTION_STRING` - Database connection
-   - `ANTHROPIC_API_KEY` - For code generation (server phase)
+   - `ANTHROPIC_API_KEY` - For code generation
+   - `JWT_SECRET` - Secret for signing JWT tokens
+   - `SESSION_SECRET` - Secret for OAuth cookie signing
+   - `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` - Google OAuth
+
+   See `.env.example` for the full list of configuration options.
 
 ### Running Ingestion
 
@@ -87,6 +100,28 @@ The ingestion process will:
 4. Store chunks with embeddings in Supabase
 
 **Note:** The `--clear` flag deletes all existing chunks from the database before ingesting. Use it when you want a fresh start.
+
+### Running the Server
+
+```bash
+go run cmd/server/main.go
+```
+
+The server provides:
+- REST API for Strudel code generation
+- WebSocket support for real-time collaboration
+- OAuth authentication (Google, GitHub)
+- Anonymous session support
+
+Default port is `8080`. Override with the `PORT` environment variable.
+
+### Running the TUI Client
+
+```bash
+go run cmd/tui/main.go
+```
+
+A terminal-based interface for interacting with Algorave.
 
 ### Automated Ingestion
 
