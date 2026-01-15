@@ -40,6 +40,13 @@ const (
 		RETURNING id, email, provider, provider_id, name, avatar_url, tier, is_admin, training_consent, ai_features_enabled, created_at, updated_at
 	`
 
+	queryUpdateDisplayName = `
+		UPDATE users
+		SET name = $1, updated_at = NOW()
+		WHERE id = $2
+		RETURNING id, email, provider, provider_id, name, avatar_url, tier, is_admin, training_consent, ai_features_enabled, created_at, updated_at
+	`
+
 	queryGetUserDailyUsage = `
 		SELECT get_user_usage_today($1)
 	`

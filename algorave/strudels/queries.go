@@ -10,9 +10,10 @@ const (
 	`
 
 	queryGetPublic = `
-		SELECT id, user_id, title, code, is_public, license, cc_signal, use_in_training, ai_assist_count, forked_from, description, tags, categories, conversation_history, created_at, updated_at
-		FROM user_strudels
-		WHERE id = $1 AND is_public = true
+		SELECT s.id, s.user_id, u.name, s.title, s.code, s.is_public, s.license, s.cc_signal, s.use_in_training, s.ai_assist_count, s.forked_from, s.description, s.tags, s.categories, s.conversation_history, s.created_at, s.updated_at
+		FROM user_strudels s
+		LEFT JOIN users u ON s.user_id = u.id
+		WHERE s.id = $1 AND s.is_public = true
 	`
 
 	queryGet = `

@@ -173,6 +173,40 @@ func (r *Repository) UpdateAIFeaturesEnabled(
 	return &user, nil
 }
 
+func (r *Repository) UpdateDisplayName(
+	ctx context.Context,
+	userID string,
+	displayName string,
+) (*User, error) {
+	var user User
+
+	err := r.db.QueryRow(
+		ctx,
+		queryUpdateDisplayName,
+		displayName,
+		userID,
+	).Scan(
+		&user.ID,
+		&user.Email,
+		&user.Provider,
+		&user.ProviderID,
+		&user.Name,
+		&user.AvatarURL,
+		&user.Tier,
+		&user.IsAdmin,
+		&user.TrainingConsent,
+		&user.AIFeaturesEnabled,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
 func (r *Repository) CheckUserRateLimit(ctx context.Context, userID string, isBYOK bool) (*RateLimitResult, error) {
 	if isBYOK {
 		return &RateLimitResult{

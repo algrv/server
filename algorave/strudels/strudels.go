@@ -186,36 +186,37 @@ func (r *Repository) List(ctx context.Context, userID string, limit, offset int,
 
 func (r *Repository) ListPublic(ctx context.Context, limit, offset int, filter ListFilter) ([]Strudel, int, error) {
 	// build dynamic query with filters
-	baseWhere := "WHERE is_public = true"
+	baseWhere := "WHERE s.is_public = true"
 	args := []interface{}{}
 	argIndex := 1
 
 	if filter.Search != "" {
-		baseWhere += fmt.Sprintf(" AND (title ILIKE $%d OR description ILIKE $%d)", argIndex, argIndex)
+		baseWhere += fmt.Sprintf(" AND (s.title ILIKE $%d OR s.description ILIKE $%d)", argIndex, argIndex)
 		args = append(args, "%"+filter.Search+"%")
 		argIndex++
 	}
 
 	if len(filter.Tags) > 0 {
-		baseWhere += fmt.Sprintf(" AND tags && $%d", argIndex)
+		baseWhere += fmt.Sprintf(" AND s.tags && $%d", argIndex)
 		args = append(args, filter.Tags)
 		argIndex++
 	}
 
 	// get total count first
 	var total int
-	countQuery := "SELECT COUNT(*) FROM user_strudels " + baseWhere
+	countQuery := "SELECT COUNT(*) FROM user_strudels s " + baseWhere
 
 	if err := r.db.QueryRow(ctx, countQuery, args...).Scan(&total); err != nil {
 		return nil, 0, err
 	}
 
-	// build list query
+	// build list query with JOIN to get author name
 	listQuery := fmt.Sprintf(`
-		SELECT id, user_id, title, code, is_public, license, cc_signal, use_in_training, ai_assist_count, forked_from, description, tags, categories, conversation_history, created_at, updated_at
-		FROM user_strudels
+		SELECT s.id, s.user_id, u.name, s.title, s.code, s.is_public, s.license, s.cc_signal, s.use_in_training, s.ai_assist_count, s.forked_from, s.description, s.tags, s.categories, s.conversation_history, s.created_at, s.updated_at
+		FROM user_strudels s
+		LEFT JOIN users u ON s.user_id = u.id
 		%s
-		ORDER BY created_at DESC
+		ORDER BY s.created_at DESC
 		LIMIT $%d OFFSET $%d
 	`, baseWhere, argIndex, argIndex+1)
 	args = append(args, limit, offset)
@@ -230,9 +231,11 @@ func (r *Repository) ListPublic(ctx context.Context, limit, offset int, filter L
 
 	for rows.Next() {
 		var s Strudel
+		var authorName *string
 		err := rows.Scan(
 			&s.ID,
 			&s.UserID,
+			&authorName,
 			&s.Title,
 			&s.Code,
 			&s.IsPublic,
@@ -252,6 +255,10 @@ func (r *Repository) ListPublic(ctx context.Context, limit, offset int, filter L
 			return nil, 0, err
 		}
 
+		if authorName != nil {
+			s.AuthorName = *authorName
+		}
+
 		strudels = append(strudels, s)
 	}
 
@@ -264,10 +271,12 @@ func (r *Repository) ListPublic(ctx context.Context, limit, offset int, filter L
 
 func (r *Repository) GetPublic(ctx context.Context, strudelID string) (*Strudel, error) {
 	var strudel Strudel
+	var authorName *string
 
 	err := r.db.QueryRow(ctx, queryGetPublic, strudelID).Scan(
 		&strudel.ID,
 		&strudel.UserID,
+		&authorName,
 		&strudel.Title,
 		&strudel.Code,
 		&strudel.IsPublic,
@@ -286,6 +295,10 @@ func (r *Repository) GetPublic(ctx context.Context, strudelID string) (*Strudel,
 
 	if err != nil {
 		return nil, err
+	}
+
+	if authorName != nil {
+		strudel.AuthorName = *authorName
 	}
 
 	return &strudel, nil

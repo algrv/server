@@ -20,3 +20,7 @@ type TrainingConsentRequest struct {
 type AIFeaturesEnabledRequest struct {
 	AIFeaturesEnabled bool `json:"ai_features_enabled"`
 }
+
+type UpdateDisplayNameRequest struct {
+	DisplayName string `json:"display_name" binding:"required,min=1,max=50"`
+}

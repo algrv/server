@@ -174,3 +174,42 @@ func UpdateAIFeaturesEnabled(db *pgxpool.Pool) gin.HandlerFunc {
 		c.JSON(http.StatusOK, user)
 	}
 }
+
+// UpdateDisplayName godoc
+// @Summary Update user's display name
+// @Description Update the authenticated user's display name (shown in sessions and raves)
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param request body UpdateDisplayNameRequest true "Display name data"
+// @Success 200 {object} users.User
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 401 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /api/v1/users/display-name [put]
+// @Security BearerAuth
+func UpdateDisplayName(db *pgxpool.Pool) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID := c.GetString("user_id")
+
+		if userID == "" {
+			errors.Unauthorized(c, "user not authenticated")
+			return
+		}
+
+		var req UpdateDisplayNameRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			errors.ValidationError(c, err)
+			return
+		}
+
+		repo := users.NewRepository(db)
+		user, err := repo.UpdateDisplayName(c.Request.Context(), userID, req.DisplayName)
+		if err != nil {
+			errors.InternalError(c, "failed to update display name", err)
+			return
+		}
+
+		c.JSON(http.StatusOK, user)
+	}
+}

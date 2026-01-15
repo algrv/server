@@ -13,4 +13,5 @@ func RegisterRoutes(rg *gin.RouterGroup, db *pgxpool.Pool) {
 	users.GET("/usage", GetUsage(db))
 	users.PUT("/training-consent", UpdateTrainingConsent(db))
 	users.PUT("/ai-features-enabled", UpdateAIFeaturesEnabled(db))
+	users.PUT("/display-name", UpdateDisplayName(db))
 }

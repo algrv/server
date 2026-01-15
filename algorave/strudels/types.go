@@ -63,6 +63,7 @@ type Repository struct {
 type Strudel struct {
 	ID                  string              `json:"id"`
 	UserID              string              `json:"user_id"`
+	AuthorName          string              `json:"author_name,omitempty"`
 	Title               string              `json:"title"`
 	Code                string              `json:"code"`
 	IsPublic            bool                `json:"is_public"`
