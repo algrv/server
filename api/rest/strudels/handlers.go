@@ -270,11 +270,13 @@ func UpdateStrudelHandler(strudelRepo *strudels.Repository, fpIndexer Fingerprin
 			return
 		}
 
-		// update fingerprint index (remove old, add new if no-ai)
-		if fpIndexer != nil {
-			fpIndexer.RemoveStrudel(strudel.ID)
+		// update fingerprint index only if code changed (avoid rehashing on metadata-only updates)
+		// UpdateStrudel also skips rehashing if the content is unchanged (optimization for frequent autosaves)
+		if fpIndexer != nil && req.Code != nil {
 			if strudel.CCSignal != nil {
-				fpIndexer.IndexStrudel(strudel.ID, strudel.UserID, strudel.Code, ccsignals.CCSignal(*strudel.CCSignal))
+				fpIndexer.UpdateStrudel(strudel.ID, strudel.UserID, strudel.Code, ccsignals.CCSignal(*strudel.CCSignal))
+			} else {
+				fpIndexer.RemoveStrudel(strudel.ID)
 			}
 		}
 
@@ -478,7 +480,7 @@ func parseFilterParams(c *gin.Context) strudels.ListFilter {
 	return filter
 }
 
-// validateNoAISignal checks if the no-ai signal is being used with AI-assisted content
+// checks if the no-ai signal is being used with AI-assisted content
 func validateNoAISignal(signal *strudels.CCSignal, history strudels.ConversationHistory) error {
 	if signal == nil || *signal != strudels.CCSignalNoAI {
 		return nil
@@ -530,7 +532,7 @@ func GetStrudelStatsHandler(strudelRepo *strudels.Repository, attrService *attri
 	}
 }
 
-// convertStrudelRefs converts agent.StrudelReference to strudels.StrudelReference
+// converts agent.StrudelReference to strudels.StrudelReference
 func convertStrudelRefs(refs []agent.StrudelReference) []strudels.StrudelReference {
 	result := make([]strudels.StrudelReference, len(refs))
 	for i, ref := range refs {
@@ -544,7 +546,7 @@ func convertStrudelRefs(refs []agent.StrudelReference) []strudels.StrudelReferen
 	return result
 }
 
-// convertDocRefs converts agent.DocReference to strudels.DocReference
+// converts agent.DocReference to strudels.DocReference
 func convertDocRefs(refs []agent.DocReference) []strudels.DocReference {
 	result := make([]strudels.DocReference, len(refs))
 	for i, ref := range refs {

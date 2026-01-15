@@ -235,6 +235,45 @@ func (s *IndexedFingerprintStore) Remove(workID string) {
 	s.index.Remove(workID)
 }
 
+// updates a fingerprint only if the content changed significantly (optimization for frequent autosaves).
+// "significant" means at least one line added or removed - small edits don't meaningfully affect SimHash.
+func (s *IndexedFingerprintStore) UpdateFromStrudel(workID, creatorID string, ccSignal CCSignal, content string) bool {
+	// check if record exists
+	s.index.mu.RLock()
+	existing, exists := s.index.records[workID]
+	s.index.mu.RUnlock()
+
+	if exists {
+		// skip if content identical
+		if existing.Content == content {
+			return false
+		}
+
+		// skip if line count unchanged (small edits within lines)
+		oldLines := countLines(existing.Content)
+		newLines := countLines(content)
+		if oldLines == newLines {
+			return false
+		}
+	}
+
+	// significant change or new record - remove old and add new
+	s.Remove(workID)
+	s.AddFromStrudel(workID, creatorID, ccSignal, content)
+	return true
+}
+
+// counts newlines in content (fast, no allocation)
+func countLines(s string) int {
+	count := 1
+	for i := 0; i < len(s); i++ {
+		if s[i] == '\n' {
+			count++
+		}
+	}
+	return count
+}
+
 // searches for content similar to the query
 func (s *IndexedFingerprintStore) FindSimilar(content string) []*MatchResult {
 	fingerprint := s.hasher.Hash(content)

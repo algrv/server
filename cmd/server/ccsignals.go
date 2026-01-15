@@ -70,7 +70,7 @@ func InitializeCCSignals(
 	}, nil
 }
 
-// loadNoAIFingerprints loads no-ai strudels and computes fingerprints into the LSH index
+// loads no-ai strudels and computes fingerprints into the LSH index
 func loadNoAIFingerprints(
 	ctx context.Context,
 	indexed *ccsignals.IndexedFingerprintStore,
@@ -105,7 +105,29 @@ func (s *CCSignalsSystem) IndexStrudel(strudelID, creatorID, code string, ccSign
 	logger.Debug("indexed no-ai strudel", "strudel_id", strudelID, "content_length", len(code))
 }
 
-// RemoveStrudel removes a strudel from the fingerprint index
+// updates a strudel in the fingerprint index, only rehashing if content changed.
+// this is an optimization for frequent autosaves - avoids expensive rehashing when content is unchanged.
+func (s *CCSignalsSystem) UpdateStrudel(strudelID, creatorID, code string, ccSignal ccsignals.CCSignal) {
+	// only index no-ai strudels
+	if ccSignal != ccsignals.SignalNoAI {
+		// not a no-ai strudel, just remove any existing entry
+		s.Fingerprints.Remove(strudelID)
+		return
+	}
+
+	// only index substantial content
+	if len(code) < minContentLengthForProtection {
+		s.Fingerprints.Remove(strudelID)
+		return
+	}
+
+	// use update method that skips rehashing if content unchanged
+	if s.Fingerprints.UpdateFromStrudel(strudelID, creatorID, ccSignal, code) {
+		logger.Debug("updated no-ai strudel fingerprint", "strudel_id", strudelID, "content_length", len(code))
+	}
+}
+
+// removes a strudel from the fingerprint index
 func (s *CCSignalsSystem) RemoveStrudel(strudelID string) {
 	s.Fingerprints.Remove(strudelID)
 }

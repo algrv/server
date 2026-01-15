@@ -11,6 +11,7 @@ import (
 // provides methods to index/remove strudels from the fingerprint index
 type FingerprintIndexer interface {
 	IndexStrudel(strudelID, creatorID, code string, ccSignal ccsignals.CCSignal)
+	UpdateStrudel(strudelID, creatorID, code string, ccSignal ccsignals.CCSignal) // only rehashes if content changed
 	RemoveStrudel(strudelID string)
 }
 
