@@ -57,8 +57,8 @@ func randomID() string {
 }
 
 func randomTitle() string {
-	prefix := titlePrefixes[rand.Intn(len(titlePrefixes))] //nolint:gosec
-	suffix := titleSuffixes[rand.Intn(len(titleSuffixes))] //nolint:gosec
+	prefix := titlePrefixes[rand.Intn(len(titlePrefixes))]         //nolint:gosec
+	suffix := titleSuffixes[rand.Intn(len(titleSuffixes))]         //nolint:gosec
 	return fmt.Sprintf("%s %s %d", prefix, suffix, rand.Intn(100)) //nolint:gosec
 }
 
@@ -72,9 +72,9 @@ func randomTags() []string {
 }
 
 func randomDate() string {
-	year := 2023 + rand.Intn(2)  //nolint:gosec
-	month := 1 + rand.Intn(12)   //nolint:gosec
-	day := 1 + rand.Intn(28)     //nolint:gosec
+	year := 2023 + rand.Intn(2)                                                                      //nolint:gosec
+	month := 1 + rand.Intn(12)                                                                       //nolint:gosec
+	day := 1 + rand.Intn(28)                                                                         //nolint:gosec
 	return fmt.Sprintf("%d-%02d-%02dT%02d:%02d:00Z", year, month, day, rand.Intn(24), rand.Intn(60)) //nolint:gosec
 }
 
@@ -106,7 +106,7 @@ func randomBrokenCode() string {
 	// fill in placeholders with random values
 	samples := []string{"bd", "sd", "hh", "cp", "cb", "xx", "zz"}
 	sample := samples[rand.Intn(len(samples))] //nolint:gosec
-	num := rand.Intn(8) + 1 //nolint:gosec
+	num := rand.Intn(8) + 1                    //nolint:gosec
 
 	return fmt.Sprintf(template, sample, num)
 }
