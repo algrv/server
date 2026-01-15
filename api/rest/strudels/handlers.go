@@ -41,6 +41,12 @@ func CreateStrudelHandler(strudelRepo *strudels.Repository, fpIndexer Fingerprin
 			return
 		}
 
+		// validate no-ai signal is not used with AI-assisted content
+		if err := validateNoAISignal(req.CCSignal, req.ConversationHistory); err != nil {
+			errors.BadRequest(c, err.Error(), nil)
+			return
+		}
+
 		strudel, err := strudelRepo.Create(c.Request.Context(), userID, req)
 		if err != nil {
 			errors.InternalError(c, "failed to create strudel", err)
@@ -228,6 +234,12 @@ func UpdateStrudelHandler(strudelRepo *strudels.Repository, fpIndexer Fingerprin
 
 		if err := c.ShouldBindJSON(&req); err != nil {
 			errors.ValidationError(c, err)
+			return
+		}
+
+		// validate no-ai signal is not used with AI-assisted content
+		if err := validateNoAISignal(req.CCSignal, req.ConversationHistory); err != nil {
+			errors.BadRequest(c, err.Error(), nil)
 			return
 		}
 
@@ -443,6 +455,22 @@ func parseFilterParams(c *gin.Context) strudels.ListFilter {
 	}
 
 	return filter
+}
+
+// validateNoAISignal checks if the no-ai signal is being used with AI-assisted content
+func validateNoAISignal(signal *strudels.CCSignal, history strudels.ConversationHistory) error {
+	if signal == nil || *signal != strudels.CCSignalNoAI {
+		return nil
+	}
+
+	// check if any message in conversation history is an AI code response
+	for _, msg := range history {
+		if msg.IsCodeResponse {
+			return fmt.Errorf("cannot use 'no-ai' signal with AI-assisted content")
+		}
+	}
+
+	return nil
 }
 
 // GetStrudelStatsHandler godoc
