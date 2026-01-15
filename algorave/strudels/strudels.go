@@ -39,11 +39,14 @@ func (r *Repository) Create(
 
 	// count AI code responses from conversation history
 	aiAssistCount := 0
-	for _, msg := range req.ConversationHistory {
+	fmt.Printf("[DEBUG Create] req.ConversationHistory length: %d\n", len(req.ConversationHistory))
+	for i, msg := range req.ConversationHistory {
+		fmt.Printf("[DEBUG Create] msg[%d]: role=%s, content_len=%d, is_code_response=%v\n", i, msg.Role, len(msg.Content), msg.IsCodeResponse)
 		if msg.IsCodeResponse {
 			aiAssistCount++
 		}
 	}
+	fmt.Printf("[DEBUG Create] aiAssistCount: %d\n", aiAssistCount)
 
 	// if forked, inherit most restrictive cc_signal from parent
 	ccSignal := req.CCSignal
@@ -64,6 +67,7 @@ func (r *Repository) Create(
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal conversation history: %w", err)
 	}
+	fmt.Printf("[DEBUG Create] marshaled JSON length: %d, first 200 chars: %.200s\n", len(conversationHistoryJSON), string(conversationHistoryJSON))
 
 	err = r.db.QueryRow(
 		ctx,
