@@ -349,3 +349,41 @@ func PingHandler() MessageHandler {
 		return nil
 	}
 }
+
+// handles cursor position messages for collaboration
+func CursorPositionHandler() MessageHandler {
+	return func(hub *Hub, client *Client, msg *Message) error {
+		// only hosts and co-authors can send cursor positions
+		if !client.CanWrite() {
+			// silently ignore cursor updates from viewers
+			return nil
+		}
+
+		// parse payload (client sends line and col only)
+		var payload CursorPositionPayload
+		if err := msg.UnmarshalPayload(&payload); err != nil {
+			// silently ignore malformed cursor updates
+			return nil
+		}
+
+		// enrich payload with sender information
+		payload.UserID = client.UserID
+		payload.DisplayName = client.DisplayName
+		payload.Role = client.Role
+
+		// create broadcast message
+		broadcastMsg, err := NewMessage(TypeCursorPosition, client.SessionID, client.UserID, payload)
+		if err != nil {
+			logger.ErrorErr(err, "failed to create cursor position broadcast message",
+				"client_id", client.ID,
+				"session_id", client.SessionID,
+			)
+			return err
+		}
+
+		// broadcast to all other clients in the session (exclude sender)
+		hub.BroadcastToSession(client.SessionID, broadcastMsg, client.ID)
+
+		return nil
+	}
+}
