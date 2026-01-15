@@ -9,7 +9,7 @@ import (
 
 	"github.com/redis/go-redis/v9"
 
-	"github.com/algrv/server/internal/logger"
+	"codeberg.org/algorave/server/internal/logger"
 )
 
 // handles Redis-backed buffering for session data

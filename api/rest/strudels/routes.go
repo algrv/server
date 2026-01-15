@@ -1,10 +1,10 @@
 package strudels
 
 import (
-	"github.com/algrv/server/algorave/strudels"
-	"github.com/algrv/server/internal/attribution"
-	"github.com/algrv/server/internal/auth"
-	"github.com/algrv/server/internal/ccsignals"
+	"codeberg.org/algorave/server/algorave/strudels"
+	"codeberg.org/algorave/server/internal/attribution"
+	"codeberg.org/algorave/server/internal/auth"
+	"codeberg.org/algorave/server/internal/ccsignals"
 	"github.com/gin-gonic/gin"
 )
 

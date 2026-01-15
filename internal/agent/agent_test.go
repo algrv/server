@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/algrv/server/internal/llm"
-	"github.com/algrv/server/internal/retriever"
+	"codeberg.org/algorave/server/internal/llm"
+	"codeberg.org/algorave/server/internal/retriever"
 )
 
 // implements llm.LLM for testing

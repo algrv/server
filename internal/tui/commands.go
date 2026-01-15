@@ -5,7 +5,7 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/algrv/server/internal/logger"
+	"codeberg.org/algorave/server/internal/logger"
 	tea "github.com/charmbracelet/bubbletea"
 )
 

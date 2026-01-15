@@ -3,9 +3,9 @@ package agent
 import (
 	"context"
 
-	"github.com/algrv/server/internal/llm"
-	"github.com/algrv/server/internal/retriever"
-	"github.com/algrv/server/internal/strudel"
+	"codeberg.org/algorave/server/internal/llm"
+	"codeberg.org/algorave/server/internal/retriever"
+	"codeberg.org/algorave/server/internal/strudel"
 )
 
 // interface for document and example retrieval

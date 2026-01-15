@@ -4,10 +4,10 @@ import (
 	"context"
 	"time"
 
-	"github.com/algrv/server/internal/logger"
+	"codeberg.org/algorave/server/internal/logger"
 )
 
-// CleanupService handles automatic expiry of stale sessions
+// handles automatic expiry of stale sessions
 type CleanupService struct {
 	repo                Repository
 	checkInterval       time.Duration
@@ -15,10 +15,10 @@ type CleanupService struct {
 	sessionEnder        SessionEnderFunc
 }
 
-// SessionEnderFunc is called to notify WebSocket clients when a session is being cleaned up
+// called to notify WebSocket clients when a session is being cleaned up
 type SessionEnderFunc func(sessionID string, reason string)
 
-// NewCleanupService creates a new cleanup service
+// creates a new cleanup service
 func NewCleanupService(
 	repo Repository,
 	checkInterval time.Duration,
@@ -33,7 +33,7 @@ func NewCleanupService(
 	}
 }
 
-// Start begins the cleanup service background loop
+// begins the cleanup service background loop
 func (s *CleanupService) Start(ctx context.Context) {
 	logger.Info("starting session cleanup service",
 		"check_interval", s.checkInterval,
@@ -54,7 +54,7 @@ func (s *CleanupService) Start(ctx context.Context) {
 	}
 }
 
-// cleanupStaleSessions finds and ends sessions that have been inactive
+// finds and ends sessions that have been inactive
 func (s *CleanupService) cleanupStaleSessions(ctx context.Context) {
 	threshold := time.Now().Add(-s.inactivityThreshold)
 
@@ -80,7 +80,7 @@ func (s *CleanupService) cleanupStaleSessions(ctx context.Context) {
 	}
 }
 
-// endStaleSession performs cleanup for a single stale session
+// performs cleanup for a single stale session
 func (s *CleanupService) endStaleSession(ctx context.Context, session *Session) error {
 	logger.Info("ending stale session",
 		"session_id", session.ID,

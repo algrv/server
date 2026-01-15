@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/algrv/server/internal/tui"
+	"codeberg.org/algorave/server/internal/tui"
 	tea "github.com/charmbracelet/bubbletea"
 )
 

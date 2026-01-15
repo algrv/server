@@ -3,8 +3,8 @@ package collaboration
 import (
 	"github.com/gin-gonic/gin"
 
-	"github.com/algrv/server/algorave/sessions"
-	"github.com/algrv/server/internal/auth"
+	"codeberg.org/algorave/server/algorave/sessions"
+	"codeberg.org/algorave/server/internal/auth"
 )
 
 func RegisterRoutes(router *gin.RouterGroup, sessionRepo sessions.Repository, sessionEnder SessionEnder) {

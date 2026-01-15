@@ -3,8 +3,8 @@ package admin
 import (
 	"net/http"
 
-	"github.com/algrv/server/algorave/strudels"
-	"github.com/algrv/server/internal/errors"
+	"codeberg.org/algorave/server/algorave/strudels"
+	"codeberg.org/algorave/server/internal/errors"
 	"github.com/gin-gonic/gin"
 )
 

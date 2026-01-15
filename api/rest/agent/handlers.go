@@ -7,12 +7,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/algrv/server/algorave/strudels"
-	agentcore "github.com/algrv/server/internal/agent"
-	"github.com/algrv/server/internal/attribution"
-	"github.com/algrv/server/internal/buffer"
-	"github.com/algrv/server/internal/errors"
-	"github.com/algrv/server/internal/llm"
+	"codeberg.org/algorave/server/algorave/strudels"
+	agentcore "codeberg.org/algorave/server/internal/agent"
+	"codeberg.org/algorave/server/internal/attribution"
+	"codeberg.org/algorave/server/internal/buffer"
+	"codeberg.org/algorave/server/internal/errors"
+	"codeberg.org/algorave/server/internal/llm"
 )
 
 const (

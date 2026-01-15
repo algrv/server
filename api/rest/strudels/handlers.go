@@ -5,12 +5,12 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/algrv/server/algorave/strudels"
-	"github.com/algrv/server/api/rest/pagination"
-	"github.com/algrv/server/internal/attribution"
-	"github.com/algrv/server/internal/auth"
-	"github.com/algrv/server/internal/ccsignals"
-	"github.com/algrv/server/internal/errors"
+	"codeberg.org/algorave/server/algorave/strudels"
+	"codeberg.org/algorave/server/api/rest/pagination"
+	"codeberg.org/algorave/server/internal/attribution"
+	"codeberg.org/algorave/server/internal/auth"
+	"codeberg.org/algorave/server/internal/ccsignals"
+	"codeberg.org/algorave/server/internal/errors"
 	"github.com/gin-gonic/gin"
 )
 

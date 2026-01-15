@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/algrv/server/algorave/sessions"
-	"github.com/algrv/server/internal/logger"
+	"codeberg.org/algorave/server/algorave/sessions"
+	"codeberg.org/algorave/server/internal/logger"
 )
 
 // handles periodic flushing of buffered data from Redis to Postgres

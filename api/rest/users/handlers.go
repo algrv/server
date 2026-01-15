@@ -3,8 +3,8 @@ package users
 import (
 	"net/http"
 
-	"github.com/algrv/server/algorave/users"
-	"github.com/algrv/server/internal/errors"
+	"codeberg.org/algorave/server/algorave/users"
+	"codeberg.org/algorave/server/internal/errors"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 )

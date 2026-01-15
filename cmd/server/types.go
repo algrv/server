@@ -1,20 +1,19 @@
 package main
 
 import (
-	"github.com/algrv/server/algorave/sessions"
-	"github.com/algrv/server/algorave/strudels"
-	"github.com/algrv/server/algorave/users"
-	"github.com/algrv/server/internal/agent"
-	"github.com/algrv/server/internal/attribution"
-	"github.com/algrv/server/internal/botdefense"
-	"github.com/algrv/server/internal/buffer"
-	"github.com/algrv/server/internal/config"
-	"github.com/algrv/server/internal/llm"
-	"github.com/algrv/server/internal/notifications"
-	"github.com/algrv/server/internal/retriever"
-	"github.com/algrv/server/internal/storage"
-	"github.com/algrv/server/internal/strudel"
-	ws "github.com/algrv/server/internal/websocket"
+	"codeberg.org/algorave/server/algorave/sessions"
+	"codeberg.org/algorave/server/algorave/strudels"
+	"codeberg.org/algorave/server/algorave/users"
+	"codeberg.org/algorave/server/internal/agent"
+	"codeberg.org/algorave/server/internal/attribution"
+	"codeberg.org/algorave/server/internal/botdefense"
+	"codeberg.org/algorave/server/internal/buffer"
+	"codeberg.org/algorave/server/internal/config"
+	"codeberg.org/algorave/server/internal/llm"
+	"codeberg.org/algorave/server/internal/retriever"
+	"codeberg.org/algorave/server/internal/storage"
+	"codeberg.org/algorave/server/internal/strudel"
+	ws "codeberg.org/algorave/server/internal/websocket"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -38,11 +37,10 @@ type Server struct {
 
 // holds all external service clients (LLM, storage, retriever, agent)
 type Services struct {
-	Agent         *agent.Agent
-	Attribution   *attribution.Service
-	Notifications *notifications.Service
-	LLM           llm.LLM
-	Retriever     *retriever.Client
-	Storage       *storage.Client
-	Validator     *strudel.Validator
+	Agent       *agent.Agent
+	Attribution *attribution.Service
+	LLM         llm.LLM
+	Retriever   *retriever.Client
+	Storage     *storage.Client
+	Validator   *strudel.Validator
 }

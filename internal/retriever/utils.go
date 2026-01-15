@@ -7,8 +7,8 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/algrv/server/internal/logger"
-	"github.com/algrv/server/internal/strudel"
+	"codeberg.org/algorave/server/internal/logger"
+	"codeberg.org/algorave/server/internal/strudel"
 )
 
 const (

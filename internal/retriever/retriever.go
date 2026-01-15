@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/algrv/server/internal/llm"
-	"github.com/algrv/server/internal/logger"
+	"codeberg.org/algorave/server/internal/llm"
+	"codeberg.org/algorave/server/internal/logger"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/pgvector/pgvector-go"
 )

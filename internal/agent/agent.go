@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/algrv/server/internal/llm"
-	"github.com/algrv/server/internal/strudel"
+	"codeberg.org/algorave/server/internal/llm"
+	"codeberg.org/algorave/server/internal/strudel"
 )
 
 func New(ret Retriever, llmClient llm.LLM) *Agent {

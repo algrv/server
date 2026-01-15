@@ -3,11 +3,11 @@ package agent
 import (
 	"github.com/gin-gonic/gin"
 
-	"github.com/algrv/server/algorave/strudels"
-	agentcore "github.com/algrv/server/internal/agent"
-	"github.com/algrv/server/internal/attribution"
-	"github.com/algrv/server/internal/buffer"
-	"github.com/algrv/server/internal/llm"
+	"codeberg.org/algorave/server/algorave/strudels"
+	agentcore "codeberg.org/algorave/server/internal/agent"
+	"codeberg.org/algorave/server/internal/attribution"
+	"codeberg.org/algorave/server/internal/buffer"
+	"codeberg.org/algorave/server/internal/llm"
 )
 
 func RegisterRoutes(router *gin.RouterGroup, agentClient *agentcore.Agent, platformLLM llm.LLM, strudelRepo *strudels.Repository, attrService *attribution.Service, sessionBuffer *buffer.SessionBuffer) {

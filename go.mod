@@ -1,4 +1,4 @@
-module github.com/algrv/server
+module codeberg.org/algorave/server
 
 go 1.24.0
 

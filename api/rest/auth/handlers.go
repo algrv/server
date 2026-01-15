@@ -6,10 +6,10 @@ import (
 	"net/url"
 	"slices"
 
-	"github.com/algrv/server/algorave/users"
-	"github.com/algrv/server/internal/auth"
-	"github.com/algrv/server/internal/errors"
-	"github.com/algrv/server/internal/logger"
+	"codeberg.org/algorave/server/algorave/users"
+	"codeberg.org/algorave/server/internal/auth"
+	"codeberg.org/algorave/server/internal/errors"
+	"codeberg.org/algorave/server/internal/logger"
 	"github.com/gin-gonic/gin"
 	"github.com/markbates/goth/gothic"
 )

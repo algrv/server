@@ -1,7 +1,7 @@
 package users
 
 import (
-	"github.com/algrv/server/internal/auth"
+	"codeberg.org/algorave/server/internal/auth"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 )

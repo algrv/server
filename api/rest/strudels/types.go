@@ -3,8 +3,8 @@ package strudels
 import (
 	"time"
 
-	"github.com/algrv/server/algorave/strudels"
-	"github.com/algrv/server/api/rest/pagination"
+	"codeberg.org/algorave/server/algorave/strudels"
+	"codeberg.org/algorave/server/api/rest/pagination"
 )
 
 // StrudelsListResponse wraps a list of strudels with pagination

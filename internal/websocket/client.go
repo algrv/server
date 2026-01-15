@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/algrv/server/internal/errors"
-	"github.com/algrv/server/internal/logger"
+	"codeberg.org/algorave/server/internal/errors"
+	"codeberg.org/algorave/server/internal/logger"
 	"github.com/gorilla/websocket"
 )
 

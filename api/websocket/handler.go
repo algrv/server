@@ -8,11 +8,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 
-	"github.com/algrv/server/algorave/sessions"
-	"github.com/algrv/server/internal/auth"
-	"github.com/algrv/server/internal/errors"
-	"github.com/algrv/server/internal/logger"
-	ws "github.com/algrv/server/internal/websocket"
+	"codeberg.org/algorave/server/algorave/sessions"
+	"codeberg.org/algorave/server/internal/auth"
+	"codeberg.org/algorave/server/internal/errors"
+	"codeberg.org/algorave/server/internal/logger"
+	ws "codeberg.org/algorave/server/internal/websocket"
 )
 
 var upgrader = websocket.Upgrader{

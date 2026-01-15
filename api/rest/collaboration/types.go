@@ -3,8 +3,8 @@ package collaboration
 import (
 	"time"
 
-	"github.com/algrv/server/algorave/sessions"
-	"github.com/algrv/server/api/rest/pagination"
+	"codeberg.org/algorave/server/algorave/sessions"
+	"codeberg.org/algorave/server/api/rest/pagination"
 )
 
 // allows ending WebSocket sessions

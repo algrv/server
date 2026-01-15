@@ -8,8 +8,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/algrv/server/internal/llm"
-	"github.com/algrv/server/internal/strudel"
+	"codeberg.org/algorave/server/internal/llm"
+	"codeberg.org/algorave/server/internal/strudel"
 )
 
 var (

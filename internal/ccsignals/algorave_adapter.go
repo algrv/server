@@ -3,7 +3,7 @@ package ccsignals
 import (
 	"context"
 
-	"github.com/algrv/server/algorave/strudels"
+	"codeberg.org/algorave/server/algorave/strudels"
 )
 
 // implements ContentValidator using Algorave's strudels repository

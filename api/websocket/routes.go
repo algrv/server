@@ -3,8 +3,8 @@ package websocket
 import (
 	"github.com/gin-gonic/gin"
 
-	"github.com/algrv/server/algorave/sessions"
-	ws "github.com/algrv/server/internal/websocket"
+	"codeberg.org/algorave/server/algorave/sessions"
+	ws "codeberg.org/algorave/server/internal/websocket"
 )
 
 func RegisterRoutes(router *gin.RouterGroup, hub *ws.Hub, sessionRepo sessions.Repository) {

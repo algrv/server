@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/algrv/server/internal/chunker"
-	"github.com/algrv/server/internal/config"
-	"github.com/algrv/server/internal/llm"
-	"github.com/algrv/server/internal/logger"
-	"github.com/algrv/server/internal/storage"
+	"codeberg.org/algorave/server/internal/chunker"
+	"codeberg.org/algorave/server/internal/config"
+	"codeberg.org/algorave/server/internal/llm"
+	"codeberg.org/algorave/server/internal/logger"
+	"codeberg.org/algorave/server/internal/storage"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 

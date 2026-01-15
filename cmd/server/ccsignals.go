@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/algrv/server/algorave/strudels"
-	"github.com/algrv/server/internal/ccsignals"
-	"github.com/algrv/server/internal/logger"
+	"codeberg.org/algorave/server/algorave/strudels"
+	"codeberg.org/algorave/server/internal/ccsignals"
+	"codeberg.org/algorave/server/internal/logger"
 	"github.com/redis/go-redis/v9"
 )
 

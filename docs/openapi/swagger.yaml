@@ -1,10 +1,10 @@
 definitions:
-  admin.SetUseInTrainingRequest:
+  api_rest_admin.SetUseInTrainingRequest:
     properties:
       use_in_training:
         type: boolean
     type: object
-  admin.StrudelAdminResponse:
+  api_rest_admin.StrudelAdminResponse:
     properties:
       code:
         type: string
@@ -25,28 +25,101 @@ definitions:
       user_id:
         type: string
     type: object
-  agent.Message:
+  api_rest_agent.DocReference:
     properties:
-      content:
-        description: message content
+      page_name:
         type: string
-      role:
-        description: '"user" or "assistant"'
+      section_title:
+        type: string
+      url:
         type: string
     type: object
-  auth.AuthResponse:
+  api_rest_agent.GenerateRequest:
+    properties:
+      conversation_history:
+        items:
+          $ref: '#/definitions/api_rest_agent.Message'
+        type: array
+      editor_state:
+        type: string
+      forked_from_id:
+        description: 'optional: for blocking AI on restricted forks'
+        type: string
+      provider:
+        description: '"anthropic" or "openai"'
+        type: string
+      provider_api_key:
+        description: BYOK key
+        type: string
+      session_id:
+        description: 'optional: for paste lock validation'
+        type: string
+      strudel_id:
+        description: 'optional: for persisting conversation'
+        type: string
+      user_query:
+        type: string
+    required:
+    - user_query
+    type: object
+  api_rest_agent.GenerateResponse:
+    properties:
+      clarifying_questions:
+        items:
+          type: string
+        type: array
+      code:
+        type: string
+      doc_references:
+        items:
+          $ref: '#/definitions/api_rest_agent.DocReference'
+        type: array
+      docs_retrieved:
+        type: integer
+      examples_retrieved:
+        type: integer
+      is_actionable:
+        type: boolean
+      is_code_response:
+        type: boolean
+      model:
+        type: string
+      strudel_references:
+        items:
+          $ref: '#/definitions/api_rest_agent.StrudelReference'
+        type: array
+    type: object
+  api_rest_agent.Message:
+    properties:
+      content:
+        type: string
+      role:
+        type: string
+    type: object
+  api_rest_agent.StrudelReference:
+    properties:
+      author_name:
+        type: string
+      id:
+        type: string
+      title:
+        type: string
+      url:
+        type: string
+    type: object
+  api_rest_auth.AuthResponse:
     properties:
       token:
         type: string
       user:
-        $ref: '#/definitions/users.User'
+        $ref: '#/definitions/codeberg_org_algorave_server_algorave_users.User'
     type: object
-  auth.MessageResponse:
+  api_rest_auth.MessageResponse:
     properties:
       message:
         type: string
     type: object
-  auth.UpdateProfileRequest:
+  api_rest_auth.UpdateProfileRequest:
     properties:
       avatar_url:
         maxLength: 500
@@ -57,12 +130,12 @@ definitions:
     required:
     - name
     type: object
-  auth.UserResponse:
+  api_rest_auth.UserResponse:
     properties:
       user:
-        $ref: '#/definitions/users.User'
+        $ref: '#/definitions/codeberg_org_algorave_server_algorave_users.User'
     type: object
-  collaboration.CreateInviteTokenRequest:
+  api_rest_collaboration.CreateInviteTokenRequest:
     properties:
       expires_at:
         type: string
@@ -76,7 +149,7 @@ definitions:
     required:
     - role
     type: object
-  collaboration.CreateSessionRequest:
+  api_rest_collaboration.CreateSessionRequest:
     properties:
       code:
         description: 1MB limit
@@ -91,7 +164,7 @@ definitions:
     required:
     - title
     type: object
-  collaboration.CreateSessionResponse:
+  api_rest_collaboration.CreateSessionResponse:
     properties:
       code:
         type: string
@@ -110,7 +183,7 @@ definitions:
       title:
         type: string
     type: object
-  collaboration.InviteTokenResponse:
+  api_rest_collaboration.InviteTokenResponse:
     properties:
       created_at:
         type: string
@@ -129,14 +202,23 @@ definitions:
       uses_count:
         type: integer
     type: object
-  collaboration.InviteTokensListResponse:
+  api_rest_collaboration.InviteTokensListResponse:
     properties:
       tokens:
         items:
-          $ref: '#/definitions/collaboration.InviteTokenResponse'
+          $ref: '#/definitions/api_rest_collaboration.InviteTokenResponse'
         type: array
     type: object
-  collaboration.JoinSessionRequest:
+  api_rest_collaboration.IsLiveResponse:
+    properties:
+      has_active_invite_tokens:
+        type: boolean
+      is_live:
+        type: boolean
+      participant_count:
+        type: integer
+    type: object
+  api_rest_collaboration.JoinSessionRequest:
     properties:
       display_name:
         maxLength: 100
@@ -146,7 +228,7 @@ definitions:
     required:
     - invite_token
     type: object
-  collaboration.JoinSessionResponse:
+  api_rest_collaboration.JoinSessionResponse:
     properties:
       display_name:
         type: string
@@ -155,12 +237,16 @@ definitions:
       session_id:
         type: string
     type: object
-  collaboration.LiveSessionResponse:
+  api_rest_collaboration.LiveSessionResponse:
     properties:
       created_at:
         type: string
       id:
         type: string
+      is_discoverable:
+        type: boolean
+      is_member:
+        type: boolean
       last_activity:
         type: string
       participant_count:
@@ -168,26 +254,28 @@ definitions:
       title:
         type: string
     type: object
-  collaboration.LiveSessionsListResponse:
+  api_rest_collaboration.LiveSessionsListResponse:
     properties:
+      pagination:
+        $ref: '#/definitions/codeberg_org_algorave_server_api_rest_pagination.Meta'
       sessions:
         items:
-          $ref: '#/definitions/collaboration.LiveSessionResponse'
+          $ref: '#/definitions/api_rest_collaboration.LiveSessionResponse'
         type: array
     type: object
-  collaboration.MessageResponse:
+  api_rest_collaboration.MessageResponse:
     properties:
       message:
         type: string
     type: object
-  collaboration.MessagesResponse:
+  api_rest_collaboration.MessagesResponse:
     properties:
       messages:
         items:
-          $ref: '#/definitions/sessions.Message'
+          $ref: '#/definitions/codeberg_org_algorave_server_algorave_sessions.Message'
         type: array
     type: object
-  collaboration.ParticipantResponse:
+  api_rest_collaboration.ParticipantResponse:
     properties:
       display_name:
         type: string
@@ -204,14 +292,14 @@ definitions:
       user_id:
         type: string
     type: object
-  collaboration.ParticipantsListResponse:
+  api_rest_collaboration.ParticipantsListResponse:
     properties:
       participants:
         items:
-          $ref: '#/definitions/collaboration.ParticipantResponse'
+          $ref: '#/definitions/api_rest_collaboration.ParticipantResponse'
         type: array
     type: object
-  collaboration.SessionResponse:
+  api_rest_collaboration.SessionResponse:
     properties:
       code:
         type: string
@@ -231,24 +319,33 @@ definitions:
         type: string
       participants:
         items:
-          $ref: '#/definitions/collaboration.ParticipantResponse'
+          $ref: '#/definitions/api_rest_collaboration.ParticipantResponse'
         type: array
       title:
         type: string
     type: object
-  collaboration.SessionsListResponse:
+  api_rest_collaboration.SessionsListResponse:
     properties:
       sessions:
         items:
-          $ref: '#/definitions/collaboration.SessionResponse'
+          $ref: '#/definitions/api_rest_collaboration.SessionResponse'
         type: array
     type: object
-  collaboration.SetDiscoverableRequest:
+  api_rest_collaboration.SetDiscoverableRequest:
     properties:
       is_discoverable:
         type: boolean
     type: object
-  collaboration.UpdateSessionCodeRequest:
+  api_rest_collaboration.SoftEndSessionResponse:
+    properties:
+      invites_revoked:
+        type: boolean
+      message:
+        type: string
+      participants_kicked:
+        type: integer
+    type: object
+  api_rest_collaboration.UpdateSessionCodeRequest:
     properties:
       code:
         description: 1MB limit
@@ -257,31 +354,19 @@ definitions:
     required:
     - code
     type: object
-  collaboration.UpdateSessionCodeResponse:
+  api_rest_collaboration.UpdateSessionCodeResponse:
     properties:
       code:
         type: string
       message:
         type: string
     type: object
-  errors.ErrorResponse:
-    properties:
-      details:
-        description: optional details (sanitized in production)
-        type: string
-      error:
-        description: error code (e.g., "unauthorized", "not_found")
-        type: string
-      message:
-        description: user-friendly message
-        type: string
-    type: object
-  health.PingResponse:
+  api_rest_health.PingResponse:
     properties:
       message:
         type: string
     type: object
-  health.Response:
+  api_rest_health.Response:
     properties:
       service:
         type: string
@@ -290,86 +375,73 @@ definitions:
       version:
         type: string
     type: object
-  sessions.Message:
+  api_rest_strudels.ConversationMessageDTO:
     properties:
+      clarifying_questions:
+        items:
+          type: string
+        type: array
       content:
         type: string
-      createdAt:
+      created_at:
         type: string
+      doc_references:
+        items:
+          $ref: '#/definitions/api_rest_strudels.DocReferenceDTO'
+        type: array
       id:
         type: string
-      messageType:
-        description: MessageTypeUserPrompt, MessageTypeAIResponse, MessageTypeChat
-        type: string
-      role:
-        description: user, assistant
-        type: string
-      sessionID:
-        type: string
-      userID:
-        type: string
-    type: object
-  strudels.CreateStrudelRequest:
-    properties:
-      categories:
-        description: max 10 categories, each max 50 chars
-        items:
-          type: string
-        maxItems: 10
-        type: array
-      code:
-        description: 1MB limit
-        maxLength: 1048576
-        type: string
-      conversation_history:
-        description: max 100 messages
-        items:
-          $ref: '#/definitions/agent.Message'
-        maxItems: 100
-        type: array
-      description:
-        maxLength: 2000
-        type: string
-      is_public:
+      is_actionable:
         type: boolean
-      tags:
-        description: max 20 tags, each max 50 chars
-        items:
-          type: string
-        maxItems: 20
-        type: array
-      title:
-        maxLength: 200
+      is_code_response:
+        type: boolean
+      role:
         type: string
-    required:
-    - code
-    - title
+      strudel_references:
+        items:
+          $ref: '#/definitions/api_rest_strudels.StrudelReferenceDTO'
+        type: array
     type: object
-  strudels.MessageResponse:
+  api_rest_strudels.DocReferenceDTO:
+    properties:
+      page_name:
+        type: string
+      section_title:
+        type: string
+      url:
+        type: string
+    type: object
+  api_rest_strudels.MessageResponse:
     properties:
       message:
         type: string
     type: object
-  strudels.Strudel:
+  api_rest_strudels.StrudelDetailResponse:
     properties:
       categories:
         items:
           type: string
         type: array
+      cc_signal:
+        $ref: '#/definitions/codeberg_org_algorave_server_algorave_strudels.CCSignal'
       code:
         type: string
       conversation_history:
         items:
-          $ref: '#/definitions/agent.Message'
+          $ref: '#/definitions/api_rest_strudels.ConversationMessageDTO'
         type: array
       created_at:
         type: string
       description:
         type: string
+      forked_from:
+        type: string
       id:
         type: string
       is_public:
         type: boolean
+      parent_cc_signal:
+        $ref: '#/definitions/codeberg_org_algorave_server_algorave_strudels.CCSignal'
       tags:
         items:
           type: string
@@ -381,49 +453,39 @@ definitions:
       user_id:
         type: string
     type: object
-  strudels.StrudelsListResponse:
+  api_rest_strudels.StrudelReferenceDTO:
     properties:
+      author_name:
+        type: string
+      id:
+        type: string
+      title:
+        type: string
+      url:
+        type: string
+    type: object
+  api_rest_strudels.StrudelsListResponse:
+    properties:
+      pagination:
+        $ref: '#/definitions/codeberg_org_algorave_server_api_rest_pagination.Meta'
       strudels:
         items:
-          $ref: '#/definitions/strudels.Strudel'
+          $ref: '#/definitions/codeberg_org_algorave_server_algorave_strudels.Strudel'
         type: array
     type: object
-  strudels.UpdateStrudelRequest:
+  api_rest_strudels.TagsListResponse:
     properties:
-      categories:
-        items:
-          type: string
-        maxItems: 10
-        type: array
-      code:
-        description: 1MB limit
-        maxLength: 1048576
-        type: string
-      conversation_history:
-        items:
-          $ref: '#/definitions/agent.Message'
-        maxItems: 100
-        type: array
-      description:
-        maxLength: 2000
-        type: string
-      is_public:
-        type: boolean
       tags:
         items:
           type: string
-        maxItems: 20
         type: array
-      title:
-        maxLength: 200
-        type: string
     type: object
-  users.AIFeaturesEnabledRequest:
+  api_rest_users.AIFeaturesEnabledRequest:
     properties:
       ai_features_enabled:
         type: boolean
     type: object
-  users.DailyUsage:
+  api_rest_users.DailyUsage:
     properties:
       count:
         description: Number of generations
@@ -432,17 +494,17 @@ definitions:
         description: 'Format: "2006-01-02"'
         type: string
     type: object
-  users.TrainingConsentRequest:
+  api_rest_users.TrainingConsentRequest:
     properties:
       training_consent:
         type: boolean
     type: object
-  users.UsageResponse:
+  api_rest_users.UsageResponse:
     properties:
       history:
         description: Last 30 days
         items:
-          $ref: '#/definitions/users.DailyUsage'
+          $ref: '#/definitions/api_rest_users.DailyUsage'
         type: array
       limit:
         description: Daily limit (-1 for unlimited)
@@ -457,7 +519,168 @@ definitions:
         description: Generations used today
         type: integer
     type: object
-  users.User:
+  codeberg_org_algorave_server_algorave_sessions.Message:
+    properties:
+      avatarUrl:
+        type: string
+      content:
+        type: string
+      createdAt:
+        type: string
+      displayName:
+        type: string
+      id:
+        type: string
+      role:
+        description: user
+        type: string
+      sessionID:
+        type: string
+      userID:
+        type: string
+    type: object
+  codeberg_org_algorave_server_algorave_strudels.CCSignal:
+    enum:
+    - cc-cr
+    - cc-dc
+    - cc-ec
+    - cc-op
+    - no-ai
+    type: string
+    x-enum-comments:
+      CCSignalCredit: 'Credit: Allow AI use with attribution'
+      CCSignalDirect: 'Credit + Direct: Attribution + financial/in-kind support'
+      CCSignalEcosystem: 'Credit + Ecosystem: Attribution + contribute to commons'
+      CCSignalNoAI: 'No AI: Explicitly opt-out of AI training'
+      CCSignalOpen: 'Credit + Open: Attribution + keep derivatives open'
+    x-enum-descriptions:
+    - 'Credit: Allow AI use with attribution'
+    - 'Credit + Direct: Attribution + financial/in-kind support'
+    - 'Credit + Ecosystem: Attribution + contribute to commons'
+    - 'Credit + Open: Attribution + keep derivatives open'
+    - 'No AI: Explicitly opt-out of AI training'
+    x-enum-varnames:
+    - CCSignalCredit
+    - CCSignalDirect
+    - CCSignalEcosystem
+    - CCSignalOpen
+    - CCSignalNoAI
+  codeberg_org_algorave_server_algorave_strudels.CreateStrudelRequest:
+    properties:
+      categories:
+        description: max 10 categories, each max 50 chars
+        items:
+          type: string
+        maxItems: 10
+        type: array
+      cc_signal:
+        $ref: '#/definitions/codeberg_org_algorave_server_algorave_strudels.CCSignal'
+      code:
+        description: 1MB limit
+        maxLength: 1048576
+        type: string
+      conversation_history:
+        description: max 100 messages
+        items:
+          $ref: '#/definitions/codeberg_org_algorave_server_internal_agent.Message'
+        maxItems: 100
+        type: array
+      description:
+        maxLength: 2000
+        type: string
+      forked_from:
+        type: string
+      is_public:
+        type: boolean
+      license:
+        type: string
+      tags:
+        description: max 20 tags, each max 50 chars
+        items:
+          type: string
+        maxItems: 20
+        type: array
+      title:
+        maxLength: 200
+        type: string
+    required:
+    - code
+    - title
+    type: object
+  codeberg_org_algorave_server_algorave_strudels.Strudel:
+    properties:
+      ai_assist_count:
+        type: integer
+      categories:
+        items:
+          type: string
+        type: array
+      cc_signal:
+        $ref: '#/definitions/codeberg_org_algorave_server_algorave_strudels.CCSignal'
+      code:
+        type: string
+      conversation_history:
+        items:
+          $ref: '#/definitions/codeberg_org_algorave_server_internal_agent.Message'
+        type: array
+      created_at:
+        type: string
+      description:
+        type: string
+      forked_from:
+        type: string
+      id:
+        type: string
+      is_public:
+        type: boolean
+      license:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  codeberg_org_algorave_server_algorave_strudels.UpdateStrudelRequest:
+    properties:
+      categories:
+        items:
+          type: string
+        maxItems: 10
+        type: array
+      cc_signal:
+        $ref: '#/definitions/codeberg_org_algorave_server_algorave_strudels.CCSignal'
+      code:
+        description: 1MB limit
+        maxLength: 1048576
+        type: string
+      conversation_history:
+        items:
+          $ref: '#/definitions/codeberg_org_algorave_server_internal_agent.Message'
+        maxItems: 100
+        type: array
+      description:
+        maxLength: 2000
+        type: string
+      is_public:
+        type: boolean
+      license:
+        type: string
+      tags:
+        items:
+          type: string
+        maxItems: 20
+        type: array
+      title:
+        maxLength: 200
+        type: string
+    type: object
+  codeberg_org_algorave_server_algorave_users.User:
     properties:
       ai_features_enabled:
         type: boolean
@@ -478,11 +701,86 @@ definitions:
       updated_at:
         type: string
     type: object
+  codeberg_org_algorave_server_api_rest_pagination.Meta:
+    properties:
+      has_more:
+        type: boolean
+      limit:
+        type: integer
+      offset:
+        type: integer
+      total:
+        type: integer
+    type: object
+  codeberg_org_algorave_server_internal_agent.Message:
+    properties:
+      content:
+        description: message content
+        type: string
+      is_code_response:
+        description: true if AI generated code
+        type: boolean
+      role:
+        description: '"user" or "assistant"'
+        type: string
+    type: object
+  codeberg_org_algorave_server_internal_attribution.StrudelStats:
+    properties:
+      fork_count:
+        type: integer
+      last_used_at:
+        type: string
+      total_uses:
+        type: integer
+      unique_users:
+        type: integer
+    type: object
+  codeberg_org_algorave_server_internal_attribution.StrudelStatsResponse:
+    properties:
+      recent_uses:
+        items:
+          $ref: '#/definitions/codeberg_org_algorave_server_internal_attribution.StrudelUse'
+        type: array
+      stats:
+        $ref: '#/definitions/codeberg_org_algorave_server_internal_attribution.StrudelStats'
+    type: object
+  codeberg_org_algorave_server_internal_attribution.StrudelUse:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      requesting_display_name:
+        type: string
+      requesting_user_id:
+        type: string
+      similarity_score:
+        type: number
+      target_strudel_id:
+        type: string
+      target_strudel_title:
+        type: string
+    type: object
+  codeberg_org_algorave_server_internal_errors.ErrorResponse:
+    properties:
+      details:
+        description: optional details (sanitized in production)
+        type: string
+      error:
+        description: error code (e.g., "unauthorized", "not_found")
+        type: string
+      message:
+        description: user-friendly message
+        type: string
+      request_id:
+        description: echoed from request for correlation
+        type: string
+    type: object
 host: algorave.dev
 info:
   contact:
     name: API Support
-    url: https://github.com/algrv/server
+    url: https://codeberg.org/algorave/server
   description: |-
     AI-powered Strudel code generation and collaborative live coding platform
 
@@ -513,19 +811,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/admin.StrudelAdminResponse'
+            $ref: '#/definitions/api_rest_admin.StrudelAdminResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
       security:
       - AdminKeyAuth: []
       summary: Get any strudel by ID (admin)
@@ -547,35 +845,65 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/admin.SetUseInTrainingRequest'
+          $ref: '#/definitions/api_rest_admin.SetUseInTrainingRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/admin.StrudelAdminResponse'
+            $ref: '#/definitions/api_rest_admin.StrudelAdminResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
       security:
       - AdminKeyAuth: []
       summary: Set use_in_training flag on a strudel
       tags:
       - admin
+  /api/v1/agent/generate:
+    post:
+      consumes:
+      - application/json
+      description: Generate Strudel code using AI with optional BYOK support
+      parameters:
+      - description: Generation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/api_rest_agent.GenerateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api_rest_agent.GenerateResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
+      summary: Generate code with AI
+      tags:
+      - agent
   /api/v1/auth/{provider}:
     get:
       description: Begin OAuth authentication flow with specified provider (google,
@@ -590,6 +918,10 @@ paths:
         name: provider
         required: true
         type: string
+      - description: URL to redirect to after authentication
+        in: query
+        name: redirect_url
+        type: string
       responses:
         "302":
           description: Redirect to OAuth provider
@@ -598,13 +930,14 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
       summary: Start OAuth authentication
       tags:
       - auth
   /api/v1/auth/{provider}/callback:
     get:
-      description: OAuth provider callback. Returns user data and JWT token
+      description: OAuth provider callback. Redirects to original URL with token,
+        or returns JSON if no redirect URL
       parameters:
       - description: OAuth provider
         enum:
@@ -621,15 +954,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/auth.AuthResponse'
+            $ref: '#/definitions/api_rest_auth.AuthResponse'
+        "302":
+          description: Redirect to original URL with token
+          schema:
+            type: string
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
       summary: OAuth callback
       tags:
       - auth
@@ -642,7 +979,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/auth.MessageResponse'
+            $ref: '#/definitions/api_rest_auth.MessageResponse'
       summary: Logout
       tags:
       - auth
@@ -655,15 +992,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/auth.UserResponse'
+            $ref: '#/definitions/api_rest_auth.UserResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get current user
@@ -679,26 +1016,26 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/auth.UpdateProfileRequest'
+          $ref: '#/definitions/api_rest_auth.UpdateProfileRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/auth.UserResponse'
+            $ref: '#/definitions/api_rest_auth.UserResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Update user profile
@@ -713,30 +1050,47 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/health.PingResponse'
+            $ref: '#/definitions/api_rest_health.PingResponse'
       summary: Ping
       tags:
       - health
   /api/v1/public/strudels:
     get:
-      description: Get publicly shared strudels from all users
+      description: Get publicly shared strudels from all users with pagination, search,
+        and filtering
       parameters:
-      - default: 50
-        description: Limit results (max 100)
+      - default: 20
+        description: Items per page (max 100)
         in: query
         name: limit
         type: integer
+      - default: 0
+        description: Number of items to skip
+        in: query
+        name: offset
+        type: integer
+      - description: Search in title and description
+        in: query
+        name: search
+        type: string
+      - collectionFormat: csv
+        description: Filter by tags (comma-separated)
+        in: query
+        items:
+          type: string
+        name: tags
+        type: array
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/strudels.StrudelsListResponse'
+            $ref: '#/definitions/api_rest_strudels.StrudelsListResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
       summary: List public strudels
       tags:
       - strudels
@@ -755,16 +1109,61 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/strudels.Strudel'
+            $ref: '#/definitions/codeberg_org_algorave_server_algorave_strudels.Strudel'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
       summary: Get public strudel by ID
+      tags:
+      - strudels
+  /api/v1/public/strudels/{id}/stats:
+    get:
+      description: Get attribution stats for a public strudel (how many times it was
+        used as RAG context)
+      parameters:
+      - description: Strudel ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_attribution.StrudelStatsResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
+      summary: Get strudel usage stats
+      tags:
+      - strudels
+  /api/v1/public/strudels/tags:
+    get:
+      description: Get all unique tags from public strudels
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api_rest_strudels.TagsListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
+      summary: List public tags
       tags:
       - strudels
   /api/v1/sessions:
@@ -782,15 +1181,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/collaboration.SessionsListResponse'
+            $ref: '#/definitions/api_rest_collaboration.SessionsListResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: List user's sessions
@@ -807,26 +1206,26 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/collaboration.CreateSessionRequest'
+          $ref: '#/definitions/api_rest_collaboration.CreateSessionRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/collaboration.CreateSessionResponse'
+            $ref: '#/definitions/api_rest_collaboration.CreateSessionResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Create collaboration session
@@ -847,27 +1246,27 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/collaboration.MessageResponse'
+            $ref: '#/definitions/api_rest_collaboration.MessageResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: End session
@@ -887,19 +1286,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/collaboration.SessionResponse'
+            $ref: '#/definitions/api_rest_collaboration.SessionResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get session details
@@ -920,34 +1319,34 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/collaboration.UpdateSessionCodeRequest'
+          $ref: '#/definitions/api_rest_collaboration.UpdateSessionCodeRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/collaboration.UpdateSessionCodeResponse'
+            $ref: '#/definitions/api_rest_collaboration.UpdateSessionCodeResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Update session code
@@ -970,37 +1369,80 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/collaboration.SetDiscoverableRequest'
+          $ref: '#/definitions/api_rest_collaboration.SetDiscoverableRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/collaboration.SessionResponse'
+            $ref: '#/definitions/api_rest_collaboration.SessionResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Set session discoverability
+      tags:
+      - sessions
+  /api/v1/sessions/{id}/end-live:
+    post:
+      description: |-
+        Ends the live portion of a session: kicks all non-host participants, revokes all invite tokens,
+        sets discoverable to false. Host keeps access to the session and their code.
+      parameters:
+      - description: Session ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api_rest_collaboration.SoftEndSessionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Soft-end a live session
       tags:
       - sessions
   /api/v1/sessions/{id}/invite:
@@ -1018,27 +1460,27 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/collaboration.InviteTokensListResponse'
+            $ref: '#/definitions/api_rest_collaboration.InviteTokensListResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: List invite tokens
@@ -1059,34 +1501,34 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/collaboration.CreateInviteTokenRequest'
+          $ref: '#/definitions/api_rest_collaboration.CreateInviteTokenRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/collaboration.InviteTokenResponse'
+            $ref: '#/definitions/api_rest_collaboration.InviteTokenResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Create invite token
@@ -1112,27 +1554,27 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/collaboration.MessageResponse'
+            $ref: '#/definitions/api_rest_collaboration.MessageResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Revoke invite token
@@ -1153,31 +1595,70 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/collaboration.MessageResponse'
+            $ref: '#/definitions/api_rest_collaboration.MessageResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Leave session
       tags:
       - sessions
+  /api/v1/sessions/{id}/live-status:
+    get:
+      description: Returns whether a session is currently live (has other participants
+        or active invite tokens)
+      parameters:
+      - description: Session ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api_rest_collaboration.IsLiveResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Check if session is live
+      tags:
+      - sessions
   /api/v1/sessions/{id}/messages:
     get:
-      description: Retrieve chat messages from a session
+      description: Retrieve chat messages from a session (AI conversations are strudel-scoped
+        and fetched separately)
       parameters:
       - description: Session ID (UUID)
         in: path
@@ -1195,19 +1676,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/collaboration.MessagesResponse'
+            $ref: '#/definitions/api_rest_collaboration.MessagesResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get session chat messages
@@ -1228,19 +1709,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/collaboration.ParticipantsListResponse'
+            $ref: '#/definitions/api_rest_collaboration.ParticipantsListResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: List session participants
@@ -1266,27 +1747,27 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/collaboration.MessageResponse'
+            $ref: '#/definitions/api_rest_collaboration.MessageResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Remove participant
@@ -1304,40 +1785,73 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/collaboration.JoinSessionRequest'
+          $ref: '#/definitions/api_rest_collaboration.JoinSessionRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/collaboration.JoinSessionResponse'
+            $ref: '#/definitions/api_rest_collaboration.JoinSessionResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "403":
           description: Invalid or expired invite
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Join session with invite
       tags:
       - sessions
+  /api/v1/sessions/last:
+    get:
+      description: Returns the user's most recent active session where they are host,
+        excluding sessions they're currently in
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api_rest_collaboration.LiveSessionResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get user's last active session for recovery
+      tags:
+      - sessions
   /api/v1/sessions/live:
     get:
-      description: Get all discoverable active sessions (public endpoint, no auth
-        required)
+      description: Get discoverable active sessions plus user's own active sessions
+        (if authenticated)
       parameters:
-      - default: 50
-        description: Max sessions to return (max 100)
+      - default: 20
+        description: Items per page (max 100)
         in: query
         name: limit
+        type: integer
+      - default: 0
+        description: Number of items to skip
+        in: query
+        name: offset
         type: integer
       produces:
       - application/json
@@ -1345,32 +1859,55 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/collaboration.LiveSessionsListResponse'
+            $ref: '#/definitions/api_rest_collaboration.LiveSessionsListResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
       summary: List live sessions
       tags:
       - sessions
   /api/v1/strudels:
     get:
-      description: Get all strudels owned by the authenticated user
+      description: Get strudels owned by the authenticated user with pagination, search,
+        and filtering
+      parameters:
+      - default: 20
+        description: Items per page (max 100)
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Number of items to skip
+        in: query
+        name: offset
+        type: integer
+      - description: Search in title and description
+        in: query
+        name: search
+        type: string
+      - collectionFormat: csv
+        description: Filter by tags (comma-separated)
+        in: query
+        items:
+          type: string
+        name: tags
+        type: array
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/strudels.StrudelsListResponse'
+            $ref: '#/definitions/api_rest_strudels.StrudelsListResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: List user's strudels
@@ -1386,26 +1923,26 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/strudels.CreateStrudelRequest'
+          $ref: '#/definitions/codeberg_org_algorave_server_algorave_strudels.CreateStrudelRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/strudels.Strudel'
+            $ref: '#/definitions/codeberg_org_algorave_server_algorave_strudels.Strudel'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Create strudel
@@ -1426,26 +1963,26 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/strudels.MessageResponse'
+            $ref: '#/definitions/api_rest_strudels.MessageResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Delete strudel
       tags:
       - strudels
     get:
-      description: Get a specific strudel by ID (must be owner)
+      description: Get a specific strudel by ID (owner or public)
       parameters:
       - description: Strudel ID (UUID)
         in: path
@@ -1458,21 +1995,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/strudels.Strudel'
+            $ref: '#/definitions/api_rest_strudels.StrudelDetailResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
-      security:
-      - BearerAuth: []
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
       summary: Get strudel by ID
       tags:
       - strudels
@@ -1491,29 +2022,52 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/strudels.UpdateStrudelRequest'
+          $ref: '#/definitions/codeberg_org_algorave_server_algorave_strudels.UpdateStrudelRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/strudels.Strudel'
+            $ref: '#/definitions/codeberg_org_algorave_server_algorave_strudels.Strudel'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Update strudel
+      tags:
+      - strudels
+  /api/v1/strudels/tags:
+    get:
+      description: Get all unique tags from the authenticated user's strudels
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api_rest_strudels.TagsListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List user's tags
       tags:
       - strudels
   /api/v1/users/ai-features-enabled:
@@ -1528,26 +2082,26 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/users.AIFeaturesEnabledRequest'
+          $ref: '#/definitions/api_rest_users.AIFeaturesEnabledRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/users.User'
+            $ref: '#/definitions/codeberg_org_algorave_server_algorave_users.User'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Update user's AI features setting
@@ -1564,26 +2118,26 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/users.TrainingConsentRequest'
+          $ref: '#/definitions/api_rest_users.TrainingConsentRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/users.User'
+            $ref: '#/definitions/codeberg_org_algorave_server_algorave_users.User'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Update user's training consent
@@ -1599,15 +2153,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/users.UsageResponse'
+            $ref: '#/definitions/api_rest_users.UsageResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get user's usage statistics
@@ -1622,7 +2176,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/health.Response'
+            $ref: '#/definitions/api_rest_health.Response'
       summary: Health check
       tags:
       - health
