@@ -200,7 +200,12 @@ func (d *Detector) IsLargeDelta(previousCode, newCode string) bool {
 
 	// large replacement (select-all + paste)
 	// detects when user pastes over existing code of similar size
-	if len(newCode) >= d.config.PasteDeltaThreshold && len(previousCode) >= d.config.PasteDeltaThreshold/2 {
+	// only applies when sizes are similar (within 50%) - not for deletions
+	sizeDiff := abs(len(newCode) - len(previousCode))
+	avgSize := (len(newCode) + len(previousCode)) / 2
+	isSimilarSize := avgSize > 0 && float64(sizeDiff)/float64(avgSize) < 0.5
+
+	if isSimilarSize && len(newCode) >= d.config.PasteDeltaThreshold && len(previousCode) >= d.config.PasteDeltaThreshold/2 {
 		// both have substantial content - check if content was replaced by seeing if the start of old code appears in new code
 		sampleLen := min(100, len(previousCode))
 
@@ -227,4 +232,11 @@ func (d *Detector) IsSignificantEdit(baseline, current string) bool {
 
 	normalized := float64(distance) / float64(baselineLen)
 	return normalized >= d.config.UnlockThreshold
+}
+
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
 }
