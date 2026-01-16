@@ -170,10 +170,20 @@ func WebSocketHandler(hub *ws.Hub, sessionRepo sessions.Repository) gin.HandlerF
 				}
 			}
 
-			// if still no role, reject connection
+			// if still no role, check if session is discoverable (public join as viewer)
 			if role == "" {
-				errors.Unauthorized(c, "valid authentication required")
-				return
+				if session.IsDiscoverable {
+					// allow joining discoverable sessions as viewer
+					role = "viewer"
+					if params.DisplayName != "" {
+						displayName = params.DisplayName
+					} else {
+						displayName = "Viewer"
+					}
+				} else {
+					errors.Unauthorized(c, "valid authentication required")
+					return
+				}
 			}
 		}
 
