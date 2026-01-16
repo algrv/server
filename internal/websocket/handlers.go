@@ -115,46 +115,29 @@ func handlePasteDetection(ctx context.Context, hub *Hub, client *Client, detecto
 		)
 
 		if result.ShouldLock {
-			// check if already locked (preserve original baseline)
-			alreadyLocked, err := detector.IsLocked(ctx, client.SessionID)
-			if err != nil {
-				logger.ErrorErr(err, "failed to check lock status", "session_id", client.SessionID)
-				// continue assuming not locked (will set new lock)
+			// determine reason for the lock
+			reason := "paste_detected"
+			if result.FingerprintMatch != nil && !result.FingerprintMatch.Record.CCSignal.AllowsAI() {
+				reason = "similar_to_protected"
+			} else if result.MatchedContent != nil && result.MatchedContent.CCSignal == ccsignals.SignalNoAI {
+				reason = "parent_no_ai"
 			}
 
-			if !alreadyLocked {
-				// set the lock
-				config := ccsignals.DefaultConfig()
-				if err := detector.SetLock(ctx, client.SessionID, newCode, config.LockTTL); err != nil {
-					logger.ErrorErr(err, "failed to set paste lock", "session_id", client.SessionID)
-					return
-				}
-
-				// determine reason for logging and notification
-				reason := "paste_detected"
-
-				if result.FingerprintMatch != nil && !result.FingerprintMatch.Record.CCSignal.AllowsAI() {
-					reason = "similar_to_protected"
-					logger.Info("paste lock set (similar to protected content)",
-						"session_id", client.SessionID,
-						"matched_work_id", result.FingerprintMatch.Record.WorkID,
-						"similarity_distance", result.FingerprintMatch.Distance,
-					)
-				} else if result.MatchedContent != nil && result.MatchedContent.CCSignal == ccsignals.SignalNoAI {
-					reason = "parent_no_ai"
-					logger.Info("paste lock set (parent has no-ai)",
-						"session_id", client.SessionID,
-					)
-				} else {
-					logger.Info("paste lock set (external paste)",
-						"session_id", client.SessionID,
-						"reason", result.Reason,
-					)
-				}
-
-				// notify client
-				sendPasteLockStatus(hub, client, true, reason)
+			// always set/update the lock with new baseline (even if already locked)
+			// this ensures baseline is updated when user pastes different content
+			config := ccsignals.DefaultConfig()
+			if err := detector.SetLock(ctx, client.SessionID, newCode, config.LockTTL); err != nil {
+				logger.ErrorErr(err, "failed to set paste lock", "session_id", client.SessionID)
+				return
 			}
+
+			logger.Info("paste lock set",
+				"session_id", client.SessionID,
+				"reason", reason,
+			)
+
+			// notify client
+			sendPasteLockStatus(hub, client, true, reason)
 		} else {
 			logger.Debug("paste detected but allowed",
 				"session_id", client.SessionID,
