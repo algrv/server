@@ -171,18 +171,36 @@ func (d *Detector) SetLock(ctx context.Context, sessionID, baselineCode string, 
 	if d.store == nil {
 		return ErrNilStore
 	}
+
 	return d.store.SetLock(ctx, sessionID, baselineCode, ttl)
 }
 
 // determines if a code update has a large delta
 func (d *Detector) IsLargeDelta(previousCode, newCode string) bool {
+	// significant growth (paste addition)
 	deltaLen := len(newCode) - len(previousCode)
 	if deltaLen >= d.config.PasteDeltaThreshold {
 		return true
 	}
 
+	// significant line count growth
 	newLines := strings.Count(newCode, "\n") - strings.Count(previousCode, "\n")
-	return newLines >= d.config.PasteLineThreshold
+	if newLines >= d.config.PasteLineThreshold {
+		return true
+	}
+
+	// large replacement (select-all + paste)
+	// detects when user pastes over existing code of similar size
+	if len(newCode) >= d.config.PasteDeltaThreshold && len(previousCode) >= d.config.PasteDeltaThreshold/2 {
+		// both have substantial content - check if content was replaced by seeing if the start of old code appears in new code
+		sampleLen := min(100, len(previousCode))
+
+		if !strings.Contains(newCode, previousCode[:sampleLen]) {
+			return true
+		}
+	}
+
+	return false
 }
 
 // determines if edits are significant enough to unlock

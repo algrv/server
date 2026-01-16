@@ -61,6 +61,18 @@ func TestDetector_IsLargeDelta(t *testing.T) {
 			new:      "",
 			want:     false,
 		},
+		{
+			name:     "select-all paste replacement triggers",
+			previous: "// original code\nconst foo = 'bar';\nconsole.log(foo);\n" + string(make([]byte, 150)),
+			new:      "// completely different code\nconst x = 123;\nprint(x);\n" + string(make([]byte, 150)),
+			want:     true,
+		},
+		{
+			name:     "similar code with same prefix does not trigger",
+			previous: "// original code\nconst foo = 'bar';\nconsole.log(foo);\n" + string(make([]byte, 150)),
+			new:      "// original code\nconst foo = 'bar';\nconsole.log(foo);\n" + string(make([]byte, 150)), // same content
+			want:     false,
+		},
 	}
 
 	for _, tt := range tests {
