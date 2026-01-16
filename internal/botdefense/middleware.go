@@ -3,6 +3,7 @@ package botdefense
 import (
 	"context"
 	"math/rand"
+	"strings"
 	"time"
 
 	"codeberg.org/algorave/server/internal/logger"
@@ -100,19 +101,29 @@ func (d *Defense) Middleware() gin.HandlerFunc {
 		}
 
 		// apply bot detection heuristics
-		if IsLikelyBot(c.Request, BotScoreThreshold) {
-			signals := DetectBot(c.Request)
+		signals := DetectBot(c.Request)
+		if signals.Score >= BotScoreThreshold {
 			logger.Warn("bot-like request detected",
 				"ip", ip,
+				"path", path,
 				"score", signals.Score,
 				"pattern", signals.BotPatternMatch,
 				"missing_headers", signals.MissingHeaders,
+				"user_agent", c.Request.Header.Get("User-Agent"),
 			)
 			if err := d.store.TrapIP(ctx, ip, ReasonBotPattern); err != nil {
 				logger.ErrorErr(err, "failed to trap IP", "ip", ip)
 			}
 			d.handleTrapped(c, ip, ReasonBotPattern)
 			return
+		} else if strings.HasPrefix(path, "/api/v1/public") {
+			// debug logging for public API requests
+			logger.Debug("public API request passed bot check",
+				"ip", ip,
+				"path", path,
+				"score", signals.Score,
+				"user_agent", c.Request.Header.Get("User-Agent"),
+			)
 		}
 
 		c.Next()
