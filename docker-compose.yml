@@ -1,8 +1,8 @@
 services:
   server:
-    build: .
+    image: ${IMAGE_TAG:-algorave-server:latest}
     ports:
-      - "8080:8080"
+      - "${PORT:-8080}:8080"
     environment:
       - REDIS_URL=redis://redis:6379
     env_file:
@@ -16,7 +16,6 @@ services:
     volumes:
       - redis_data:/data
     restart: unless-stopped
-    # no ports exposed - only accessible from server container
 
 volumes:
   redis_data:

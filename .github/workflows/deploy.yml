@@ -59,6 +59,15 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/algorave-server:${{ steps.vars.outputs.tag }}
 
+      - name: Copy docker-compose to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.LIGHTSAIL_HOST }}
+          username: ubuntu
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          source: "docker-compose.yml"
+          target: "~/algorave"
+
       - name: Deploy to Lightsail
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -66,10 +75,18 @@ jobs:
           username: ubuntu
           key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
           script: |
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/algorave-server:${{ steps.vars.outputs.tag }}
-            docker stop ${{ steps.vars.outputs.container }} || true
-            docker rm ${{ steps.vars.outputs.container }} || true
-            docker run -d -p ${{ steps.vars.outputs.port }}:8080 --name ${{ steps.vars.outputs.container }} --restart unless-stopped --env-file ~/.env ${{ secrets.DOCKERHUB_USERNAME }}/algorave-server:${{ steps.vars.outputs.tag }}
+            cd ~/algorave
+
+            # copy env file to compose directory
+            cp ~/.env .env
+
+            # set image and port
+            export IMAGE_TAG=${{ secrets.DOCKERHUB_USERNAME }}/algorave-server:${{ steps.vars.outputs.tag }}
+            export PORT=${{ steps.vars.outputs.port }}
+
+            # pull and restart
+            docker compose pull
+            docker compose up -d
             docker image prune -f
 
       - name: Deployment summary
