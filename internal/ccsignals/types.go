@@ -30,8 +30,15 @@ func (s CCSignal) IsValid() bool {
 }
 
 // returns true if this signal permits AI usage
+// empty/missing signal defaults to no-ai (restrictive default)
 func (s CCSignal) AllowsAI() bool {
-	return s != SignalNoAI
+	switch s {
+	case SignalCredit, SignalDirect, SignalEcosystem, SignalOpen:
+		return true
+	default:
+		// no-ai or empty/missing signal blocks AI
+		return false
+	}
 }
 
 // holds configuration for the detection system

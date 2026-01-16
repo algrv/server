@@ -143,19 +143,23 @@ func handlePasteDetection(ctx context.Context, hub *Hub, client *Client, detecto
 		}
 	} else {
 		// no large delta - check if edits are significant enough to unlock
-		if err := detector.CheckUnlock(ctx, client.SessionID, newCode); err != nil {
-			logger.ErrorErr(err, "failed to check unlock", "session_id", client.SessionID)
+		// first check if there's actually a lock to potentially remove
+		wasLocked, err := detector.IsLocked(ctx, client.SessionID)
+		if err != nil {
+			logger.ErrorErr(err, "failed to check lock status", "session_id", client.SessionID)
 			return
 		}
 
-		// check if lock was removed
-		locked, err := detector.IsLocked(ctx, client.SessionID)
-		if err == nil && !locked {
-			// lock was removed by CheckUnlock, notify client
-			// note: we only send this if lock was previously active
-			// CheckUnlock handles the state internally, we just notify
-			// For now, we check by seeing if significant edit threshold was met
-			if detector.IsSignificantEdit(previousCode, newCode) {
+		// only process unlock logic if there was a lock
+		if wasLocked {
+			if err := detector.CheckUnlock(ctx, client.SessionID, newCode); err != nil {
+				logger.ErrorErr(err, "failed to check unlock", "session_id", client.SessionID)
+				return
+			}
+
+			// check if lock was removed
+			stillLocked, err := detector.IsLocked(ctx, client.SessionID)
+			if err == nil && !stillLocked {
 				logger.Info("paste lock removed due to significant edits",
 					"session_id", client.SessionID,
 				)
