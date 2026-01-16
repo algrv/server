@@ -50,12 +50,10 @@ func CodeUpdateHandler(sessionRepo sessions.Repository, detector *ccsignals.Dete
 		}
 
 		// use ccsignals detector for paste detection
-		if detector != nil {
+		// only check for 'paste' or 'typed' sources (skip loaded_strudel, forked)
+		shouldCheckPaste := payload.Source == "" || payload.Source == "typed" || payload.Source == "paste"
+		if detector != nil && shouldCheckPaste {
 			handlePasteDetection(ctx, hub, client, detector, previousCode, payload.Code)
-		} else {
-			logger.Warn("paste detection skipped - detector is nil",
-				"session_id", client.SessionID,
-			)
 		}
 
 		// save code (goes to redis buffer via BufferedRepository)
