@@ -52,6 +52,10 @@ func CodeUpdateHandler(sessionRepo sessions.Repository, detector *ccsignals.Dete
 		// use ccsignals detector for paste detection
 		if detector != nil {
 			handlePasteDetection(ctx, hub, client, detector, previousCode, payload.Code)
+		} else {
+			logger.Warn("paste detection skipped - detector is nil",
+				"session_id", client.SessionID,
+			)
 		}
 
 		// save code (goes to redis buffer via BufferedRepository)
@@ -86,7 +90,7 @@ func CodeUpdateHandler(sessionRepo sessions.Repository, detector *ccsignals.Dete
 // uses the ccsignals detector to manage paste locks
 func handlePasteDetection(ctx context.Context, hub *Hub, client *Client, detector *ccsignals.Detector, previousCode, newCode string) {
 	deltaChars := len(newCode) - len(previousCode)
-	logger.Debug("paste detection check",
+	logger.Info("paste detection check",
 		"session_id", client.SessionID,
 		"delta_chars", deltaChars,
 		"previous_len", len(previousCode),
