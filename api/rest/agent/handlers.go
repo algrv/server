@@ -8,8 +8,10 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"codeberg.org/algorave/server/algorave/strudels"
+	"codeberg.org/algorave/server/algorave/users"
 	agentcore "codeberg.org/algorave/server/internal/agent"
 	"codeberg.org/algorave/server/internal/attribution"
+	"codeberg.org/algorave/server/internal/auth"
 	"codeberg.org/algorave/server/internal/buffer"
 	"codeberg.org/algorave/server/internal/errors"
 	"codeberg.org/algorave/server/internal/llm"
@@ -34,12 +36,40 @@ const (
 // @Failure 400 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /api/v1/agent/generate [post]
-func GenerateHandler(agentClient *agentcore.Agent, _ llm.LLM, strudelRepo *strudels.Repository, attrService *attribution.Service, sessionBuffer *buffer.SessionBuffer) gin.HandlerFunc {
+func GenerateHandler(agentClient *agentcore.Agent, _ llm.LLM, strudelRepo *strudels.Repository, userRepo *users.Repository, attrService *attribution.Service, sessionBuffer *buffer.SessionBuffer) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req GenerateRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			errors.ValidationError(c, err)
 			return
+		}
+
+		// check rate limits (skip for BYOK users)
+		isBYOK := req.ProviderAPIKey != ""
+		if !isBYOK {
+			userID, isAuthenticated := auth.GetUserID(c)
+			var rateLimitResult *users.RateLimitResult
+			var err error
+
+			if isAuthenticated {
+				rateLimitResult, err = userRepo.CheckUserRateLimit(c.Request.Context(), userID, false)
+			} else if req.SessionID != "" {
+				rateLimitResult, err = userRepo.CheckSessionRateLimit(c.Request.Context(), req.SessionID)
+			}
+
+			if err != nil {
+				log.Printf("rate limit check failed: %v", err)
+				// fail open - allow request if rate limit check fails
+			} else if rateLimitResult != nil && !rateLimitResult.Allowed {
+				c.JSON(http.StatusTooManyRequests, gin.H{
+					"error":     "rate_limit_exceeded",
+					"message":   fmt.Sprintf("Daily AI limit reached (%d/%d). Try again tomorrow or use your own API key.", rateLimitResult.Current, rateLimitResult.Limit),
+					"limit":     rateLimitResult.Limit,
+					"current":   rateLimitResult.Current,
+					"remaining": rateLimitResult.Remaining,
+				})
+				return
+			}
 		}
 
 		// paste lock validation (if session_id provided)

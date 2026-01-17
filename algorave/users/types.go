@@ -7,16 +7,10 @@ import (
 )
 
 const (
-	DailyLimitAnonymous = 50   // anonymous users: 50/day
-	DailyLimitFree      = 100  // free tier: 100/day
+	DailyLimitAnonymous = 4    // anonymous users: 4/day
+	DailyLimitFree      = 4    // free tier: 4/day
 	DailyLimitPAYG      = 1000 // payg tier: 1000/day (pay as you go)
 	DailyLimitBYOK      = -1   // BYOK: unlimited (using own keys)
-)
-
-const (
-	MinuteLimitDefault = 10 // default for all users
-	MinuteLimitPAYG    = 20 // payg tier
-	MinuteLimitBYOK    = 30 // BYOK
 )
 
 type Repository struct {

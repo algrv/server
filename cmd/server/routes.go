@@ -33,7 +33,7 @@ func RegisterRoutes(router *gin.Engine, server *Server) {
 		collaboration.RegisterRoutes(v1, server.sessionRepo, server.hub)
 		users.RegisterRoutes(v1, server.db)
 		admin.RegisterRoutes(v1, server.strudelRepo)
-		agent.RegisterRoutes(v1, server.services.Agent, server.services.LLM, server.strudelRepo, server.services.Attribution, server.buffer)
+		agent.RegisterRoutes(v1, server.services.Agent, server.services.LLM, server.strudelRepo, server.userRepo, server.services.Attribution, server.buffer)
 		websocket.RegisterRoutes(v1, server.hub, server.sessionRepo)
 	}
 }
