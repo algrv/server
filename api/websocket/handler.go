@@ -124,29 +124,26 @@ func WebSocketHandler(hub *ws.Hub, sessionRepo sessions.Repository, userRepo *us
 				return
 			}
 
-			// try JWT authentication
+			// try JWT authentication (for user identity, not role assignment)
 			if params.Token != "" {
 				claims, err := auth.ValidateJWT(params.Token)
 				if err == nil {
 					userID = claims.UserID
 
+					// only assign host role here, other roles determined below
 					if userID == session.HostUserID {
 						role = "host"
-					} else {
-						role = "viewer"
-					}
-					// get user's actual name, default to role if not found
-					if user, err := userRepo.FindByID(ctx, userID); err == nil && user.Name != "" {
-						displayName = user.Name
-					} else if role == "host" {
-						displayName = "Host"
-					} else {
-						displayName = "Viewer"
+						// get user's actual name
+						if user, err := userRepo.FindByID(ctx, userID); err == nil && user.Name != "" {
+							displayName = user.Name
+						} else {
+							displayName = "Host"
+						}
 					}
 				}
 			}
 
-			// try invite token if no JWT or JWT failed
+			// try invite token (takes priority over default viewer role)
 			if role == "" && params.InviteToken != "" {
 				inviteToken, err := sessionRepo.ValidateInviteToken(ctx, params.InviteToken)
 				if err != nil {
@@ -166,7 +163,16 @@ func WebSocketHandler(hub *ws.Hub, sessionRepo sessions.Repository, userRepo *us
 
 				role = inviteToken.Role
 
-				if params.DisplayName != "" {
+				// use authenticated user's name if available, otherwise use display name param or default
+				if userID != "" {
+					if user, err := userRepo.FindByID(ctx, userID); err == nil && user.Name != "" {
+						displayName = user.Name
+					} else if params.DisplayName != "" {
+						displayName = params.DisplayName
+					} else {
+						displayName = fmt.Sprintf("Anonymous %s", inviteToken.Role)
+					}
+				} else if params.DisplayName != "" {
 					displayName = params.DisplayName
 				} else {
 					displayName = fmt.Sprintf("Anonymous %s", inviteToken.Role)
@@ -187,7 +193,16 @@ func WebSocketHandler(hub *ws.Hub, sessionRepo sessions.Repository, userRepo *us
 				if session.IsDiscoverable {
 					// allow joining discoverable sessions as viewer
 					role = "viewer"
-					if params.DisplayName != "" {
+					// use authenticated user's name if available
+					if userID != "" {
+						if user, err := userRepo.FindByID(ctx, userID); err == nil && user.Name != "" {
+							displayName = user.Name
+						} else if params.DisplayName != "" {
+							displayName = params.DisplayName
+						} else {
+							displayName = "Viewer"
+						}
+					} else if params.DisplayName != "" {
 						displayName = params.DisplayName
 					} else {
 						displayName = "Viewer"
