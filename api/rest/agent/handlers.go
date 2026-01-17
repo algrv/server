@@ -23,6 +23,10 @@ const (
 	defaultMaxTokens      = 4096
 	defaultTemperature    = 0.7
 	maxHistoryMessages    = 50
+
+	// NOTE: free AI tier is currently disabled. users must provide their own API key (BYOK).
+	// to re-enable free tier, set this to true.
+	freeTierEnabled = false
 )
 
 // GenerateHandler godoc
@@ -44,8 +48,17 @@ func GenerateHandler(agentClient *agentcore.Agent, _ llm.LLM, strudelRepo *strud
 			return
 		}
 
-		// check rate limits (skip for BYOK users)
+		// check if BYOK is required (free tier disabled)
 		isBYOK := req.ProviderAPIKey != ""
+		if !freeTierEnabled && !isBYOK {
+			c.JSON(http.StatusForbidden, gin.H{
+				"error":   "byok_required",
+				"message": "AI features require your own API key. Add your API key in Settings to use AI assistance.",
+			})
+			return
+		}
+
+		// check rate limits (skip for BYOK users)
 		if !isBYOK {
 			userID, isAuthenticated := auth.GetUserID(c)
 			var rateLimitResult *users.RateLimitResult
