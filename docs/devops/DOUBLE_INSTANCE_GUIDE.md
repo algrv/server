@@ -237,13 +237,13 @@ Required in `~/.env` on gateway:
 ### Bot defense trapping IPs
 ```bash
 # List trapped IPs
-docker exec algorave-redis redis-cli KEYS "botdefense:trap:*"
+docker exec algorave-redis redis-cli KEYS "botdefense:trapped:*"
 
 # Clear specific IP
-docker exec algorave-redis redis-cli DEL "botdefense:trap:YOUR_IP"
+docker exec algorave-redis redis-cli DEL "botdefense:trapped:YOUR_IP" "botdefense:reason:YOUR_IP"
 
 # Clear all traps
-docker exec algorave-redis redis-cli KEYS "botdefense:trap:*" | xargs -r docker exec -i algorave-redis redis-cli DEL
+docker exec algorave-redis redis-cli KEYS "botdefense:*" | xargs -r docker exec -i algorave-redis redis-cli DEL
 ```
 
 ### Frontend not updating after deploy

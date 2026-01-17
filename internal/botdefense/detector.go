@@ -137,13 +137,6 @@ func DetectBot(r *http.Request) *BotSignals {
 	return signals
 }
 
-// returns true if the request is likely from a bot
-// threshold is 40 by default (can be tuned)
-func IsLikelyBot(r *http.Request, threshold int) bool {
-	signals := DetectBot(r)
-	return signals.Score >= threshold
-}
-
 // checks if the user-agent contains browser indicators
 func hasBrowserIndicator(userAgentLower string) bool {
 	for _, indicator := range browserIndicators {

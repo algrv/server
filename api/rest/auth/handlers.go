@@ -4,7 +4,9 @@ import (
 	"encoding/base64"
 	"net/http"
 	"net/url"
+	"os"
 	"slices"
+	"strings"
 
 	"codeberg.org/algorave/server/algorave/users"
 	"codeberg.org/algorave/server/internal/auth"
@@ -36,7 +38,8 @@ func BeginAuthHandler(_ *users.Repository) gin.HandlerFunc {
 		q.Add("provider", provider)
 
 		// encode redirect URL in OAuth state parameter (survives the OAuth redirect)
-		if redirectURL := c.Query("redirect_url"); redirectURL != "" {
+		// validate to prevent open redirect attacks
+		if redirectURL := validateRedirectURL(c.Query("redirect_url")); redirectURL != "" {
 			state := base64.URLEncoding.EncodeToString([]byte(redirectURL))
 			q.Set("state", state)
 		}
@@ -62,8 +65,8 @@ func CallbackHandler(userRepo *users.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		provider := c.Param("provider")
 
-		// extract redirect URL from state before gothic processes it
-		redirectURL := extractRedirectURL(c.Query("state"))
+		// extract and validate redirect URL from state before gothic processes it
+		redirectURL := validateRedirectURL(extractRedirectURL(c.Query("state")))
 
 		q := c.Request.URL.Query()
 		q.Add("provider", provider)
@@ -230,4 +233,40 @@ func LogoutHandler() gin.HandlerFunc {
 func isValidProvider(provider string) bool {
 	validProviders := []string{"google", "github", "apple"}
 	return slices.Contains(validProviders, provider)
+}
+
+// validateRedirectURL ensures the redirect URL is safe (relative path or same host as BASE_URL)
+func validateRedirectURL(redirectURL string) string {
+	if redirectURL == "" {
+		return ""
+	}
+
+	// allow relative paths
+	if strings.HasPrefix(redirectURL, "/") && !strings.HasPrefix(redirectURL, "//") {
+		return redirectURL
+	}
+
+	// for absolute URLs, validate against BASE_URL
+	baseURL := os.Getenv("BASE_URL")
+	if baseURL == "" {
+		return "" // no BASE_URL configured, reject absolute URLs
+	}
+
+	parsedBase, err := url.Parse(baseURL)
+	if err != nil {
+		return ""
+	}
+
+	parsedRedirect, err := url.Parse(redirectURL)
+	if err != nil {
+		return ""
+	}
+
+	// only allow same host
+	if parsedRedirect.Host != parsedBase.Host {
+		logger.Warn("rejected redirect to external host", "redirect", redirectURL, "allowed", parsedBase.Host)
+		return ""
+	}
+
+	return redirectURL
 }

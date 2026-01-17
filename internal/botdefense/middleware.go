@@ -2,7 +2,6 @@ package botdefense
 
 import (
 	"context"
-	"math/rand"
 	"strings"
 	"time"
 
@@ -137,7 +136,7 @@ func (d *Defense) handleHoneypot(ctx context.Context, c *gin.Context, ip, path s
 		logger.ErrorErr(err, "failed to trap IP", "ip", ip)
 	}
 
-	if rand.Float32() < 0.5 { //nolint:gosec
+	if cryptoRandInt(2) == 0 {
 		ServePoisonedJSON(c)
 	} else {
 		Tarpit(c, d.config.TarpitDuration, d.config.TarpitChunkDelay)
@@ -149,7 +148,7 @@ func (d *Defense) handleHoneypot(ctx context.Context, c *gin.Context, ip, path s
 func (d *Defense) handleTrapped(c *gin.Context, ip string, reason TrapReason) {
 	logger.Debug("trapped IP request blocked", "ip", ip, "reason", reason)
 
-	switch rand.Intn(3) { //nolint:gosec
+	switch cryptoRandInt(3) {
 	case 0:
 		Tarpit(c, d.config.TarpitDuration, d.config.TarpitChunkDelay)
 	case 1:
