@@ -145,10 +145,11 @@ type ServerShutdownPayload struct {
 
 // contains session info sent to connecting client
 type SessionStatePayload struct {
-	Code         string                    `json:"code"`
-	YourRole     string                    `json:"your_role"`
-	Participants []SessionStateParticipant `json:"participants"`
-	ChatHistory  []SessionStateChatMessage `json:"chat_history"`
+	Code            string                    `json:"code"`
+	YourRole        string                    `json:"your_role"`
+	YourDisplayName string                    `json:"your_display_name"`
+	Participants    []SessionStateParticipant `json:"participants"`
+	ChatHistory     []SessionStateChatMessage `json:"chat_history"`
 }
 
 // represents a chat message in the chat history
