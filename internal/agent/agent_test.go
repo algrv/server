@@ -479,36 +479,32 @@ func TestHasCodePatterns(t *testing.T) {
 func TestEnhancedInstructionsPresent(t *testing.T) {
 	instructions := getInstructions()
 
-	// verify enhanced instructions sections are present
+	// verify key instruction sections are present
 	requiredSections := []string{
-		"REQUEST TYPE ANALYSIS",
-		"A. ADDITIVE REQUESTS",
-		"B. MODIFICATION REQUESTS",
-		"C. DELETION REQUESTS",
-		"D. QUESTIONS",
-		"SURGICAL PRECISION",
-		"Step 1: IDENTIFY",
-		"Step 2: LOCATE",
-		"Step 3: MAKE THE CHANGE SURGICALLY",
-		"Step 4: PRESERVE EVERYTHING ELSE",
-		"Example 1: MODIFICATION",
-		"Example 2: DELETION",
-		"Example 3: ADDITIVE",
-		"Example 4: MODIFICATION",
-		"Example 5: MODIFICATION",
+		"YOUR CAPABILITIES",
+		"UNDERSTANDING USER INTENT",
+		"TEACHING MODE",
+		"CODE GENERATION RULES",
+		"STATE PRESERVATION",
+		"REQUEST TYPES",
+		"ADDITIVE",
+		"MODIFICATION",
+		"DELETION",
+		"PATTERN RULES",
+		"RESOURCES",
 	}
 
 	for _, section := range requiredSections {
 		if !containsSubstr(instructions, section) {
-			t.Errorf("missing required enhanced instruction section: %q", section)
+			t.Errorf("missing required instruction section: %q", section)
 		}
 	}
 
-	// verify critical keywords are present (case-sensitive)
+	// verify critical keywords are present
 	criticalKeywords := []string{
-		"SURGICAL",
-		"PRESERVE",
-		"EXACTLY",
+		"COMPLETE",
+		"ONLY",
+		"CRITICAL",
 	}
 
 	for _, keyword := range criticalKeywords {
@@ -517,5 +513,5 @@ func TestEnhancedInstructionsPresent(t *testing.T) {
 		}
 	}
 
-	t.Logf("✓ All enhanced instruction sections and keywords present")
+	t.Logf("✓ All instruction sections and keywords present")
 }
