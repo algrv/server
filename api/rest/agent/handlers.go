@@ -436,7 +436,7 @@ func GenerateStreamHandler(agentClient *agentcore.Agent, strudelRepo *strudels.R
 				Type:  "error",
 				Error: err.Error(),
 			}
-			eventJSON, _ := json.Marshal(errorEvent)       //nolint:errcheck
+			eventJSON, _ := json.Marshal(errorEvent)         //nolint:errcheck
 			fmt.Fprintf(c.Writer, "data: %s\n\n", eventJSON) //nolint:errcheck
 			c.Writer.Flush()
 		}
