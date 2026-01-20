@@ -21,7 +21,7 @@ type AgentClient struct {
 
 // creates a new agent REST client
 func NewAgentClient() *AgentClient {
-	endpoint := os.Getenv("ALGORAVE_API_ENDPOINT")
+	endpoint := os.Getenv("ALGOJAMS_API_ENDPOINT")
 	if endpoint == "" {
 		endpoint = "http://localhost:8080"
 	}

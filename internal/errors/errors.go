@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"codeberg.org/algorave/server/internal/logger"
+	"codeberg.org/algojams/server/internal/logger"
 	"github.com/gin-gonic/gin"
 )
 

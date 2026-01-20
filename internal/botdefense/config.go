@@ -91,7 +91,7 @@ func DefaultConfig() *Config {
 			"/api/debug",
 			"/api/v1/internal",
 
-			// algorave-specific honeypots
+			// algojams-specific honeypots
 			"/api/v1/strudels/export-all",
 			"/api/v1/users/dump",
 			"/api/v1/sessions/all",

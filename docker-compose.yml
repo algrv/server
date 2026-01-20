@@ -1,6 +1,6 @@
 services:
   server:
-    image: ${IMAGE_TAG:-algorave-server:latest}
+    image: ${IMAGE_TAG:-algojams-server:latest}
     ports:
       - "${PORT:-8080}:8080"
     environment:

@@ -1,6 +1,6 @@
 package auth
 
-import "codeberg.org/algorave/server/algorave/users"
+import "codeberg.org/algojams/server/algojams/users"
 
 // AuthResponse returned after successful OAuth callback
 type AuthResponse struct {

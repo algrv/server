@@ -1,4 +1,4 @@
-module codeberg.org/algorave/server
+module codeberg.org/algojams/server
 
 go 1.24.0
 

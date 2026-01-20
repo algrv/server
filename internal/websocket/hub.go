@@ -3,7 +3,7 @@ package websocket
 import (
 	"time"
 
-	"codeberg.org/algorave/server/internal/logger"
+	"codeberg.org/algojams/server/internal/logger"
 )
 
 func NewHub() *Hub {

@@ -1,4 +1,4 @@
-# algorave - RAG-Powered Code Generation Agent
+# algojams - RAG-Powered Code Generation Agent
 
 ## Project Context
 Building a RAG system that helps users create music via Strudel with text commands by retrieving relevant documentation and feeding it to Claude API. The system transforms user queries for better retrieval and maintains conversation context for coherent multi-turn interactions.
@@ -28,7 +28,7 @@ This file contains detailed implementation decisions and technical context for t
 
 ## Tech Stack
 - **Language:** Go 1.21+
-- **Module:** algorave
+- **Module:** algojams
 - **Vector DB:** Supabase pgvector
 - **Embeddings:** OpenAI text-embedding-3-small (1536 dimensions)
 - **LLM:** Claude API (Anthropic)
@@ -36,8 +36,8 @@ This file contains detailed implementation decisions and technical context for t
 
 ## Project Structure
 ```
-algorave/
-├── algorave/                # Domain models & business logic
+algojams/
+├── algojams/                # Domain models & business logic
 │   ├── sessions/            # Collaborative sessions (with repository pattern)
 │   ├── strudels/            # User-saved Strudels
 │   └── users/               # User models

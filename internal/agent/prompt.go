@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"codeberg.org/algorave/server/internal/llm"
-	"codeberg.org/algorave/server/internal/retriever"
+	"codeberg.org/algojams/server/internal/llm"
+	"codeberg.org/algojams/server/internal/retriever"
 )
 
 // holds all the context needed to build the system prompt

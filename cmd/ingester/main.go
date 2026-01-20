@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"codeberg.org/algorave/server/internal/config"
-	"codeberg.org/algorave/server/internal/logger"
+	"codeberg.org/algojams/server/internal/config"
+	"codeberg.org/algojams/server/internal/logger"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 

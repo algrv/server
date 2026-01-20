@@ -8,7 +8,7 @@
 INSERT INTO users (id, email, provider, provider_id, name, tier)
 VALUES (
   '00000000-0000-0000-0000-000000000000',
-  'system@algorave.local',
+  'system@algojams.local',
   'system',
   'system',
   'System',

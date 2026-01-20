@@ -4,8 +4,8 @@
 
 ```bash
 # Build and run
-docker build -t algorave-server .
-docker run -p 8080:8080 --env-file .env algorave-server
+docker build -t algojams-server .
+docker run -p 8080:8080 --env-file .env algojams-server
 
 # Test
 curl http://localhost:8080/health
@@ -30,17 +30,17 @@ curl http://localhost:8080/health
 
 | Provider | URL |
 |----------|-----|
-| GitHub | `https://algorave.cc/api/v1/auth/github/callback` |
-| Google | `https://algorave.cc/api/v1/auth/google/callback` |
+| GitHub | `https://algojams.cc/api/v1/auth/github/callback` |
+| Google | `https://algojams.cc/api/v1/auth/google/callback` |
 
 ## Common Commands
 
 ```bash
 # View logs
-docker logs algorave
+docker logs algojams
 
 # Restart
-docker restart algorave
+docker restart algojams
 
 # Rebuild and deploy
 docker compose up -d --build

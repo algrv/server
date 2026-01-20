@@ -3,8 +3,8 @@ package attribution
 import (
 	"context"
 
-	"codeberg.org/algorave/server/internal/logger"
-	"codeberg.org/algorave/server/internal/retriever"
+	"codeberg.org/algojams/server/internal/logger"
+	"codeberg.org/algojams/server/internal/retriever"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 

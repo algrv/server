@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"os"
 
-	"codeberg.org/algorave/server/internal/tui"
+	"codeberg.org/algojams/server/internal/tui"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 func main() {
-	env := os.Getenv("ALGORAVE_ENV")
+	env := os.Getenv("ALGOJAMS_ENV")
 
 	if env == "" {
 		env = "development"
@@ -19,7 +19,7 @@ func main() {
 	p := tea.NewProgram(app, tea.WithAltScreen(), tea.WithMouseCellMotion())
 
 	if _, err := p.Run(); err != nil {
-		fmt.Printf("error running algorave: %v\n", err)
+		fmt.Printf("error running algojams: %v\n", err)
 		os.Exit(1)
 	}
 }

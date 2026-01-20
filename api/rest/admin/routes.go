@@ -1,8 +1,8 @@
 package admin
 
 import (
-	"codeberg.org/algorave/server/algorave/strudels"
-	"codeberg.org/algorave/server/internal/auth"
+	"codeberg.org/algojams/server/algojams/strudels"
+	"codeberg.org/algojams/server/internal/auth"
 	"github.com/gin-gonic/gin"
 )
 

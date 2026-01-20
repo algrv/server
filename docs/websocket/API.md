@@ -1,6 +1,6 @@
 # WebSocket API
 
-Real-time collaboration API for Algorave sessions.
+Real-time collaboration API for Algojams sessions.
 
 ## Connection
 

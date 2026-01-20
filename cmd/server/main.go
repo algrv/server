@@ -9,12 +9,12 @@ import (
 	"syscall"
 	"time"
 
-	"codeberg.org/algorave/server/internal/auth"
-	"codeberg.org/algorave/server/internal/config"
-	"codeberg.org/algorave/server/internal/logger"
+	"codeberg.org/algojams/server/internal/auth"
+	"codeberg.org/algojams/server/internal/config"
+	"codeberg.org/algojams/server/internal/logger"
 )
 
-// @title Algorave API
+// @title Algojams API
 // @version 1.0
 // @description AI-powered Strudel code generation and collaborative live coding platform
 // @description
@@ -26,12 +26,12 @@ import (
 // @description - Save and share Strudel patterns
 
 // @contact.name API Support
-// @contact.url https://codeberg.org/algorave/server
+// @contact.url https://codeberg.org/algojams/server
 
 // @license.name GPL-3.0
 // @license.url https://www.gnu.org/licenses/gpl-3.0.html
 
-// @host algorave.dev
+// @host algojams.dev
 
 // @securityDefinitions.apikey BearerAuth
 // @in header
@@ -39,7 +39,7 @@ import (
 // @description JWT token for authenticated requests. Format: Bearer {token}
 
 func main() {
-	logger.Info("starting algorave server")
+	logger.Info("starting algojams server")
 
 	// load configuration from environment
 	cfg, err := config.LoadEnvironmentVariables()

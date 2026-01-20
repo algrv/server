@@ -16,7 +16,7 @@ import (
 func Handler(c *gin.Context) {
 	c.JSON(http.StatusOK, Response{
 		Status:  "healthy",
-		Service: "algorave",
+		Service: "algojams",
 		Version: "1.0.0",
 	})
 }

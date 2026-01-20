@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"codeberg.org/algorave/server/internal/strudel"
+	"codeberg.org/algojams/server/internal/strudel"
 	"github.com/joho/godotenv"
 )
 

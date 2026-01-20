@@ -1,8 +1,8 @@
 package auth
 
 import (
-	"codeberg.org/algorave/server/algorave/users"
-	"codeberg.org/algorave/server/internal/auth"
+	"codeberg.org/algojams/server/algojams/users"
+	"codeberg.org/algojams/server/internal/auth"
 	"github.com/gin-gonic/gin"
 )
 

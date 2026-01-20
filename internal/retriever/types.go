@@ -1,7 +1,7 @@
 package retriever
 
 import (
-	"codeberg.org/algorave/server/internal/llm"
+	"codeberg.org/algojams/server/internal/llm"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 

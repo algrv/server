@@ -11,10 +11,10 @@ import (
 // returns a new welcome screen
 func NewWelcome(mode string) *Welcome {
 	commands := []Command{
-		{Name: "start", Description: "start the algorave server", Available: true},
+		{Name: "start", Description: "start the algojams server", Available: true},
 		{Name: "ingest", Description: "run documentation ingester", Available: mode == "development"},
 		{Name: "editor", Description: "interactive code editor", Available: true},
-		{Name: "quit", Description: "exit algorave", Available: true},
+		{Name: "quit", Description: "exit algojams", Available: true},
 	}
 
 	return &Welcome{

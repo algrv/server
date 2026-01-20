@@ -11,7 +11,7 @@ const docTemplate = `{
         "title": "{{.Title}}",
         "contact": {
             "name": "API Support",
-            "url": "https://codeberg.org/algorave/server"
+            "url": "https://codeberg.org/algojams/server"
         },
         "license": {
             "name": "GPL-3.0",
@@ -56,19 +56,19 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -120,25 +120,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -178,13 +178,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -235,13 +235,13 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -284,19 +284,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -339,7 +339,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -385,13 +385,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -469,7 +469,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -495,7 +495,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -524,19 +524,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_algorave_strudels.Strudel"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_algojams_strudels.Strudel"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -565,19 +565,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_attribution.StrudelStatsResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_attribution.StrudelStatsResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -617,13 +617,13 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -666,19 +666,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -723,19 +723,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Invalid or expired invite",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -766,19 +766,19 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -820,7 +820,7 @@ const docTemplate = `{
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -860,19 +860,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -922,31 +922,31 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -984,31 +984,31 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -1060,31 +1060,31 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -1124,31 +1124,31 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -1188,31 +1188,31 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -1262,31 +1262,31 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -1333,31 +1333,31 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -1397,25 +1397,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -1455,25 +1455,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -1520,19 +1520,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -1572,19 +1572,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -1631,31 +1631,31 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -1718,13 +1718,13 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -1753,7 +1753,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_algorave_strudels.CreateStrudelRequest"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_algojams_strudels.CreateStrudelRequest"
                         }
                     }
                 ],
@@ -1761,25 +1761,25 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_algorave_strudels.Strudel"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_algojams_strudels.Strudel"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -1810,13 +1810,13 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -1851,13 +1851,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -1893,7 +1893,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_algorave_strudels.UpdateStrudelRequest"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_algojams_strudels.UpdateStrudelRequest"
                         }
                     }
                 ],
@@ -1901,25 +1901,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_algorave_strudels.Strudel"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_algojams_strudels.Strudel"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -1957,19 +1957,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -2008,25 +2008,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_algorave_users.User"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_algojams_users.User"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -2065,25 +2065,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_algorave_users.User"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_algojams_users.User"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -2114,13 +2114,13 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/codeberg_org_algorave_server_internal_errors.ErrorResponse"
+                            "$ref": "#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse"
                         }
                     }
                 }
@@ -2318,7 +2318,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user": {
-                    "$ref": "#/definitions/codeberg_org_algorave_server_algorave_users.User"
+                    "$ref": "#/definitions/codeberg_org_algojams_server_algojams_users.User"
                 }
             }
         },
@@ -2350,7 +2350,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "user": {
-                    "$ref": "#/definitions/codeberg_org_algorave_server_algorave_users.User"
+                    "$ref": "#/definitions/codeberg_org_algojams_server_algojams_users.User"
                 }
             }
         },
@@ -2538,7 +2538,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "pagination": {
-                    "$ref": "#/definitions/codeberg_org_algorave_server_api_rest_pagination.Meta"
+                    "$ref": "#/definitions/codeberg_org_algojams_server_api_rest_pagination.Meta"
                 },
                 "sessions": {
                     "type": "array",
@@ -2562,7 +2562,7 @@ const docTemplate = `{
                 "messages": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/codeberg_org_algorave_server_algorave_sessions.Message"
+                        "$ref": "#/definitions/codeberg_org_algojams_server_algojams_sessions.Message"
                     }
                 }
             }
@@ -2794,7 +2794,7 @@ const docTemplate = `{
                     }
                 },
                 "cc_signal": {
-                    "$ref": "#/definitions/codeberg_org_algorave_server_algorave_strudels.CCSignal"
+                    "$ref": "#/definitions/codeberg_org_algojams_server_algojams_strudels.CCSignal"
                 },
                 "code": {
                     "type": "string"
@@ -2821,7 +2821,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "parent_cc_signal": {
-                    "$ref": "#/definitions/codeberg_org_algorave_server_algorave_strudels.CCSignal"
+                    "$ref": "#/definitions/codeberg_org_algojams_server_algojams_strudels.CCSignal"
                 },
                 "tags": {
                     "type": "array",
@@ -2861,12 +2861,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "pagination": {
-                    "$ref": "#/definitions/codeberg_org_algorave_server_api_rest_pagination.Meta"
+                    "$ref": "#/definitions/codeberg_org_algojams_server_api_rest_pagination.Meta"
                 },
                 "strudels": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/codeberg_org_algorave_server_algorave_strudels.Strudel"
+                        "$ref": "#/definitions/codeberg_org_algojams_server_algojams_strudels.Strudel"
                     }
                 }
             }
@@ -2939,7 +2939,7 @@ const docTemplate = `{
                 }
             }
         },
-        "codeberg_org_algorave_server_algorave_sessions.Message": {
+        "codeberg_org_algojams_server_algojams_sessions.Message": {
             "type": "object",
             "properties": {
                 "avatarUrl": {
@@ -2969,7 +2969,7 @@ const docTemplate = `{
                 }
             }
         },
-        "codeberg_org_algorave_server_algorave_strudels.CCSignal": {
+        "codeberg_org_algojams_server_algojams_strudels.CCSignal": {
             "type": "string",
             "enum": [
                 "cc-cr",
@@ -3000,7 +3000,7 @@ const docTemplate = `{
                 "CCSignalNoAI"
             ]
         },
-        "codeberg_org_algorave_server_algorave_strudels.CreateStrudelRequest": {
+        "codeberg_org_algojams_server_algojams_strudels.CreateStrudelRequest": {
             "type": "object",
             "required": [
                 "code",
@@ -3016,7 +3016,7 @@ const docTemplate = `{
                     }
                 },
                 "cc_signal": {
-                    "$ref": "#/definitions/codeberg_org_algorave_server_algorave_strudels.CCSignal"
+                    "$ref": "#/definitions/codeberg_org_algojams_server_algojams_strudels.CCSignal"
                 },
                 "code": {
                     "description": "1MB limit",
@@ -3028,7 +3028,7 @@ const docTemplate = `{
                     "type": "array",
                     "maxItems": 100,
                     "items": {
-                        "$ref": "#/definitions/codeberg_org_algorave_server_internal_agent.Message"
+                        "$ref": "#/definitions/codeberg_org_algojams_server_internal_agent.Message"
                     }
                 },
                 "description": {
@@ -3058,7 +3058,7 @@ const docTemplate = `{
                 }
             }
         },
-        "codeberg_org_algorave_server_algorave_strudels.Strudel": {
+        "codeberg_org_algojams_server_algojams_strudels.Strudel": {
             "type": "object",
             "properties": {
                 "ai_assist_count": {
@@ -3071,7 +3071,7 @@ const docTemplate = `{
                     }
                 },
                 "cc_signal": {
-                    "$ref": "#/definitions/codeberg_org_algorave_server_algorave_strudels.CCSignal"
+                    "$ref": "#/definitions/codeberg_org_algojams_server_algojams_strudels.CCSignal"
                 },
                 "code": {
                     "type": "string"
@@ -3079,7 +3079,7 @@ const docTemplate = `{
                 "conversation_history": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/codeberg_org_algorave_server_internal_agent.Message"
+                        "$ref": "#/definitions/codeberg_org_algojams_server_internal_agent.Message"
                     }
                 },
                 "created_at": {
@@ -3117,7 +3117,7 @@ const docTemplate = `{
                 }
             }
         },
-        "codeberg_org_algorave_server_algorave_strudels.UpdateStrudelRequest": {
+        "codeberg_org_algojams_server_algojams_strudels.UpdateStrudelRequest": {
             "type": "object",
             "properties": {
                 "categories": {
@@ -3128,7 +3128,7 @@ const docTemplate = `{
                     }
                 },
                 "cc_signal": {
-                    "$ref": "#/definitions/codeberg_org_algorave_server_algorave_strudels.CCSignal"
+                    "$ref": "#/definitions/codeberg_org_algojams_server_algojams_strudels.CCSignal"
                 },
                 "code": {
                     "description": "1MB limit",
@@ -3139,7 +3139,7 @@ const docTemplate = `{
                     "type": "array",
                     "maxItems": 100,
                     "items": {
-                        "$ref": "#/definitions/codeberg_org_algorave_server_internal_agent.Message"
+                        "$ref": "#/definitions/codeberg_org_algojams_server_internal_agent.Message"
                     }
                 },
                 "description": {
@@ -3165,7 +3165,7 @@ const docTemplate = `{
                 }
             }
         },
-        "codeberg_org_algorave_server_algorave_users.User": {
+        "codeberg_org_algojams_server_algojams_users.User": {
             "type": "object",
             "properties": {
                 "ai_features_enabled": {
@@ -3197,7 +3197,7 @@ const docTemplate = `{
                 }
             }
         },
-        "codeberg_org_algorave_server_api_rest_pagination.Meta": {
+        "codeberg_org_algojams_server_api_rest_pagination.Meta": {
             "type": "object",
             "properties": {
                 "has_more": {
@@ -3214,7 +3214,7 @@ const docTemplate = `{
                 }
             }
         },
-        "codeberg_org_algorave_server_internal_agent.Message": {
+        "codeberg_org_algojams_server_internal_agent.Message": {
             "type": "object",
             "properties": {
                 "content": {
@@ -3231,7 +3231,7 @@ const docTemplate = `{
                 }
             }
         },
-        "codeberg_org_algorave_server_internal_attribution.StrudelStats": {
+        "codeberg_org_algojams_server_internal_attribution.StrudelStats": {
             "type": "object",
             "properties": {
                 "fork_count": {
@@ -3248,21 +3248,21 @@ const docTemplate = `{
                 }
             }
         },
-        "codeberg_org_algorave_server_internal_attribution.StrudelStatsResponse": {
+        "codeberg_org_algojams_server_internal_attribution.StrudelStatsResponse": {
             "type": "object",
             "properties": {
                 "recent_uses": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/codeberg_org_algorave_server_internal_attribution.StrudelUse"
+                        "$ref": "#/definitions/codeberg_org_algojams_server_internal_attribution.StrudelUse"
                     }
                 },
                 "stats": {
-                    "$ref": "#/definitions/codeberg_org_algorave_server_internal_attribution.StrudelStats"
+                    "$ref": "#/definitions/codeberg_org_algojams_server_internal_attribution.StrudelStats"
                 }
             }
         },
-        "codeberg_org_algorave_server_internal_attribution.StrudelUse": {
+        "codeberg_org_algojams_server_internal_attribution.StrudelUse": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -3288,7 +3288,7 @@ const docTemplate = `{
                 }
             }
         },
-        "codeberg_org_algorave_server_internal_errors.ErrorResponse": {
+        "codeberg_org_algojams_server_internal_errors.ErrorResponse": {
             "type": "object",
             "properties": {
                 "details": {
@@ -3323,10 +3323,10 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "algorave.dev",
+	Host:             "algojams.dev",
 	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "Algorave API",
+	Title:            "Algojams API",
 	Description:      "AI-powered Strudel code generation and collaborative live coding platform\n\nFeatures:\n- AI-powered Strudel code generation from natural language\n- Real-time collaborative editing via WebSockets\n- OAuth authentication (Google, GitHub)\n- Anonymous session support\n- Save and share Strudel patterns",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

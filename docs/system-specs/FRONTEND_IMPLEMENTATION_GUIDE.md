@@ -1,6 +1,6 @@
 # Frontend Implementation Guide
 
-This document describes how the frontend should interact with the Algorave API, covering authentication, sessions, and the distinction between REST and WebSocket usage.
+This document describes how the frontend should interact with the Algojams API, covering authentication, sessions, and the distinction between REST and WebSocket usage.
 
 ## Authentication Model
 
@@ -41,7 +41,7 @@ Use REST for **authenticated CRUD operations only**.
 Use WebSocket for **real-time session state and collaboration**.
 
 ```
-wss://algorave.dev/ws?session_id={uuid}&token={jwt}&display_name={name}
+wss://algojams.dev/ws?session_id={uuid}&token={jwt}&display_name={name}
 ```
 
 | Parameter             | Required | Description                                    |
@@ -104,7 +104,7 @@ wss://algorave.dev/ws?session_id={uuid}&token={jwt}&display_name={name}
 ### Joining via Invite Link
 
 ```
-URL format: https://algorave.dev/join?invite={invite_token}
+URL format: https://algojams.dev/join?invite={invite_token}
 
 1. Parse invite_token from URL
 

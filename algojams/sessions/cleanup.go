@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"codeberg.org/algorave/server/internal/logger"
+	"codeberg.org/algojams/server/internal/logger"
 )
 
 // handles automatic expiry of stale sessions

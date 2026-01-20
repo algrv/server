@@ -5,13 +5,13 @@ import (
 	"net/http"
 	"strings"
 
-	"codeberg.org/algorave/server/algorave/strudels"
-	"codeberg.org/algorave/server/api/rest/pagination"
-	"codeberg.org/algorave/server/internal/agent"
-	"codeberg.org/algorave/server/internal/attribution"
-	"codeberg.org/algorave/server/internal/auth"
-	"codeberg.org/algorave/server/internal/ccsignals"
-	"codeberg.org/algorave/server/internal/errors"
+	"codeberg.org/algojams/server/algojams/strudels"
+	"codeberg.org/algojams/server/api/rest/pagination"
+	"codeberg.org/algojams/server/internal/agent"
+	"codeberg.org/algojams/server/internal/attribution"
+	"codeberg.org/algojams/server/internal/auth"
+	"codeberg.org/algojams/server/internal/ccsignals"
+	"codeberg.org/algojams/server/internal/errors"
 	"github.com/gin-gonic/gin"
 )
 

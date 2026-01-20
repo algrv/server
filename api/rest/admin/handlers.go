@@ -3,8 +3,8 @@ package admin
 import (
 	"net/http"
 
-	"codeberg.org/algorave/server/algorave/strudels"
-	"codeberg.org/algorave/server/internal/errors"
+	"codeberg.org/algojams/server/algojams/strudels"
+	"codeberg.org/algojams/server/internal/errors"
 	"github.com/gin-gonic/gin"
 )
 
