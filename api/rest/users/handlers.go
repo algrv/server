@@ -177,7 +177,7 @@ func UpdateAIFeaturesEnabled(db *pgxpool.Pool) gin.HandlerFunc {
 
 // UpdateDisplayName godoc
 // @Summary Update user's display name
-// @Description Update the authenticated user's display name (shown in sessions and raves)
+// @Description Update the authenticated user's display name (shown in sessions and jams)
 // @Tags users
 // @Accept json
 // @Produce json
