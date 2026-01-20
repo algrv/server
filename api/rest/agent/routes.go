@@ -15,5 +15,6 @@ func RegisterRoutes(router *gin.RouterGroup, agentClient *agentcore.Agent, platf
 	agentGroup := router.Group("/agent")
 	{
 		agentGroup.POST("/generate", GenerateHandler(agentClient, platformLLM, strudelRepo, userRepo, attrService, sessionBuffer))
+		agentGroup.POST("/generate/stream", GenerateStreamHandler(agentClient, strudelRepo, sessionBuffer))
 	}
 }

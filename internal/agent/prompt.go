@@ -8,7 +8,7 @@ import (
 	"codeberg.org/algopatterns/server/internal/retriever"
 )
 
-// holds all the context needed to build the system prompt
+// all context needed to build the system prompt
 type SystemPromptContext struct {
 	Cheatsheet    string
 	EditorState   string
@@ -16,6 +16,7 @@ type SystemPromptContext struct {
 	Examples      []retriever.ExampleResult
 	Conversations []Message
 	QueryAnalysis *llm.QueryAnalysis // optional: helps generator tailor response
+	UsedRAGCache  bool               // if true, add instruction for requesting more docs
 }
 
 // assembles the complete system prompt
@@ -130,6 +131,19 @@ func buildSystemPrompt(ctx SystemPromptContext) string {
 	builder.WriteString("INSTRUCTIONS\n")
 	builder.WriteString("═══════════════════════════════════════════════════════════\n\n")
 	builder.WriteString(getInstructions())
+
+	// section 7: rag cache instruction (only when using cached docs)
+	if ctx.UsedRAGCache {
+		builder.WriteString("\n\n")
+		builder.WriteString("═══════════════════════════════════════════════════════════\n")
+		builder.WriteString("DOCUMENTATION NOTE\n")
+		builder.WriteString("═══════════════════════════════════════════════════════════\n\n")
+		builder.WriteString("The documentation above was retrieved for a previous message in this conversation.\n")
+		builder.WriteString("If the user's current question is about a DIFFERENT TOPIC not covered in the docs above,\n")
+		builder.WriteString("respond with ONLY: [NEED_DOCS: topic] where 'topic' is what you need documentation about.\n")
+		builder.WriteString("For example: [NEED_DOCS: reverb and delay effects]\n")
+		builder.WriteString("Only use this if the provided docs are clearly insufficient for the current question.\n")
+	}
 
 	return builder.String()
 }

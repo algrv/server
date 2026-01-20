@@ -3,15 +3,23 @@ package agent
 import (
 	"context"
 
+	"codeberg.org/algopatterns/server/internal/buffer"
 	"codeberg.org/algopatterns/server/internal/llm"
 	"codeberg.org/algopatterns/server/internal/retriever"
 	"codeberg.org/algopatterns/server/internal/strudel"
 )
 
-// interface for document and example retrieval
+// document and example retrieval interface
 type Retriever interface {
 	HybridSearchDocs(ctx context.Context, query, editorState string, k int) ([]retriever.SearchResult, error)
 	HybridSearchExamples(ctx context.Context, query, editorState string, k int) ([]retriever.ExampleResult, error)
+}
+
+// rag result caching interface
+type RAGCache interface {
+	GetRAGCache(ctx context.Context, sessionID string) (*buffer.CachedRAGResult, error)
+	SetRAGCache(ctx context.Context, sessionID string, cache *buffer.CachedRAGResult) error
+	ClearRAGCache(ctx context.Context, sessionID string) error
 }
 
 // orchestrates rag-powered code generation
@@ -21,12 +29,14 @@ type Agent struct {
 	validator *strudel.Validator
 }
 
-// contains all inputs for code generation
+// all inputs for code generation
 type GenerateRequest struct {
 	UserQuery           string
 	EditorState         string
 	ConversationHistory []Message
-	CustomGenerator     llm.TextGenerator // optional BYOK generator
+	CustomGenerator     llm.TextGenerator // optional byok generator
+	SessionID           string            // optional: enables rag caching for follow-up messages
+	RAGCache            RAGCache          // optional: cache for rag results
 }
 
 // reference to a strudel used as context
@@ -44,7 +54,7 @@ type DocReference struct {
 	URL          string `json:"url"`
 }
 
-// contains the generated code and metadata
+// generated code and metadata
 type GenerateResponse struct {
 	Code                string                    `json:"code,omitempty"`
 	DocsRetrieved       int                       `json:"docs_retrieved"`
@@ -63,7 +73,22 @@ type GenerateResponse struct {
 	ValidationError     string                    `json:"validation_error,omitempty"`
 }
 
-// represents a single conversation turn
+// chunk of a streaming response
+type StreamEvent struct {
+	Type    string `json:"type"`              // "chunk", "refs", "done", "error"
+	Content string `json:"content,omitempty"` // text chunk for type="chunk"
+	Error   string `json:"error,omitempty"`   // error message for type="error"
+
+	// final metadata sent with type="done"
+	StrudelReferences []StrudelReference `json:"strudel_references,omitempty"`
+	DocReferences     []DocReference     `json:"doc_references,omitempty"`
+	Model             string             `json:"model,omitempty"`
+	IsCodeResponse    bool               `json:"is_code_response,omitempty"`
+	InputTokens       int                `json:"input_tokens,omitempty"`
+	OutputTokens      int                `json:"output_tokens,omitempty"`
+}
+
+// single conversation turn
 type Message struct {
 	Role                string             `json:"role"`                       // "user" or "assistant"
 	Content             string             `json:"content"`                    // message content

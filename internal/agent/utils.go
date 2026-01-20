@@ -8,7 +8,9 @@ import (
 	"strings"
 	"sync"
 
+	"codeberg.org/algopatterns/server/internal/buffer"
 	"codeberg.org/algopatterns/server/internal/llm"
+	"codeberg.org/algopatterns/server/internal/retriever"
 	"codeberg.org/algopatterns/server/internal/strudel"
 )
 
@@ -32,9 +34,9 @@ func getCheatsheet() string {
 	return cheatsheetCache
 }
 
-// analyzeResponse determines if an LLM response is code or explanation,
+// determines if an llm response is code or explanation,
 // and extracts code from markdown fences if present.
-// Returns the content to display and whether it should be treated as code.
+// returns the content to display and whether it should be treated as code.
 func analyzeResponse(response string) (content string, isCode bool) {
 	if response == "" {
 		return "", false
@@ -61,8 +63,8 @@ func analyzeResponse(response string) (content string, isCode bool) {
 	return response, false
 }
 
-// extractCodeFromFence extracts code content from a single markdown fence pair.
-// Returns empty string if extraction fails.
+// extracts code content from a single markdown fence pair.
+// returns empty string if extraction fails.
 func extractCodeFromFence(response string) string {
 	startIdx := strings.Index(response, "```")
 	if startIdx == -1 {
@@ -87,7 +89,7 @@ func extractCodeFromFence(response string) string {
 	return code
 }
 
-// hasCodePatterns checks if the response contains definitive Strudel code patterns.
+// checks if the response contains definitive strudel code patterns
 func hasCodePatterns(response string) bool {
 	// definitive code patterns - these only appear in actual code
 	definitivePatterns := []string{
@@ -117,7 +119,7 @@ func hasCodePatterns(response string) bool {
 	return false
 }
 
-// formats code with line numbers for error context.
+// formats code with line numbers for error context
 func addLineNumbers(code string) string {
 	lines := strings.Split(code, "\n")
 	var builder strings.Builder
@@ -157,7 +159,7 @@ func (a *Agent) callGeneratorWithClient(ctx context.Context, generator llm.TextG
 	return response, nil
 }
 
-// retries code generation with validation error context.
+// retries code generation with validation error context
 func (a *Agent) retryWithValidationError(
 	ctx context.Context,
 	generator llm.TextGenerator,
@@ -199,4 +201,135 @@ func (a *Agent) retryWithValidationError(
 	do not include any explanation or line numbers.`, numberedCode, errorMsg)
 
 	return a.callGeneratorWithClient(ctx, generator, systemPrompt, retryPrompt, retryHistory)
+}
+
+// converts retriever.SearchResult slice to buffer.CachedDoc slice
+func docsToCache(docs []retriever.SearchResult) []buffer.CachedDoc {
+	cached := make([]buffer.CachedDoc, len(docs))
+	for i, d := range docs {
+		cached[i] = buffer.CachedDoc{
+			ID:           d.ID,
+			PageName:     d.PageName,
+			PageURL:      d.PageURL,
+			SectionTitle: d.SectionTitle,
+			Content:      d.Content,
+			Similarity:   d.Similarity,
+		}
+	}
+	return cached
+}
+
+// converts buffer.CachedDoc slice to retriever.SearchResult slice
+func cacheToDocs(cached []buffer.CachedDoc) []retriever.SearchResult {
+	docs := make([]retriever.SearchResult, len(cached))
+	for i, c := range cached {
+		docs[i] = retriever.SearchResult{
+			ID:           c.ID,
+			PageName:     c.PageName,
+			PageURL:      c.PageURL,
+			SectionTitle: c.SectionTitle,
+			Content:      c.Content,
+			Similarity:   c.Similarity,
+		}
+	}
+	return docs
+}
+
+// converts retriever.ExampleResult slice to buffer.CachedExample slice
+func examplesToCache(examples []retriever.ExampleResult) []buffer.CachedExample {
+	cached := make([]buffer.CachedExample, len(examples))
+	for i, e := range examples {
+		cached[i] = buffer.CachedExample{
+			ID:          e.ID,
+			UserID:      e.UserID,
+			Title:       e.Title,
+			Description: e.Description,
+			Code:        e.Code,
+			Tags:        e.Tags,
+			AuthorName:  e.AuthorName,
+			URL:         e.URL,
+			Similarity:  e.Similarity,
+		}
+	}
+	return cached
+}
+
+// converts buffer.CachedExample slice to retriever.ExampleResult slice
+func cacheToExamples(cached []buffer.CachedExample) []retriever.ExampleResult {
+	examples := make([]retriever.ExampleResult, len(cached))
+	for i, c := range cached {
+		examples[i] = retriever.ExampleResult{
+			ID:          c.ID,
+			UserID:      c.UserID,
+			Title:       c.Title,
+			Description: c.Description,
+			Code:        c.Code,
+			Tags:        c.Tags,
+			AuthorName:  c.AuthorName,
+			URL:         c.URL,
+			Similarity:  c.Similarity,
+		}
+	}
+	return examples
+}
+
+// detects if a query is purely conversational and doesn't need rag retrieval.
+// this saves ~500ms+ latency on greetings and simple questions.
+func isConversationalQuery(query string) bool {
+	query = strings.ToLower(strings.TrimSpace(query))
+
+	// very short queries are often greetings
+	if len(query) < 10 {
+		greetings := []string{
+			"hi", "hey", "hello", "yo", "sup",
+			"thanks", "thank you", "thx", "ty",
+			"ok", "okay", "cool", "nice", "great",
+			"yes", "no", "yep", "nope", "sure",
+			"help", "?",
+		}
+		for _, g := range greetings {
+			if query == g || query == g+"!" || query == g+"?" {
+				return true
+			}
+		}
+	}
+
+	// common conversational patterns
+	conversationalPrefixes := []string{
+		"who are you",
+		"what are you",
+		"are you a",
+		"can you help",
+		"what can you",
+		"how are you",
+	}
+	for _, prefix := range conversationalPrefixes {
+		if strings.HasPrefix(query, prefix) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// marker that llm uses to request additional documentation
+const needDocsMarker = "[NEED_DOCS:"
+
+// checks if response contains a request for more documentation.
+// returns the topic if found, empty string otherwise.
+func parseNeedDocsMarker(response string) string {
+	idx := strings.Index(response, needDocsMarker)
+	if idx == -1 {
+		return ""
+	}
+
+	// find the closing bracket
+	start := idx + len(needDocsMarker)
+	endIdx := strings.Index(response[start:], "]")
+	if endIdx == -1 {
+		return ""
+	}
+
+	topic := strings.TrimSpace(response[start : start+endIdx])
+	return topic
 }

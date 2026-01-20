@@ -1,6 +1,7 @@
 package llm
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -40,6 +41,29 @@ type transformRequest struct {
 	System      string    `json:"system,omitempty"`
 	Messages    []message `json:"messages"`
 	Temperature float32   `json:"temperature"`
+	Stream      bool      `json:"stream,omitempty"`
+}
+
+// anthropic streaming event types
+type anthropicStreamEvent struct {
+	Type  string          `json:"type"`
+	Index int             `json:"index,omitempty"`
+	Delta json.RawMessage `json:"delta,omitempty"`
+	Usage *struct {
+		InputTokens  int `json:"input_tokens"`
+		OutputTokens int `json:"output_tokens"`
+	} `json:"usage,omitempty"`
+	Message *struct {
+		Usage struct {
+			InputTokens  int `json:"input_tokens"`
+			OutputTokens int `json:"output_tokens"`
+		} `json:"usage"`
+	} `json:"message,omitempty"`
+}
+
+type anthropicContentDelta struct {
+	Type string `json:"type"`
+	Text string `json:"text"`
 }
 
 type message struct {
@@ -167,6 +191,110 @@ func (t *AnthropicTransformer) TransformQuery(ctx context.Context, userQuery str
 
 	// combine original query with transformed keywords for hybrid search
 	return userQuery + " " + analysis.TransformedQuery, nil
+}
+
+func (t *AnthropicTransformer) GenerateTextStream(ctx context.Context, req TextGenerationRequest, onChunk func(chunk string) error) (*TextGenerationResponse, error) {
+	messages := make([]message, 0, len(req.Messages))
+	for _, msg := range req.Messages {
+		messages = append(messages, message(msg))
+	}
+
+	maxTokens := req.MaxTokens
+	if maxTokens == 0 {
+		maxTokens = t.config.MaxTokens
+	}
+
+	reqBody := transformRequest{
+		Model:       t.config.Model,
+		MaxTokens:   maxTokens,
+		System:      req.SystemPrompt,
+		Temperature: t.config.Temperature,
+		Messages:    messages,
+		Stream:      true,
+	}
+
+	jsonData, err := json.Marshal(reqBody)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", anthropicMessagesURL, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("x-api-key", t.config.APIKey)
+	httpReq.Header.Set("anthropic-version", anthropicVersion)
+
+	if err := anthropicRateLimiter.Wait(ctx); err != nil {
+		return nil, fmt.Errorf("rate limiter error: %w", err)
+	}
+
+	resp, err := t.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("failed to send request: %w", err)
+	}
+	defer resp.Body.Close() //nolint:errcheck
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body) //nolint:errcheck
+		return nil, fmt.Errorf("API request failed with status %d: %s", resp.StatusCode, string(body))
+	}
+
+	var fullText strings.Builder
+	var usage Usage
+
+	scanner := bufio.NewScanner(resp.Body)
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		// Anthropic sends "event: <type>" followed by "data: <json>"
+		if strings.HasPrefix(line, "event:") {
+			continue // skip event type lines, we get type from data
+		}
+
+		if !strings.HasPrefix(line, "data: ") {
+			continue
+		}
+
+		data := strings.TrimPrefix(line, "data: ")
+
+		var event anthropicStreamEvent
+		if err := json.Unmarshal([]byte(data), &event); err != nil {
+			continue // skip malformed events
+		}
+
+		switch event.Type {
+		case "content_block_delta":
+			var delta anthropicContentDelta
+			if err := json.Unmarshal(event.Delta, &delta); err == nil && delta.Text != "" {
+				fullText.WriteString(delta.Text)
+				if err := onChunk(delta.Text); err != nil {
+					return nil, fmt.Errorf("chunk callback error: %w", err)
+				}
+			}
+		case "message_start":
+			if event.Message != nil {
+				usage.InputTokens = event.Message.Usage.InputTokens
+			}
+		case "message_delta":
+			if event.Usage != nil {
+				usage.OutputTokens = event.Usage.OutputTokens
+			}
+		case "message_stop":
+			// end of message
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, fmt.Errorf("error reading stream: %w", err)
+	}
+
+	return &TextGenerationResponse{
+		Text:  strings.TrimSpace(fullText.String()),
+		Usage: usage,
+	}, nil
 }
 
 func (t *AnthropicTransformer) GenerateText(ctx context.Context, req TextGenerationRequest) (*TextGenerationResponse, error) {

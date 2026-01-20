@@ -62,6 +62,19 @@ func (m *mockLLM) AnalyzeQuery(_ context.Context, query string) (*llm.QueryAnaly
 	}, nil
 }
 
+func (m *mockLLM) GenerateTextStream(ctx context.Context, req llm.TextGenerationRequest, onChunk func(chunk string) error) (*llm.TextGenerationResponse, error) {
+	// simulate streaming by calling onChunk then returning full response
+	resp, err := m.GenerateText(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	// send full response as a single chunk
+	if onChunk != nil {
+		_ = onChunk(resp.Text)
+	}
+	return resp, nil
+}
+
 // implements Retriever for testing
 type mockRetriever struct {
 	hybridSearchDocsFunc     func(ctx context.Context, query, editorState string, k int) ([]retriever.SearchResult, error)

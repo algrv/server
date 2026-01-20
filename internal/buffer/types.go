@@ -2,7 +2,7 @@ package buffer
 
 import "time"
 
-// represents a chat message waiting to be flushed to Postgres
+// chat message waiting to be flushed to postgres
 type BufferedChatMessage struct {
 	SessionID   string    `json:"session_id"`
 	UserID      string    `json:"user_id,omitempty"`
@@ -31,7 +31,43 @@ const (
 
 	// paste_baseline:{sessionID} - stores code at time of paste for edit distance calculation
 	keyPasteBaseline = "paste_baseline:%s"
+
+	// rag_cache:{sessionID} - stores cached rag results (docs + examples)
+	keyRAGCache = "rag_cache:%s"
 )
+
+// ttl for rag cache (reuse docs for follow-up messages within this window)
+const RAGCacheTTL = 10 * time.Minute
+
+// stores retrieved docs and examples for reuse
+type CachedRAGResult struct {
+	Docs     []CachedDoc     `json:"docs"`
+	Examples []CachedExample `json:"examples"`
+	Query    string          `json:"query"` // original query that triggered retrieval
+}
+
+// simplified doc for caching (matches retriever.SearchResult)
+type CachedDoc struct {
+	ID           string  `json:"id"`
+	PageName     string  `json:"page_name"`
+	PageURL      string  `json:"page_url"`
+	SectionTitle string  `json:"section_title"`
+	Content      string  `json:"content"`
+	Similarity   float32 `json:"similarity"`
+}
+
+// simplified example for caching (matches retriever.ExampleResult)
+type CachedExample struct {
+	ID          string   `json:"id"`
+	UserID      string   `json:"user_id"`
+	Title       string   `json:"title"`
+	Description string   `json:"description"`
+	Code        string   `json:"code"`
+	Tags        []string `json:"tags"`
+	AuthorName  string   `json:"author_name"`
+	URL         string   `json:"url"`
+	Similarity  float32  `json:"similarity"`
+}
 
 // paste detection constants
 const (

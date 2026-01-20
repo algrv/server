@@ -1,12 +1,14 @@
 package llm
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"golang.org/x/time/rate"
@@ -143,12 +145,33 @@ func (e *OpenAIEmbedder) GenerateEmbeddings(ctx context.Context, texts []string)
 	return embeddings, nil
 }
 
-// OpenAI chat completion types
+// openai chat completion types
 type openaiChatRequest struct {
 	Model       string              `json:"model"`
 	Messages    []openaiChatMessage `json:"messages"`
 	MaxTokens   int                 `json:"max_tokens,omitempty"`
 	Temperature float32             `json:"temperature,omitempty"`
+	Stream      bool                `json:"stream,omitempty"`
+}
+
+// streaming chunk from openai
+type openaiStreamChunk struct {
+	ID      string `json:"id"`
+	Object  string `json:"object"`
+	Created int64  `json:"created"`
+	Model   string `json:"model"`
+	Choices []struct {
+		Index int `json:"index"`
+		Delta struct {
+			Content string `json:"content"`
+		} `json:"delta"`
+		FinishReason string `json:"finish_reason"`
+	} `json:"choices"`
+	Usage *struct {
+		PromptTokens     int `json:"prompt_tokens"`
+		CompletionTokens int `json:"completion_tokens"`
+		TotalTokens      int `json:"total_tokens"`
+	} `json:"usage,omitempty"`
 }
 
 type openaiChatMessage struct {
@@ -176,7 +199,7 @@ type openaiChatResponse struct {
 	} `json:"usage"`
 }
 
-// implements TextGenerator and QueryTransformer for OpenAI
+// implements TextGenerator and QueryTransformer for openai
 type OpenAIGenerator struct {
 	config     OpenAIConfig
 	httpClient *http.Client
@@ -264,6 +287,101 @@ func (g *OpenAIGenerator) GenerateText(ctx context.Context, req TextGenerationRe
 			InputTokens:  chatResp.Usage.PromptTokens,
 			OutputTokens: chatResp.Usage.CompletionTokens,
 		},
+	}, nil
+}
+
+func (g *OpenAIGenerator) GenerateTextStream(ctx context.Context, req TextGenerationRequest, onChunk func(chunk string) error) (*TextGenerationResponse, error) {
+	messages := make([]openaiChatMessage, 0, len(req.Messages)+1)
+
+	if req.SystemPrompt != "" {
+		messages = append(messages, openaiChatMessage{
+			Role:    "system",
+			Content: req.SystemPrompt,
+		})
+	}
+
+	for _, msg := range req.Messages {
+		messages = append(messages, openaiChatMessage(msg))
+	}
+
+	reqBody := openaiChatRequest{
+		Model:       g.config.Model,
+		Messages:    messages,
+		MaxTokens:   req.MaxTokens,
+		Temperature: 0.7,
+		Stream:      true,
+	}
+
+	jsonData, err := json.Marshal(reqBody)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", openaiChatCompletionsURL, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("Authorization", fmt.Sprintf("Bearer %s", g.config.APIKey))
+
+	if err := openaiRateLimiter.Wait(ctx); err != nil {
+		return nil, fmt.Errorf("rate limiter error: %w", err)
+	}
+
+	resp, err := g.httpClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("failed to send request: %w", err)
+	}
+	defer resp.Body.Close() //nolint:errcheck
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body) //nolint:errcheck
+		return nil, fmt.Errorf("API request failed with status %d: %s", resp.StatusCode, string(body))
+	}
+
+	var fullText strings.Builder
+	var usage Usage
+
+	scanner := bufio.NewScanner(resp.Body)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if !strings.HasPrefix(line, "data: ") {
+			continue
+		}
+
+		data := strings.TrimPrefix(line, "data: ")
+		if data == "[DONE]" {
+			break
+		}
+
+		var chunk openaiStreamChunk
+		if err := json.Unmarshal([]byte(data), &chunk); err != nil {
+			continue // skip malformed chunks
+		}
+
+		if len(chunk.Choices) > 0 && chunk.Choices[0].Delta.Content != "" {
+			content := chunk.Choices[0].Delta.Content
+			fullText.WriteString(content)
+			if err := onChunk(content); err != nil {
+				return nil, fmt.Errorf("chunk callback error: %w", err)
+			}
+		}
+
+		// capture usage from final chunk if available
+		if chunk.Usage != nil {
+			usage.InputTokens = chunk.Usage.PromptTokens
+			usage.OutputTokens = chunk.Usage.CompletionTokens
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, fmt.Errorf("error reading stream: %w", err)
+	}
+
+	return &TextGenerationResponse{
+		Text:  fullText.String(),
+		Usage: usage,
 	}, nil
 }
 

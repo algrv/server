@@ -12,13 +12,13 @@ import (
 	"codeberg.org/algopatterns/server/internal/logger"
 )
 
-// handles Redis-backed buffering for session data
+// handles redis-backed buffering for session data
 type SessionBuffer struct {
 	client       *redis.Client
 	flushTimeout time.Duration
 }
 
-// creates a new session buffer with Redis connection
+// creates a new session buffer with redis connection
 func NewSessionBuffer(redisURL string, flushTimeout time.Duration) (*SessionBuffer, error) {
 	opts, err := redis.ParseURL(redisURL)
 	if err != nil {
@@ -43,7 +43,7 @@ func NewSessionBuffer(redisURL string, flushTimeout time.Duration) (*SessionBuff
 	}, nil
 }
 
-// closes the Redis connection
+// closes the redis connection
 func (b *SessionBuffer) Close() error {
 	return b.client.Close()
 }
@@ -67,8 +67,8 @@ func (b *SessionBuffer) SetCode(ctx context.Context, sessionID, code string) err
 	return nil
 }
 
-// retrieves the current code for a session from Redis
-// returns empty string if not found (caller should fall back to Postgres)
+// retrieves the current code for a session from redis.
+// returns empty string if not found (caller should fall back to postgres).
 func (b *SessionBuffer) GetCode(ctx context.Context, sessionID string) (string, error) {
 	codeKey := fmt.Sprintf(keySessionCode, sessionID)
 	code, err := b.client.Get(ctx, codeKey).Result()
@@ -140,7 +140,7 @@ func (b *SessionBuffer) FlushCode(ctx context.Context, sessionID string) (string
 	return code, nil
 }
 
-// retrieves chat messages for a session WITHOUT clearing them
+// retrieves chat messages for a session without clearing them
 func (b *SessionBuffer) GetBufferedChatMessages(ctx context.Context, sessionID string) ([]BufferedChatMessage, error) {
 	msgKey := fmt.Sprintf(keySessionMessages, sessionID)
 
@@ -217,12 +217,12 @@ func (b *SessionBuffer) ClearSession(ctx context.Context, sessionID string) erro
 	return err
 }
 
-// returns the underlying Redis client for advanced operations
+// returns the underlying redis client for advanced operations
 func (b *SessionBuffer) Client() *redis.Client {
 	return b.client
 }
 
-// SetPasteLock sets a paste lock for a session with baseline code
+// sets a paste lock for a session with baseline code
 func (b *SessionBuffer) SetPasteLock(ctx context.Context, sessionID, baselineCode string) error {
 	pipe := b.client.Pipeline()
 
@@ -240,7 +240,7 @@ func (b *SessionBuffer) SetPasteLock(ctx context.Context, sessionID, baselineCod
 	return nil
 }
 
-// IsPasteLocked checks if a session has an active paste lock
+// checks if a session has an active paste lock
 func (b *SessionBuffer) IsPasteLocked(ctx context.Context, sessionID string) (bool, error) {
 	lockKey := fmt.Sprintf(keyPasteLock, sessionID)
 	exists, err := b.client.Exists(ctx, lockKey).Result()
@@ -250,7 +250,7 @@ func (b *SessionBuffer) IsPasteLocked(ctx context.Context, sessionID string) (bo
 	return exists > 0, nil
 }
 
-// GetPasteBaseline retrieves the baseline code for edit distance calculation
+// retrieves the baseline code for edit distance calculation
 func (b *SessionBuffer) GetPasteBaseline(ctx context.Context, sessionID string) (string, error) {
 	baselineKey := fmt.Sprintf(keyPasteBaseline, sessionID)
 	baseline, err := b.client.Get(ctx, baselineKey).Result()
@@ -263,7 +263,7 @@ func (b *SessionBuffer) GetPasteBaseline(ctx context.Context, sessionID string) 
 	return baseline, nil
 }
 
-// RemovePasteLock removes the paste lock for a session
+// removes the paste lock for a session
 func (b *SessionBuffer) RemovePasteLock(ctx context.Context, sessionID string) error {
 	pipe := b.client.Pipeline()
 
@@ -281,7 +281,7 @@ func (b *SessionBuffer) RemovePasteLock(ctx context.Context, sessionID string) e
 	return nil
 }
 
-// RefreshPasteLockTTL extends the TTL of the paste lock
+// extends the ttl of the paste lock
 func (b *SessionBuffer) RefreshPasteLockTTL(ctx context.Context, sessionID string) error {
 	pipe := b.client.Pipeline()
 
@@ -297,4 +297,46 @@ func (b *SessionBuffer) RefreshPasteLockTTL(ctx context.Context, sessionID strin
 	}
 
 	return nil
+}
+
+// stores rag results for a session
+func (b *SessionBuffer) SetRAGCache(ctx context.Context, sessionID string, cache *CachedRAGResult) error {
+	cacheJSON, err := json.Marshal(cache)
+	if err != nil {
+		return fmt.Errorf("failed to marshal RAG cache: %w", err)
+	}
+
+	cacheKey := fmt.Sprintf(keyRAGCache, sessionID)
+	if err := b.client.Set(ctx, cacheKey, cacheJSON, RAGCacheTTL).Err(); err != nil {
+		return fmt.Errorf("failed to set RAG cache: %w", err)
+	}
+
+	return nil
+}
+
+// retrieves cached rag results for a session.
+// returns nil if cache miss or expired.
+func (b *SessionBuffer) GetRAGCache(ctx context.Context, sessionID string) (*CachedRAGResult, error) {
+	cacheKey := fmt.Sprintf(keyRAGCache, sessionID)
+	cacheJSON, err := b.client.Get(ctx, cacheKey).Result()
+
+	if errors.Is(err, redis.Nil) {
+		return nil, nil // cache miss
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get RAG cache: %w", err)
+	}
+
+	var cache CachedRAGResult
+	if err := json.Unmarshal([]byte(cacheJSON), &cache); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal RAG cache: %w", err)
+	}
+
+	return &cache, nil
+}
+
+// removes the rag cache for a session
+func (b *SessionBuffer) ClearRAGCache(ctx context.Context, sessionID string) error {
+	cacheKey := fmt.Sprintf(keyRAGCache, sessionID)
+	return b.client.Del(ctx, cacheKey).Err()
 }

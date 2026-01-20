@@ -1,6 +1,7 @@
 package agent
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -186,6 +187,12 @@ func GenerateHandler(agentClient *agentcore.Agent, _ llm.LLM, strudelRepo *strud
 				return
 			}
 			generateReq.CustomGenerator = customGenerator
+
+			// enable RAG caching for BYOK users (reduces latency on follow-ups)
+			if req.SessionID != "" && sessionBuffer != nil {
+				generateReq.SessionID = req.SessionID
+				generateReq.RAGCache = sessionBuffer
+			}
 		}
 
 		// generate response
@@ -296,7 +303,7 @@ func GenerateHandler(agentClient *agentcore.Agent, _ llm.LLM, strudelRepo *strud
 	}
 }
 
-// creates a BYOK generator based on provider
+// creates a byok generator based on provider
 func createBYOKGenerator(provider, apiKey string) (llm.TextGenerator, error) {
 	switch provider {
 	case "anthropic", "":
@@ -313,5 +320,125 @@ func createBYOKGenerator(provider, apiKey string) (llm.TextGenerator, error) {
 		}), nil
 	default:
 		return nil, fmt.Errorf("unsupported provider: %s", provider)
+	}
+}
+
+// GenerateStreamHandler godoc
+// @Summary Stream generate code with AI (SSE)
+// @Description Stream Strudel code generation using Server-Sent Events. BYOK required.
+// @Tags agent
+// @Accept json
+// @Produce text/event-stream
+// @Param request body GenerateRequest true "Generation request"
+// @Success 200 {object} agentcore.StreamEvent
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 403 {object} errors.ErrorResponse
+// @Router /api/v1/agent/generate/stream [post]
+func GenerateStreamHandler(agentClient *agentcore.Agent, strudelRepo *strudels.Repository, sessionBuffer *buffer.SessionBuffer) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req GenerateRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			errors.ValidationError(c, err)
+			return
+		}
+
+		// streaming requires BYOK
+		if req.ProviderAPIKey == "" {
+			c.JSON(http.StatusForbidden, gin.H{
+				"error":   "byok_required",
+				"message": "Streaming requires your own API key. Add your API key in Settings.",
+			})
+			return
+		}
+
+		// paste lock validation
+		if req.SessionID != "" && sessionBuffer != nil {
+			ctx := c.Request.Context()
+			locked, err := sessionBuffer.IsPasteLocked(ctx, req.SessionID)
+			if err != nil {
+				log.Printf("failed to check paste lock for session %s: %v", req.SessionID, err)
+			} else if locked {
+				errors.Forbidden(c, "AI assistant temporarily disabled - please make significant edits to the pasted code before using AI.")
+				return
+			}
+		}
+
+		// CC signal validation for forks
+		if req.ForkedFromID != "" {
+			parentCCSignal, err := strudelRepo.GetStrudelCCSignal(c.Request.Context(), req.ForkedFromID)
+			if err != nil {
+				log.Printf("blocking AI: parent strudel %s not found: %v", req.ForkedFromID, err)
+				errors.Forbidden(c, "AI assistant disabled - the original strudel no longer exists or is invalid")
+				return
+			}
+			if parentCCSignal != nil && *parentCCSignal == strudels.CCSignalNoAI {
+				errors.Forbidden(c, "AI assistant disabled - original author restricted AI use for this strudel")
+				return
+			}
+		}
+
+		// build conversation history from request
+		conversationHistory := make([]agentcore.Message, 0, len(req.ConversationHistory))
+		for _, msg := range req.ConversationHistory {
+			if msg.Content != "" {
+				conversationHistory = append(conversationHistory, agentcore.Message{
+					Role:    msg.Role,
+					Content: msg.Content,
+				})
+			}
+		}
+
+		// create BYOK generator
+		customGenerator, err := createBYOKGenerator(req.Provider, req.ProviderAPIKey)
+		if err != nil {
+			errors.BadRequest(c, "invalid provider configuration", err)
+			return
+		}
+
+		generateReq := agentcore.GenerateRequest{
+			UserQuery:           req.UserQuery,
+			EditorState:         req.EditorState,
+			ConversationHistory: conversationHistory,
+			CustomGenerator:     customGenerator,
+		}
+
+		// enable RAG caching
+		if req.SessionID != "" && sessionBuffer != nil {
+			generateReq.SessionID = req.SessionID
+			generateReq.RAGCache = sessionBuffer
+		}
+
+		// set SSE headers
+		c.Header("Content-Type", "text/event-stream")
+		c.Header("Cache-Control", "no-cache")
+		c.Header("Connection", "keep-alive")
+		c.Header("X-Accel-Buffering", "no") // disable nginx buffering
+
+		// stream response
+		err = agentClient.GenerateStream(c.Request.Context(), generateReq, func(event agentcore.StreamEvent) error {
+			eventJSON, err := json.Marshal(event)
+			if err != nil {
+				return err
+			}
+
+			// write SSE format: "data: <json>\n\n"
+			_, err = fmt.Fprintf(c.Writer, "data: %s\n\n", eventJSON)
+			if err != nil {
+				return err
+			}
+			c.Writer.Flush()
+			return nil
+		})
+
+		if err != nil {
+			// send error event
+			errorEvent := agentcore.StreamEvent{
+				Type:  "error",
+				Error: err.Error(),
+			}
+			eventJSON, _ := json.Marshal(errorEvent)
+			fmt.Fprintf(c.Writer, "data: %s\n\n", eventJSON)
+			c.Writer.Flush()
+		}
 	}
 }

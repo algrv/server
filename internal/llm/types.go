@@ -15,7 +15,7 @@ type CompositeLLM struct {
 	TextGenerator
 }
 
-// represents different LLM providers
+// represents different llm providers
 type Provider string
 
 // transforms user queries into technical search terms
@@ -24,7 +24,7 @@ type QueryTransformer interface {
 	AnalyzeQuery(ctx context.Context, userQuery string) (*QueryAnalysis, error)
 }
 
-// QueryAnalysis contains the result of query transformation with actionability metadata
+// contains the result of query transformation with actionability metadata
 type QueryAnalysis struct {
 	TransformedQuery    string   `json:"transformed_query"`
 	IsActionable        bool     `json:"is_actionable"`
@@ -42,29 +42,30 @@ type Embedder interface {
 // generates text/code from prompts
 type TextGenerator interface {
 	GenerateText(ctx context.Context, req TextGenerationRequest) (*TextGenerationResponse, error)
+	GenerateTextStream(ctx context.Context, req TextGenerationRequest, onChunk func(chunk string) error) (*TextGenerationResponse, error)
 	Model() string
 }
 
-// TextGenerationRequest contains inputs for text generation
+// contains inputs for text generation
 type TextGenerationRequest struct {
 	SystemPrompt string    // system-level instructions
 	Messages     []Message // conversation history
 	MaxTokens    int       // max tokens to generate
 }
 
-// TextGenerationResponse contains output from text generation
+// contains output from text generation
 type TextGenerationResponse struct {
 	Text  string // generated text
 	Usage Usage  // token usage statistics
 }
 
-// Usage contains token usage statistics from LLM API calls
+// contains token usage statistics from llm api calls
 type Usage struct {
 	InputTokens  int // tokens in the prompt
 	OutputTokens int // tokens in the response
 }
 
-// Message represents a conversation turn
+// represents a conversation turn
 type Message struct {
 	Role    string // "user" or "assistant"
 	Content string // message content
@@ -75,7 +76,7 @@ const (
 	ProviderOpenAI    Provider = "openai"
 )
 
-// holds configuration for LLM initialization
+// holds configuration for llm initialization
 type Config struct {
 	// transformer configuration (query expansion)
 	TransformerProvider    Provider
