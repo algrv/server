@@ -1,10 +1,10 @@
 package strudels
 
 import (
-	"codeberg.org/algojams/server/algojams/strudels"
-	"codeberg.org/algojams/server/internal/attribution"
-	"codeberg.org/algojams/server/internal/auth"
-	"codeberg.org/algojams/server/internal/ccsignals"
+	"codeberg.org/algopatterns/server/algopatterns/strudels"
+	"codeberg.org/algopatterns/server/internal/attribution"
+	"codeberg.org/algopatterns/server/internal/auth"
+	"codeberg.org/algopatterns/server/internal/ccsignals"
 	"github.com/gin-gonic/gin"
 )
 

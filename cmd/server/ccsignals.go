@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"codeberg.org/algojams/server/algojams/strudels"
-	"codeberg.org/algojams/server/internal/ccsignals"
-	"codeberg.org/algojams/server/internal/logger"
+	"codeberg.org/algopatterns/server/algopatterns/strudels"
+	"codeberg.org/algopatterns/server/internal/ccsignals"
+	"codeberg.org/algopatterns/server/internal/logger"
 	"github.com/redis/go-redis/v9"
 )
 

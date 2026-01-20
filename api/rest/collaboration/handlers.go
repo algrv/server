@@ -6,11 +6,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"codeberg.org/algojams/server/algojams/sessions"
-	"codeberg.org/algojams/server/api/rest/pagination"
-	"codeberg.org/algojams/server/internal/auth"
-	"codeberg.org/algojams/server/internal/errors"
-	"codeberg.org/algojams/server/internal/logger"
+	"codeberg.org/algopatterns/server/algopatterns/sessions"
+	"codeberg.org/algopatterns/server/api/rest/pagination"
+	"codeberg.org/algopatterns/server/internal/auth"
+	"codeberg.org/algopatterns/server/internal/errors"
+	"codeberg.org/algopatterns/server/internal/logger"
 )
 
 // CreateSessionHandler godoc

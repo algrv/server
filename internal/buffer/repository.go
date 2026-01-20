@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"codeberg.org/algojams/server/algojams/sessions"
-	"codeberg.org/algojams/server/internal/logger"
+	"codeberg.org/algopatterns/server/algopatterns/sessions"
+	"codeberg.org/algopatterns/server/internal/logger"
 )
 
 // wraps a sessions.Repository with Redis buffering

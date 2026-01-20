@@ -6,14 +6,14 @@ import (
 	"os"
 	"path/filepath"
 
-	"codeberg.org/algojams/server/internal/agent"
-	"codeberg.org/algojams/server/internal/attribution"
-	"codeberg.org/algojams/server/internal/config"
-	"codeberg.org/algojams/server/internal/llm"
-	"codeberg.org/algojams/server/internal/logger"
-	"codeberg.org/algojams/server/internal/retriever"
-	"codeberg.org/algojams/server/internal/storage"
-	"codeberg.org/algojams/server/internal/strudel"
+	"codeberg.org/algopatterns/server/internal/agent"
+	"codeberg.org/algopatterns/server/internal/attribution"
+	"codeberg.org/algopatterns/server/internal/config"
+	"codeberg.org/algopatterns/server/internal/llm"
+	"codeberg.org/algopatterns/server/internal/logger"
+	"codeberg.org/algopatterns/server/internal/retriever"
+	"codeberg.org/algopatterns/server/internal/storage"
+	"codeberg.org/algopatterns/server/internal/strudel"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 

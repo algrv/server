@@ -8,10 +8,10 @@ import (
 	"slices"
 	"strings"
 
-	"codeberg.org/algojams/server/algojams/users"
-	"codeberg.org/algojams/server/internal/auth"
-	"codeberg.org/algojams/server/internal/errors"
-	"codeberg.org/algojams/server/internal/logger"
+	"codeberg.org/algopatterns/server/algopatterns/users"
+	"codeberg.org/algopatterns/server/internal/auth"
+	"codeberg.org/algopatterns/server/internal/errors"
+	"codeberg.org/algopatterns/server/internal/logger"
 	"github.com/gin-gonic/gin"
 	"github.com/markbates/goth/gothic"
 )

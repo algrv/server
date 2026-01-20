@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"codeberg.org/algojams/server/internal/agent"
+	"codeberg.org/algopatterns/server/internal/agent"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 

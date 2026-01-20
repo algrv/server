@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"codeberg.org/algojams/server/internal/llm"
-	"codeberg.org/algojams/server/internal/retriever"
+	"codeberg.org/algopatterns/server/internal/llm"
+	"codeberg.org/algopatterns/server/internal/retriever"
 )
 
 // implements llm.LLM for testing

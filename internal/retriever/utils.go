@@ -7,8 +7,8 @@ import (
 	"sort"
 	"sync"
 
-	"codeberg.org/algojams/server/internal/logger"
-	"codeberg.org/algojams/server/internal/strudel"
+	"codeberg.org/algopatterns/server/internal/logger"
+	"codeberg.org/algopatterns/server/internal/strudel"
 )
 
 const (

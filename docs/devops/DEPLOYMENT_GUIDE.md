@@ -4,8 +4,8 @@
 
 ```bash
 # Build and run
-docker build -t algojams-server .
-docker run -p 8080:8080 --env-file .env algojams-server
+docker build -t algopatterns-server .
+docker run -p 8080:8080 --env-file .env algopatterns-server
 
 # Test
 curl http://localhost:8080/health
@@ -30,17 +30,17 @@ curl http://localhost:8080/health
 
 | Provider | URL |
 |----------|-----|
-| GitHub | `https://algojams.cc/api/v1/auth/github/callback` |
-| Google | `https://algojams.cc/api/v1/auth/google/callback` |
+| GitHub | `https://algopatterns.cc/api/v1/auth/github/callback` |
+| Google | `https://algopatterns.cc/api/v1/auth/google/callback` |
 
 ## Common Commands
 
 ```bash
 # View logs
-docker logs algojams
+docker logs algopatterns
 
 # Restart
-docker restart algojams
+docker restart algopatterns
 
 # Rebuild and deploy
 docker compose up -d --build

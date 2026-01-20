@@ -71,7 +71,7 @@ formatters:
   settings:
     goimports:
       local-prefixes:
-        - algojams
+        - algopatterns
   exclusions:
     generated: lax
     paths:

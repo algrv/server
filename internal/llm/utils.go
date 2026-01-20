@@ -1,6 +1,6 @@
 package llm
 
-import "codeberg.org/algojams/server/internal/config"
+import "codeberg.org/algopatterns/server/internal/config"
 
 // returns the appropriate API key for the given provider
 func getAPIKeyForProvider(provider Provider, baseConfig *config.Config) string {

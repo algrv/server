@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"codeberg.org/algojams/server/internal/logger"
+	"codeberg.org/algopatterns/server/internal/logger"
 )
 
 func DefaultOptions() ChunkOptions {

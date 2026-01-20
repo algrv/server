@@ -1,10 +1,10 @@
 # Product Architecture
 
-This document describes the user-facing product architecture for Algojams, including authentication, user strudels, and collaborative sessions.
+This document describes the user-facing product architecture for Algopatterns, including authentication, user strudels, and collaborative sessions.
 
 ## Overview
 
-Algojams is evolving from a simple code generation tool into a collaborative live coding platform where users can:
+Algopatterns is evolving from a simple code generation tool into a collaborative live coding platform where users can:
 - Authenticate using OAuth providers
 - Save and organize their strudel code
 - Collaborate in real-time sessions
@@ -25,7 +25,7 @@ Interactive terminal interface for local development:
 
 ### 2. Authentication System
 
-**Location**: `internal/auth/`, `api/rest/auth/`, `algojams/users/`
+**Location**: `internal/auth/`, `api/rest/auth/`, `algopatterns/users/`
 
 Multi-provider OAuth authentication supporting:
 - Google OAuth
@@ -54,7 +54,7 @@ Key columns: `id`, `email`, `provider`, `provider_id`, `name`, `avatar_url`
 
 ### 3. User Strudels
 
-**Location**: `algojams/strudels/`, `api/rest/strudels/`
+**Location**: `algopatterns/strudels/`, `api/rest/strudels/`
 
 Users can save, organize, and share their Strudel code.
 
@@ -110,7 +110,7 @@ Public:
 
 ### 4. Collaborative Sessions
 
-**Location**: `algojams/sessions/`, `internal/websocket/`, `api/websocket/`
+**Location**: `algopatterns/sessions/`, `internal/websocket/`, `api/websocket/`
 
 **Status**: Implemented
 
@@ -156,7 +156,7 @@ Scheduled live coding events with waiting rooms. `events` table: `id`, `host_use
 
 - `api/rest/` - REST handlers by domain (auth, strudels, generate, health)
 - `api/websocket/` - WebSocket handlers for real-time collaboration
-- `algojams/` - Business logic (users, strudels, sessions)
+- `algopatterns/` - Business logic (users, strudels, sessions)
 - `internal/` - Infrastructure (auth, agent, retriever, storage, llm, websocket)
 
 ## Security

@@ -3,8 +3,8 @@ package collaboration
 import (
 	"time"
 
-	"codeberg.org/algojams/server/algojams/sessions"
-	"codeberg.org/algojams/server/api/rest/pagination"
+	"codeberg.org/algopatterns/server/algopatterns/sessions"
+	"codeberg.org/algopatterns/server/api/rest/pagination"
 )
 
 // allows ending WebSocket sessions

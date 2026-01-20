@@ -1,6 +1,6 @@
 # WebSocket API
 
-Real-time collaboration API for Algojams sessions.
+Real-time collaboration API for Algopatterns sessions.
 
 ## Connection
 

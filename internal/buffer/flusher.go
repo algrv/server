@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
-	"codeberg.org/algojams/server/algojams/sessions"
-	"codeberg.org/algojams/server/internal/logger"
+	"codeberg.org/algopatterns/server/algopatterns/sessions"
+	"codeberg.org/algopatterns/server/internal/logger"
 )
 
 // handles periodic flushing of buffered data from Redis to Postgres

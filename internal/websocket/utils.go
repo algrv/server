@@ -8,7 +8,7 @@ import (
 	"slices"
 	"strings"
 
-	"codeberg.org/algojams/server/internal/logger"
+	"codeberg.org/algopatterns/server/internal/logger"
 )
 
 func getAllowedWebSocketOrigins() []string {

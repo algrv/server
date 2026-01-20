@@ -7,7 +7,7 @@ help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'
 
 setup: ## initial project setup (run once)
-	@echo "setting up algojams..."
+	@echo "setting up algopatterns..."
 	@cp .env.example .env
 	@echo "✓ created .env file - please edit with your API keys"
 	@go mod download
@@ -38,14 +38,14 @@ build: ## build binaries
 	@mkdir -p bin
 	go build -o bin/ingester ./cmd/ingester
 	go build -o bin/server ./cmd/server
-	go build -o bin/algojams ./cmd/tui
+	go build -o bin/algopatterns ./cmd/tui
 	@echo "✓ built all binaries in bin/"
 
 cli: ## build local CLI
 	@echo "building local CLI..."
 	@mkdir -p bin
-	go build -o bin/algojams ./cmd/tui
-	@echo "✓ built bin/algojams"
+	go build -o bin/algopatterns ./cmd/tui
+	@echo "✓ built bin/algopatterns"
 
 test: ## run all tests
 	@echo "running tests..."

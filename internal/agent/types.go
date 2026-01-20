@@ -3,9 +3,9 @@ package agent
 import (
 	"context"
 
-	"codeberg.org/algojams/server/internal/llm"
-	"codeberg.org/algojams/server/internal/retriever"
-	"codeberg.org/algojams/server/internal/strudel"
+	"codeberg.org/algopatterns/server/internal/llm"
+	"codeberg.org/algopatterns/server/internal/retriever"
+	"codeberg.org/algopatterns/server/internal/strudel"
 )
 
 // interface for document and example retrieval

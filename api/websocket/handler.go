@@ -8,12 +8,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 
-	"codeberg.org/algojams/server/algojams/sessions"
-	"codeberg.org/algojams/server/algojams/users"
-	"codeberg.org/algojams/server/internal/auth"
-	"codeberg.org/algojams/server/internal/errors"
-	"codeberg.org/algojams/server/internal/logger"
-	ws "codeberg.org/algojams/server/internal/websocket"
+	"codeberg.org/algopatterns/server/algopatterns/sessions"
+	"codeberg.org/algopatterns/server/algopatterns/users"
+	"codeberg.org/algopatterns/server/internal/auth"
+	"codeberg.org/algopatterns/server/internal/errors"
+	"codeberg.org/algopatterns/server/internal/logger"
+	ws "codeberg.org/algopatterns/server/internal/websocket"
 )
 
 var upgrader = websocket.Upgrader{

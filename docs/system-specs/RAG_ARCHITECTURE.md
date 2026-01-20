@@ -1,10 +1,10 @@
 # RAG Architecture
 
-This document provides an overview of the Retrieval-Augmented Generation (RAG) system powering Algojams's intelligent code generation.
+This document provides an overview of the Retrieval-Augmented Generation (RAG) system powering Algopatterns's intelligent code generation.
 
 ## Overview
 
-Algojams uses a hybrid retrieval system that combines vector similarity search with keyword-based BM25 search to find the most relevant Strudel documentation and examples for user queries.
+Algopatterns uses a hybrid retrieval system that combines vector similarity search with keyword-based BM25 search to find the most relevant Strudel documentation and examples for user queries.
 
 ## Architecture Components
 

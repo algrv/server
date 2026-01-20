@@ -5,7 +5,7 @@ import (
 	"os"
 	"strconv"
 
-	"codeberg.org/algojams/server/internal/config"
+	"codeberg.org/algopatterns/server/internal/config"
 )
 
 func loadConfig() (*Config, error) {

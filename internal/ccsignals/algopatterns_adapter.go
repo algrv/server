@@ -3,10 +3,10 @@ package ccsignals
 import (
 	"context"
 
-	"codeberg.org/algojams/server/algojams/strudels"
+	"codeberg.org/algopatterns/server/algopatterns/strudels"
 )
 
-// implements ContentValidator using Algojams's strudels repository
+// implements ContentValidator using Algopatterns's strudels repository
 type StrudelValidator struct {
 	repo *strudels.Repository
 }

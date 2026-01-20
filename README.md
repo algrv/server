@@ -1,4 +1,4 @@
-# Algojams
+# Algopatterns
 
 Create music using human language.
 
@@ -19,7 +19,7 @@ Create music using human language.
 1. **Clone and enter the project:**
 
    ```bash
-   cd algojams
+   cd algopatterns
    ```
 
 2. **Install dependencies:**
@@ -121,7 +121,7 @@ Default port is `8080`. Override with the `PORT` environment variable.
 go run cmd/tui/main.go
 ```
 
-A terminal-based interface for interacting with Algojams.
+A terminal-based interface for interacting with Algopatterns.
 
 ### Automated Ingestion
 

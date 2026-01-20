@@ -112,7 +112,7 @@ definitions:
       token:
         type: string
       user:
-        $ref: '#/definitions/codeberg_org_algojams_server_algojams_users.User'
+        $ref: '#/definitions/codeberg_org_algopatterns_server_algopatterns_users.User'
     type: object
   api_rest_auth.MessageResponse:
     properties:
@@ -133,7 +133,7 @@ definitions:
   api_rest_auth.UserResponse:
     properties:
       user:
-        $ref: '#/definitions/codeberg_org_algojams_server_algojams_users.User'
+        $ref: '#/definitions/codeberg_org_algopatterns_server_algopatterns_users.User'
     type: object
   api_rest_collaboration.CreateInviteTokenRequest:
     properties:
@@ -257,7 +257,7 @@ definitions:
   api_rest_collaboration.LiveSessionsListResponse:
     properties:
       pagination:
-        $ref: '#/definitions/codeberg_org_algojams_server_api_rest_pagination.Meta'
+        $ref: '#/definitions/codeberg_org_algopatterns_server_api_rest_pagination.Meta'
       sessions:
         items:
           $ref: '#/definitions/api_rest_collaboration.LiveSessionResponse'
@@ -272,7 +272,7 @@ definitions:
     properties:
       messages:
         items:
-          $ref: '#/definitions/codeberg_org_algojams_server_algojams_sessions.Message'
+          $ref: '#/definitions/codeberg_org_algopatterns_server_algopatterns_sessions.Message'
         type: array
     type: object
   api_rest_collaboration.ParticipantResponse:
@@ -423,7 +423,7 @@ definitions:
           type: string
         type: array
       cc_signal:
-        $ref: '#/definitions/codeberg_org_algojams_server_algojams_strudels.CCSignal'
+        $ref: '#/definitions/codeberg_org_algopatterns_server_algopatterns_strudels.CCSignal'
       code:
         type: string
       conversation_history:
@@ -441,7 +441,7 @@ definitions:
       is_public:
         type: boolean
       parent_cc_signal:
-        $ref: '#/definitions/codeberg_org_algojams_server_algojams_strudels.CCSignal'
+        $ref: '#/definitions/codeberg_org_algopatterns_server_algopatterns_strudels.CCSignal'
       tags:
         items:
           type: string
@@ -467,10 +467,10 @@ definitions:
   api_rest_strudels.StrudelsListResponse:
     properties:
       pagination:
-        $ref: '#/definitions/codeberg_org_algojams_server_api_rest_pagination.Meta'
+        $ref: '#/definitions/codeberg_org_algopatterns_server_api_rest_pagination.Meta'
       strudels:
         items:
-          $ref: '#/definitions/codeberg_org_algojams_server_algojams_strudels.Strudel'
+          $ref: '#/definitions/codeberg_org_algopatterns_server_algopatterns_strudels.Strudel'
         type: array
     type: object
   api_rest_strudels.TagsListResponse:
@@ -519,7 +519,7 @@ definitions:
         description: Generations used today
         type: integer
     type: object
-  codeberg_org_algojams_server_algojams_sessions.Message:
+  codeberg_org_algopatterns_server_algopatterns_sessions.Message:
     properties:
       avatarUrl:
         type: string
@@ -539,7 +539,7 @@ definitions:
       userID:
         type: string
     type: object
-  codeberg_org_algojams_server_algojams_strudels.CCSignal:
+  codeberg_org_algopatterns_server_algopatterns_strudels.CCSignal:
     enum:
     - cc-cr
     - cc-dc
@@ -565,7 +565,7 @@ definitions:
     - CCSignalEcosystem
     - CCSignalOpen
     - CCSignalNoAI
-  codeberg_org_algojams_server_algojams_strudels.CreateStrudelRequest:
+  codeberg_org_algopatterns_server_algopatterns_strudels.CreateStrudelRequest:
     properties:
       categories:
         description: max 10 categories, each max 50 chars
@@ -574,7 +574,7 @@ definitions:
         maxItems: 10
         type: array
       cc_signal:
-        $ref: '#/definitions/codeberg_org_algojams_server_algojams_strudels.CCSignal'
+        $ref: '#/definitions/codeberg_org_algopatterns_server_algopatterns_strudels.CCSignal'
       code:
         description: 1MB limit
         maxLength: 1048576
@@ -582,7 +582,7 @@ definitions:
       conversation_history:
         description: max 100 messages
         items:
-          $ref: '#/definitions/codeberg_org_algojams_server_internal_agent.Message'
+          $ref: '#/definitions/codeberg_org_algopatterns_server_internal_agent.Message'
         maxItems: 100
         type: array
       description:
@@ -607,7 +607,7 @@ definitions:
     - code
     - title
     type: object
-  codeberg_org_algojams_server_algojams_strudels.Strudel:
+  codeberg_org_algopatterns_server_algopatterns_strudels.Strudel:
     properties:
       ai_assist_count:
         type: integer
@@ -616,12 +616,12 @@ definitions:
           type: string
         type: array
       cc_signal:
-        $ref: '#/definitions/codeberg_org_algojams_server_algojams_strudels.CCSignal'
+        $ref: '#/definitions/codeberg_org_algopatterns_server_algopatterns_strudels.CCSignal'
       code:
         type: string
       conversation_history:
         items:
-          $ref: '#/definitions/codeberg_org_algojams_server_internal_agent.Message'
+          $ref: '#/definitions/codeberg_org_algopatterns_server_internal_agent.Message'
         type: array
       created_at:
         type: string
@@ -646,7 +646,7 @@ definitions:
       user_id:
         type: string
     type: object
-  codeberg_org_algojams_server_algojams_strudels.UpdateStrudelRequest:
+  codeberg_org_algopatterns_server_algopatterns_strudels.UpdateStrudelRequest:
     properties:
       categories:
         items:
@@ -654,14 +654,14 @@ definitions:
         maxItems: 10
         type: array
       cc_signal:
-        $ref: '#/definitions/codeberg_org_algojams_server_algojams_strudels.CCSignal'
+        $ref: '#/definitions/codeberg_org_algopatterns_server_algopatterns_strudels.CCSignal'
       code:
         description: 1MB limit
         maxLength: 1048576
         type: string
       conversation_history:
         items:
-          $ref: '#/definitions/codeberg_org_algojams_server_internal_agent.Message'
+          $ref: '#/definitions/codeberg_org_algopatterns_server_internal_agent.Message'
         maxItems: 100
         type: array
       description:
@@ -680,7 +680,7 @@ definitions:
         maxLength: 200
         type: string
     type: object
-  codeberg_org_algojams_server_algojams_users.User:
+  codeberg_org_algopatterns_server_algopatterns_users.User:
     properties:
       ai_features_enabled:
         type: boolean
@@ -701,7 +701,7 @@ definitions:
       updated_at:
         type: string
     type: object
-  codeberg_org_algojams_server_api_rest_pagination.Meta:
+  codeberg_org_algopatterns_server_api_rest_pagination.Meta:
     properties:
       has_more:
         type: boolean
@@ -712,7 +712,7 @@ definitions:
       total:
         type: integer
     type: object
-  codeberg_org_algojams_server_internal_agent.Message:
+  codeberg_org_algopatterns_server_internal_agent.Message:
     properties:
       content:
         description: message content
@@ -724,7 +724,7 @@ definitions:
         description: '"user" or "assistant"'
         type: string
     type: object
-  codeberg_org_algojams_server_internal_attribution.StrudelStats:
+  codeberg_org_algopatterns_server_internal_attribution.StrudelStats:
     properties:
       fork_count:
         type: integer
@@ -735,16 +735,16 @@ definitions:
       unique_users:
         type: integer
     type: object
-  codeberg_org_algojams_server_internal_attribution.StrudelStatsResponse:
+  codeberg_org_algopatterns_server_internal_attribution.StrudelStatsResponse:
     properties:
       recent_uses:
         items:
-          $ref: '#/definitions/codeberg_org_algojams_server_internal_attribution.StrudelUse'
+          $ref: '#/definitions/codeberg_org_algopatterns_server_internal_attribution.StrudelUse'
         type: array
       stats:
-        $ref: '#/definitions/codeberg_org_algojams_server_internal_attribution.StrudelStats'
+        $ref: '#/definitions/codeberg_org_algopatterns_server_internal_attribution.StrudelStats'
     type: object
-  codeberg_org_algojams_server_internal_attribution.StrudelUse:
+  codeberg_org_algopatterns_server_internal_attribution.StrudelUse:
     properties:
       created_at:
         type: string
@@ -761,7 +761,7 @@ definitions:
       target_strudel_title:
         type: string
     type: object
-  codeberg_org_algojams_server_internal_errors.ErrorResponse:
+  codeberg_org_algopatterns_server_internal_errors.ErrorResponse:
     properties:
       details:
         description: optional details (sanitized in production)
@@ -776,11 +776,11 @@ definitions:
         description: echoed from request for correlation
         type: string
     type: object
-host: algojams.dev
+host: algopatterns.dev
 info:
   contact:
     name: API Support
-    url: https://codeberg.org/algojams/server
+    url: https://codeberg.org/algopatterns/server
   description: |-
     AI-powered Strudel code generation and collaborative live coding platform
 
@@ -793,7 +793,7 @@ info:
   license:
     name: GPL-3.0
     url: https://www.gnu.org/licenses/gpl-3.0.html
-  title: Algojams API
+  title: Algopatterns API
   version: "1.0"
 paths:
   /api/v1/admin/strudels/{id}:
@@ -815,15 +815,15 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       security:
       - AdminKeyAuth: []
       summary: Get any strudel by ID (admin)
@@ -856,19 +856,19 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       security:
       - AdminKeyAuth: []
       summary: Set use_in_training flag on a strudel
@@ -896,11 +896,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       summary: Generate code with AI
       tags:
       - agent
@@ -930,7 +930,7 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       summary: Start OAuth authentication
       tags:
       - auth
@@ -962,11 +962,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       summary: OAuth callback
       tags:
       - auth
@@ -996,11 +996,11 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get current user
@@ -1027,15 +1027,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Update user profile
@@ -1090,7 +1090,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       summary: List public strudels
       tags:
       - strudels
@@ -1109,15 +1109,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_algojams_strudels.Strudel'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_algopatterns_strudels.Strudel'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       summary: Get public strudel by ID
       tags:
       - strudels
@@ -1137,15 +1137,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_attribution.StrudelStatsResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_attribution.StrudelStatsResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       summary: Get strudel usage stats
       tags:
       - strudels
@@ -1162,7 +1162,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       summary: List public tags
       tags:
       - strudels
@@ -1185,11 +1185,11 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: List user's sessions
@@ -1217,15 +1217,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Create collaboration session
@@ -1250,23 +1250,23 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: End session
@@ -1290,15 +1290,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get session details
@@ -1330,23 +1330,23 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Update session code
@@ -1380,23 +1380,23 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Set session discoverability
@@ -1423,23 +1423,23 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Soft-end a live session
@@ -1464,23 +1464,23 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: List invite tokens
@@ -1512,23 +1512,23 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Create invite token
@@ -1558,23 +1558,23 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Revoke invite token
@@ -1599,19 +1599,19 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Leave session
@@ -1637,19 +1637,19 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Check if session is live
@@ -1680,15 +1680,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get session chat messages
@@ -1713,15 +1713,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: List session participants
@@ -1751,23 +1751,23 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Remove participant
@@ -1796,15 +1796,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "403":
           description: Invalid or expired invite
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Join session with invite
@@ -1824,15 +1824,15 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get user's last active session for recovery
@@ -1863,7 +1863,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       summary: List live sessions
       tags:
       - sessions
@@ -1903,11 +1903,11 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: List user's strudels
@@ -1923,26 +1923,26 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/codeberg_org_algojams_server_algojams_strudels.CreateStrudelRequest'
+          $ref: '#/definitions/codeberg_org_algopatterns_server_algopatterns_strudels.CreateStrudelRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_algojams_strudels.Strudel'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_algopatterns_strudels.Strudel'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Create strudel
@@ -1967,15 +1967,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Delete strudel
@@ -1999,11 +1999,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       summary: Get strudel by ID
       tags:
       - strudels
@@ -2022,26 +2022,26 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/codeberg_org_algojams_server_algojams_strudels.UpdateStrudelRequest'
+          $ref: '#/definitions/codeberg_org_algopatterns_server_algopatterns_strudels.UpdateStrudelRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_algojams_strudels.Strudel'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_algopatterns_strudels.Strudel'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Update strudel
@@ -2060,11 +2060,11 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: List user's tags
@@ -2089,19 +2089,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_algojams_users.User'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_algopatterns_users.User'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Update user's AI features setting
@@ -2125,19 +2125,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_algojams_users.User'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_algopatterns_users.User'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Update user's training consent
@@ -2157,11 +2157,11 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/codeberg_org_algojams_server_internal_errors.ErrorResponse'
+            $ref: '#/definitions/codeberg_org_algopatterns_server_internal_errors.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get user's usage statistics

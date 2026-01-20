@@ -5,7 +5,7 @@ import (
 	"os"
 	"os/exec"
 
-	"codeberg.org/algojams/server/internal/logger"
+	"codeberg.org/algopatterns/server/internal/logger"
 	tea "github.com/charmbracelet/bubbletea"
 )
 

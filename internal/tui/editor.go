@@ -343,7 +343,7 @@ func (m *EditorModel) renderChatHistory() string {
 			agentPrompt := lipgloss.NewStyle().
 				Foreground(colorDarkGray).
 				Bold(true).
-				Render("algojams")
+				Render("algopatterns")
 
 			b.WriteString(lipgloss.JoinHorizontal(lipgloss.Left, agentIndicator, agentPrompt))
 			b.WriteString("\n")

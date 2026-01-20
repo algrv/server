@@ -8,8 +8,8 @@ import (
 	"strings"
 	"sync"
 
-	"codeberg.org/algojams/server/internal/llm"
-	"codeberg.org/algojams/server/internal/strudel"
+	"codeberg.org/algopatterns/server/internal/llm"
+	"codeberg.org/algopatterns/server/internal/strudel"
 )
 
 var (

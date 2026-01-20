@@ -1,11 +1,11 @@
-# Algojams Deployment Guide
+# Algopatterns Deployment Guide
 
-Deploy Algojams on two Lightsail instances: one gateway (Go server + Caddy), one for the Next.js frontend.
+Deploy Algopatterns on two Lightsail instances: one gateway (Go server + Caddy), one for the Next.js frontend.
 
 ## Architecture
 
 ```
-                         algojams.cc
+                         algopatterns.cc
                               │
                               ▼
 ┌──────────────────────────────────────────────────────────┐
@@ -42,8 +42,8 @@ Push to main → GitHub Actions → Build Docker image → Push to Docker Hub �
 ### 1. Create Instances
 
 In Lightsail console, create two Ubuntu 22.04 instances in the same region:
-- `algojams-gateway` — $5/month (1GB RAM)
-- `algojams-frontend` — $3.50/month (512MB RAM)
+- `algopatterns-gateway` — $5/month (1GB RAM)
+- `algopatterns-frontend` — $3.50/month (512MB RAM)
 
 Note the **private IP** of the frontend instance (Networking tab).
 
@@ -58,14 +58,14 @@ sudo usermod -aG docker ubuntu
 exit && ssh -i key.pem ubuntu@FRONTEND_PUBLIC_IP
 
 # Create deployment directory
-mkdir -p ~/algojams/frontend
-cd ~/algojams/frontend
+mkdir -p ~/algopatterns/frontend
+cd ~/algopatterns/frontend
 
 # Create docker-compose.yml
 cat > docker-compose.yml << 'EOF'
 services:
   frontend:
-    image: kadetxx/algojams-frontend:latest
+    image: kadetxx/algopatterns-frontend:latest
     ports:
       - '3000:3000'
     restart: unless-stopped
@@ -94,7 +94,7 @@ sudo apt update && sudo apt install caddy
 
 # Create Caddyfile (replace FRONTEND_PRIVATE_IP)
 sudo tee /etc/caddy/Caddyfile << 'EOF'
-algojams.cc {
+algopatterns.cc {
     handle /api/* {
         reverse_proxy localhost:8080 {
             flush_interval -1
@@ -106,37 +106,37 @@ algojams.cc {
     }
 }
 
-www.algojams.cc {
-    redir https://algojams.cc{uri} permanent
+www.algopatterns.cc {
+    redir https://algopatterns.cc{uri} permanent
 }
 EOF
 
 sudo systemctl reload caddy
 
 # Create Docker network
-docker network create algojams-net
+docker network create algopatterns-net
 
 # Start Redis
 docker run -d \
-  --name algojams-redis \
-  --network algojams-net \
+  --name algopatterns-redis \
+  --network algopatterns-net \
   --restart unless-stopped \
-  -v algojams_redis_data:/data \
+  -v algopatterns_redis_data:/data \
   redis:7-alpine
 
 # Create .env file
 nano ~/.env  # Add production environment variables
 
 # Pull and run server (first time)
-docker pull kadetxx/algojams-server:latest
+docker pull kadetxx/algopatterns-server:latest
 docker run -d \
   -p 8080:8080 \
-  --name algojams \
-  --network algojams-net \
+  --name algopatterns \
+  --network algopatterns-net \
   --restart unless-stopped \
   --env-file ~/.env \
-  -e REDIS_URL=redis://algojams-redis:6379 \
-  kadetxx/algojams-server:latest
+  -e REDIS_URL=redis://algopatterns-redis:6379 \
+  kadetxx/algopatterns-server:latest
 ```
 
 ### 4. Configure Firewalls
@@ -153,8 +153,8 @@ docker run -d \
 ### 5. Point DNS
 
 Add A records pointing to gateway public IP:
-- `algojams.cc` → Gateway IP
-- `www.algojams.cc` → Gateway IP
+- `algopatterns.cc` → Gateway IP
+- `www.algopatterns.cc` → Gateway IP
 
 ### 6. Setup GitHub Actions Secrets
 
@@ -181,10 +181,10 @@ Add A records pointing to gateway public IP:
 ### Gateway
 ```bash
 # View server logs
-docker logs algojams -f
+docker logs algopatterns -f
 
 # Restart server
-docker restart algojams
+docker restart algopatterns
 
 # View Caddy logs
 journalctl -u caddy -f
@@ -193,7 +193,7 @@ journalctl -u caddy -f
 sudo systemctl reload caddy
 
 # Check Redis
-docker exec algojams-redis redis-cli PING
+docker exec algopatterns-redis redis-cli PING
 ```
 
 ### Frontend
@@ -202,7 +202,7 @@ docker exec algojams-redis redis-cli PING
 docker compose logs -f
 
 # Manual redeploy
-cd ~/algojams/frontend
+cd ~/algopatterns/frontend
 docker compose down
 docker compose pull
 docker compose up -d
@@ -219,7 +219,7 @@ Required in `~/.env` on gateway:
 
 | Variable | Description |
 |----------|-------------|
-| `BASE_URL` | `https://algojams.cc` |
+| `BASE_URL` | `https://algopatterns.cc` |
 | `PORT` | `8080` |
 | `JWT_SECRET` | `openssl rand -base64 64` |
 | `SUPABASE_CONNECTION_STRING` | Database URL |
@@ -237,13 +237,13 @@ Required in `~/.env` on gateway:
 ### Bot defense trapping IPs
 ```bash
 # List trapped IPs
-docker exec algojams-redis redis-cli KEYS "botdefense:trapped:*"
+docker exec algopatterns-redis redis-cli KEYS "botdefense:trapped:*"
 
 # Clear specific IP
-docker exec algojams-redis redis-cli DEL "botdefense:trapped:YOUR_IP" "botdefense:reason:YOUR_IP"
+docker exec algopatterns-redis redis-cli DEL "botdefense:trapped:YOUR_IP" "botdefense:reason:YOUR_IP"
 
 # Clear all traps
-docker exec algojams-redis redis-cli KEYS "botdefense:*" | xargs -r docker exec -i algojams-redis redis-cli DEL
+docker exec algopatterns-redis redis-cli KEYS "botdefense:*" | xargs -r docker exec -i algopatterns-redis redis-cli DEL
 ```
 
 ### Frontend not updating after deploy

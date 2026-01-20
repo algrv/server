@@ -34,11 +34,11 @@ jobs:
         run: |
           if [ "${{ env.DEPLOY_ENV }}" = "production" ]; then
             echo "tag=latest" >> $GITHUB_OUTPUT
-            echo "container=algojams" >> $GITHUB_OUTPUT
+            echo "container=algopatterns" >> $GITHUB_OUTPUT
             echo "port=8080" >> $GITHUB_OUTPUT
           else
             echo "tag=staging" >> $GITHUB_OUTPUT
-            echo "container=algojams-staging" >> $GITHUB_OUTPUT
+            echo "container=algopatterns-staging" >> $GITHUB_OUTPUT
             echo "port=8081" >> $GITHUB_OUTPUT
           fi
 
@@ -57,7 +57,7 @@ jobs:
           context: .
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/algojams-server:${{ steps.vars.outputs.tag }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/algopatterns-server:${{ steps.vars.outputs.tag }}
 
       - name: Deploy to Lightsail
         uses: appleboy/ssh-action@v1.0.3
@@ -67,16 +67,16 @@ jobs:
           key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
           script: |
             # create shared network
-            docker network create algojams-net 2>/dev/null || true
+            docker network create algopatterns-net 2>/dev/null || true
 
             # ensure redis is running on the network
-            if ! docker ps --format '{{.Names}}' | grep -q '^algojams-redis$'; then
-              docker rm algojams-redis 2>/dev/null || true
+            if ! docker ps --format '{{.Names}}' | grep -q '^algopatterns-redis$'; then
+              docker rm algopatterns-redis 2>/dev/null || true
               docker run -d \
-                --name algojams-redis \
-                --network algojams-net \
+                --name algopatterns-redis \
+                --network algopatterns-net \
                 --restart unless-stopped \
-                -v algojams_redis_data:/data \
+                -v algopatterns_redis_data:/data \
                 redis:7-alpine
               echo "Started Redis container"
             else
@@ -84,17 +84,17 @@ jobs:
             fi
 
             # deploy server
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/algojams-server:${{ steps.vars.outputs.tag }}
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/algopatterns-server:${{ steps.vars.outputs.tag }}
             docker stop ${{ steps.vars.outputs.container }} 2>/dev/null || true
             docker rm ${{ steps.vars.outputs.container }} 2>/dev/null || true
             docker run -d \
               -p ${{ steps.vars.outputs.port }}:8080 \
               --name ${{ steps.vars.outputs.container }} \
-              --network algojams-net \
+              --network algopatterns-net \
               --restart unless-stopped \
               --env-file ~/.env \
-              -e REDIS_URL=redis://algojams-redis:6379 \
-              ${{ secrets.DOCKERHUB_USERNAME }}/algojams-server:${{ steps.vars.outputs.tag }}
+              -e REDIS_URL=redis://algopatterns-redis:6379 \
+              ${{ secrets.DOCKERHUB_USERNAME }}/algopatterns-server:${{ steps.vars.outputs.tag }}
 
             docker image prune -f
 

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"codeberg.org/algojams/server/internal/logger"
+	"codeberg.org/algopatterns/server/internal/logger"
 	"github.com/gin-gonic/gin"
 )
 

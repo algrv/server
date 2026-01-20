@@ -3,8 +3,8 @@ package users
 import (
 	"net/http"
 
-	"codeberg.org/algojams/server/algojams/users"
-	"codeberg.org/algojams/server/internal/errors"
+	"codeberg.org/algopatterns/server/algopatterns/users"
+	"codeberg.org/algopatterns/server/internal/errors"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 )

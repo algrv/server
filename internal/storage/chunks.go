@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	"codeberg.org/algojams/server/internal/chunker"
-	"codeberg.org/algojams/server/internal/logger"
+	"codeberg.org/algopatterns/server/internal/chunker"
+	"codeberg.org/algopatterns/server/internal/logger"
 	"github.com/jackc/pgx/v5"
 	"github.com/pgvector/pgvector-go"
 )

@@ -3,8 +3,8 @@ package admin
 import (
 	"net/http"
 
-	"codeberg.org/algojams/server/algojams/strudels"
-	"codeberg.org/algojams/server/internal/errors"
+	"codeberg.org/algopatterns/server/algopatterns/strudels"
+	"codeberg.org/algopatterns/server/internal/errors"
 	"github.com/gin-gonic/gin"
 )
 

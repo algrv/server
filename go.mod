@@ -1,4 +1,4 @@
-module codeberg.org/algojams/server
+module codeberg.org/algopatterns/server
 
 go 1.24.0
 

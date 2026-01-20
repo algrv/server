@@ -524,7 +524,7 @@ Attack:
 | `internal/ccsignals/levenshtein.go`      | Edit distance for unlock detection    |
 | `internal/ccsignals/redis_store.go`      | Redis-backed lock storage             |
 | `internal/ccsignals/memory_store.go`     | In-memory lock storage (testing)      |
-| `internal/ccsignals/algojams_adapter.go` | Strudel repository adapter            |
+| `internal/ccsignals/algopatterns_adapter.go` | Strudel repository adapter            |
 | `internal/ccsignals/types.go`            | Shared types and config                |
 
 ### Backend - Integration
@@ -538,8 +538,8 @@ Attack:
 | `api/rest/strudels/handlers.go`  | Index updates on create/update/delete   |
 | `api/rest/strudels/routes.go`    | FingerprintIndexer interface            |
 | `api/rest/agent/handlers.go`     | Lock check before AI generation         |
-| `algojams/strudels/strudels.go`  | ListNoAIStrudels for startup load       |
-| `algojams/strudels/queries.go`   | DB queries for validation               |
+| `algopatterns/strudels/strudels.go`  | ListNoAIStrudels for startup load       |
+| `algopatterns/strudels/queries.go`   | DB queries for validation               |
 
 ### Frontend
 

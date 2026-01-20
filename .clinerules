@@ -1,4 +1,4 @@
-# Algojams - Coding Standards
+# Algopatterns - Coding Standards
 
 ## Documentation
 - **Architecture:** [AGENTS.md](AGENTS.md)
@@ -24,7 +24,7 @@
 internal/     # Private packages
 cmd/          # Entry points (keep main.go minimal)
 api/          # HTTP/WebSocket handlers
-algojams/     # Domain models
+algopatterns/     # Domain models
 ```
 Within packages: `types.go` for types, `utils.go` for helpers, main logic in primary files.
 

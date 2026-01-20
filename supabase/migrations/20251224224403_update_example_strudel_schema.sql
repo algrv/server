@@ -1,4 +1,4 @@
--- Create RAG tables for Algojams hybrid retrieval system
+-- Create RAG tables for Algopatterns hybrid retrieval system
 -- Generated: 2024-12-24
 
 -- Enable pgvector extension

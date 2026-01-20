@@ -5,9 +5,9 @@ import (
 	"strings"
 	"time"
 
-	"codeberg.org/algojams/server/algojams/sessions"
-	"codeberg.org/algojams/server/internal/ccsignals"
-	"codeberg.org/algojams/server/internal/logger"
+	"codeberg.org/algopatterns/server/algopatterns/sessions"
+	"codeberg.org/algopatterns/server/internal/ccsignals"
+	"codeberg.org/algopatterns/server/internal/logger"
 )
 
 // handles code update messages with CC signals detection

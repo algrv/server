@@ -7,14 +7,14 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"codeberg.org/algojams/server/algojams/strudels"
-	"codeberg.org/algojams/server/algojams/users"
-	agentcore "codeberg.org/algojams/server/internal/agent"
-	"codeberg.org/algojams/server/internal/attribution"
-	"codeberg.org/algojams/server/internal/auth"
-	"codeberg.org/algojams/server/internal/buffer"
-	"codeberg.org/algojams/server/internal/errors"
-	"codeberg.org/algojams/server/internal/llm"
+	"codeberg.org/algopatterns/server/algopatterns/strudels"
+	"codeberg.org/algopatterns/server/algopatterns/users"
+	agentcore "codeberg.org/algopatterns/server/internal/agent"
+	"codeberg.org/algopatterns/server/internal/attribution"
+	"codeberg.org/algopatterns/server/internal/auth"
+	"codeberg.org/algopatterns/server/internal/buffer"
+	"codeberg.org/algopatterns/server/internal/errors"
+	"codeberg.org/algopatterns/server/internal/llm"
 )
 
 const (
